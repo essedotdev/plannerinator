@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "plannerinator",
+  "compatibility_date": "2025-04-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "keep_names": false,
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  "vars": {
+    "BETTER_AUTH_URL": "https://plannerinator.essedev.it",
+    "NEXT_PUBLIC_APP_URL": "https://plannerinator.essedev.it",
+    "EMAIL_PROVIDER": "mock",
+    "EMAIL_FROM": "noreply@plannerinator.essedev.it",
+    "EMAIL_REPLY_TO": "support@plannerinator.essedev.it",
+    "ADMIN_EMAIL": "admin@plannerinator.essedev.it",
+  },
+}

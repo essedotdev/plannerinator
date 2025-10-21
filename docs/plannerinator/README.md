@@ -1,0 +1,132 @@
+# Plannerinator
+
+Sistema completo per la gestione di tutti gli aspetti della vita: task, eventi, note, progetti e collezioni personalizzate.
+
+## Filosofia del Progetto
+
+**Flessibilità totale senza caos**
+
+Plannerinator adotta un approccio **hybrid multi-model**:
+- **Entità core rigide** (task, eventi, note) con campi specifici e type-safe
+- **Sistema di linking universale** per connettere qualsiasi entità a qualsiasi altra
+- **Metadata JSONB** per campi custom senza sacrificare performance
+- **Collections dinamiche** per liste personalizzate (libri, servizi, ricerche, etc.)
+
+## Entità Principali
+
+### 1. Tasks
+Cose da fare, con o senza scadenza, assegnabili a progetti, collegabili a note/eventi.
+
+**Campi core:**
+- Titolo, descrizione
+- Data di scadenza (opzionale)
+- Durata stimata (opzionale)
+- Status (todo, in_progress, done, cancelled)
+- Priorità (low, medium, high, urgent)
+
+### 2. Events
+Eventi nel tempo, visualizzabili in calendario o lista.
+
+**Campi core:**
+- Titolo, descrizione
+- Data/ora inizio (obbligatorio)
+- Data/ora fine (opzionale)
+- Location
+- All-day flag
+
+### 3. Notes
+Note, documenti, ricerche, knowledge base.
+
+**Campi core:**
+- Titolo (opzionale)
+- Contenuto (markdown)
+- Tipo (note, document, research, idea)
+
+### 4. Projects
+Contenitori logici per organizzare task/eventi/note.
+
+**Campi core:**
+- Nome, descrizione
+- Status (active, archived, completed)
+- Date inizio/fine (opzionali)
+- Colore
+
+### 5. Collections
+Liste personalizzate con schema definibile dall'utente.
+
+**Esempi:**
+- Pacchetti servizi freelance (nome, prezzo, descrizione, durata)
+- Libri letti (titolo, autore, voto, note)
+- Serie TV (titolo, stagioni viste, piattaforma)
+- Clienti (nome, email, telefono, progetti associati)
+
+## Sistema di Linking
+
+Qualsiasi entità può essere collegata a qualsiasi altra con una relazione tipizzata:
+
+**Esempi:**
+- Task → Project (relationship: "assigned_to")
+- Task → Note (relationship: "documented_by")
+- Task → Event (relationship: "scheduled_as")
+- Task → Task (relationship: "blocks" o "depends_on")
+- Note → Collection Item (relationship: "related_to")
+
+## Features Universali
+
+Tutte le entità supportano:
+- **Tags** - organizzazione flessibile (#urgent, #work, #personal)
+- **Comments** - conversazioni su qualsiasi risorsa
+- **Attachments** - file collegati (futuro con R2)
+- **Activity log** - storico modifiche
+- **Search** - full-text search su tutti i contenuti
+
+## Tech Stack
+
+- **Framework:** Next.js 15 (App Router, Server Components, Server Actions)
+- **Database:** PostgreSQL (Neon) + Drizzle ORM
+- **UI:** Tailwind CSS + shadcn/ui + Lucide icons
+- **Forms:** React Hook Form + Zod validation
+- **Auth:** Better Auth con RBAC
+- **Deploy:** Cloudflare Workers
+
+## Roadmap
+
+### Phase 1: Foundation ✅ (Current)
+- Database schema
+- CRUD operations per tutte le entità
+- Dashboard con sidebar navigation
+- Sistema di linking
+
+### Phase 2: Core Features 🚧
+- Task views (lista, kanban, calendario)
+- Event calendar
+- Note editor (markdown)
+- Project management
+- Collections CRUD
+
+### Phase 3: Advanced Features 📋
+- Advanced search & filters
+- Bulk operations
+- Activity timeline
+- Data export/import
+
+### Phase 4: Collaboration 📋
+- Sharing entities con altri utenti
+- Permissions granulari
+- Comments & mentions
+
+### Phase 5: AI Assistant 📋
+- Chat interface
+- Natural language task creation
+- Smart suggestions
+- Semantic search
+
+## Documentazione
+
+- [Database Schema](./DATABASE_SCHEMA.md) - Schema completo con esempi
+- [Architecture](./ARCHITECTURE.md) - Architettura applicazione
+- [Features](./FEATURES.md) - Lista feature dettagliata
+- [UI Patterns](./UI_PATTERNS.md) - Pattern e componenti UI
+- [API Design](./API_DESIGN.md) - Server Actions e validazione
+- [Sharing System](./SHARING.md) - Sistema di condivisione (futuro)
+- [AI Assistant](./AI_ASSISTANT.md) - Integrazione AI (futuro)
