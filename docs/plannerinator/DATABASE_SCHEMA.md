@@ -5,6 +5,7 @@ Schema completo PostgreSQL per Plannerinator utilizzando Drizzle ORM.
 ## Filosofia dello Schema
 
 **Hybrid Multi-Model Approach:**
+
 1. Tabelle tipizzate per entità core (performance + type safety)
 2. Campi JSONB per metadata custom (flessibilità)
 3. Tabelle universali per features condivise (links, tags, comments)
@@ -61,6 +62,7 @@ CREATE TABLE tasks (
 ```
 
 **Esempi metadata JSONB:**
+
 ```json
 {
   "recurring": {
@@ -120,6 +122,7 @@ CREATE TABLE events (
 ```
 
 **Esempi metadata JSONB:**
+
 ```json
 {
   "meeting_link": "https://zoom.us/j/123456",
@@ -178,14 +181,13 @@ CREATE TABLE notes (
 ```
 
 **Esempi metadata JSONB:**
+
 ```json
 {
   "source_url": "https://example.com/article",
   "author": "Mario Rossi",
   "reading_time_minutes": 15,
-  "highlights": [
-    {"text": "Quote importante", "color": "yellow"}
-  ],
+  "highlights": [{ "text": "Quote importante", "color": "yellow" }],
   "related_book_isbn": "978-1234567890"
 }
 ```
@@ -233,6 +235,7 @@ CREATE TABLE projects (
 ```
 
 **Esempi metadata JSONB:**
+
 ```json
 {
   "client_name": "Acme Corp",
@@ -298,6 +301,7 @@ CREATE TABLE collection_items (
 ```
 
 **Esempio schema servizi freelance:**
+
 ```json
 {
   "fields": [
@@ -334,6 +338,7 @@ CREATE TABLE collection_items (
 ```
 
 **Esempio item:**
+
 ```json
 {
   "name": "Sviluppo Landing Page",
@@ -395,6 +400,7 @@ CREATE TABLE links (
 ```
 
 **Query esempio - trova tutti i link di un task:**
+
 ```sql
 SELECT * FROM links
 WHERE (from_type = 'task' AND from_id = $taskId)

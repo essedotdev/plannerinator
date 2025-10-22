@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import { RoleSelector } from "./RoleSelector";
+import { formatFullDate } from "@/lib/dates";
 
 /**
  * Dashboard users management page (Admin only).
@@ -33,7 +34,6 @@ export default async function UsersPage() {
   // Statistiche per ruolo
   const usersByRole = {
     user: allUsers.filter((u) => u.role === "user").length,
-    editor: allUsers.filter((u) => u.role === "editor").length,
     admin: allUsers.filter((u) => u.role === "admin").length,
   };
 
@@ -45,7 +45,7 @@ export default async function UsersPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-3">
             <CardDescription>Total Users</CardDescription>
@@ -56,12 +56,6 @@ export default async function UsersPage() {
           <CardHeader className="pb-3">
             <CardDescription>Users</CardDescription>
             <CardTitle className="text-3xl">{usersByRole.user}</CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription>Editors</CardDescription>
-            <CardTitle className="text-3xl">{usersByRole.editor}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
@@ -100,7 +94,7 @@ export default async function UsersPage() {
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Joined: {new Date(userItem.createdAt).toLocaleDateString()}
+                    Joined: {formatFullDate(userItem.createdAt)}
                   </p>
                 </div>
 

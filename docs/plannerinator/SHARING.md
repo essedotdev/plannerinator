@@ -11,17 +11,20 @@ Permettere agli utenti di condividere task, eventi, note, progetti e collection 
 ## Permission Levels
 
 ### View (Lettura)
+
 - Visualizza entità e suoi dettagli
 - Visualizza commenti
 - Visualizza collegamenti
 - **Non può:** modificare, commentare, eliminare
 
 ### Comment (Commenta)
+
 - Tutti i permessi di View +
 - Aggiungere commenti
 - **Non può:** modificare entità, eliminare
 
 ### Edit (Modifica)
+
 - Tutti i permessi di Comment +
 - Modificare entità (title, description, fields, etc.)
 - Aggiungere/rimuovere tags
@@ -29,6 +32,7 @@ Permettere agli utenti di condividere task, eventi, note, progetti e collection 
 - **Non può:** eliminare entità, cambiare sharing settings, trasferire ownership
 
 ### Owner (Proprietario)
+
 - Tutti i permessi +
 - Eliminare entità
 - Gestire sharing (aggiungere/rimuovere persone, cambiare permessi)
@@ -158,36 +162,32 @@ Email ricevente:
 
 ```typescript
 // features/sharing/actions.ts
-'use server';
+"use server";
 
 export async function shareEntity(input: {
   entityType: EntityType;
   entityId: string;
   sharedWithEmail?: string; // for specific user
-  permission: 'view' | 'comment' | 'edit';
+  permission: "view" | "comment" | "edit";
   expiresAt?: Date;
   generateLink?: boolean; // for anyone-with-link
 }) {
   const session = await auth();
   if (!session?.user) {
-    return { success: false, error: 'Unauthorized' };
+    return { success: false, error: "Unauthorized" };
   }
 
   try {
     // 1. Verify ownership
-    const isOwner = await verifyOwnership(
-      session.user.id,
-      input.entityType,
-      input.entityId
-    );
+    const isOwner = await verifyOwnership(session.user.id, input.entityType, input.entityId);
 
     if (!isOwner) {
-      return { success: false, error: 'You do not own this entity' };
+      return { success: false, error: "You do not own this entity" };
     }
 
     // 2. If email provided, find user
     let sharedWithUserId: string | null = null;
-    let status: 'pending' | 'active' = 'active';
+    let status: "pending" | "active" = "active";
 
     if (input.sharedWithEmail) {
       const recipient = await db.query.user.findFirst({
@@ -198,27 +198,28 @@ export async function shareEntity(input: {
         sharedWithUserId = recipient.id;
       } else {
         // User doesn't exist yet, create pending share
-        status = 'pending';
+        status = "pending";
       }
     }
 
     // 3. Generate invite token if requested or if anyone-with-link
-    const inviteToken = input.generateLink || !input.sharedWithEmail
-      ? generateSecureToken()
-      : null;
+    const inviteToken = input.generateLink || !input.sharedWithEmail ? generateSecureToken() : null;
 
     // 4. Create share
-    const [share] = await db.insert(shares).values({
-      ownerId: session.user.id,
-      entityType: input.entityType,
-      entityId: input.entityId,
-      sharedWithUserId,
-      sharedWithEmail: input.sharedWithEmail,
-      permission: input.permission,
-      expiresAt: input.expiresAt,
-      inviteToken,
-      status,
-    }).returning();
+    const [share] = await db
+      .insert(shares)
+      .values({
+        ownerId: session.user.id,
+        entityType: input.entityType,
+        entityId: input.entityId,
+        sharedWithUserId,
+        sharedWithEmail: input.sharedWithEmail,
+        permission: input.permission,
+        expiresAt: input.expiresAt,
+        inviteToken,
+        status,
+      })
+      .returning();
 
     // 5. Send notification email
     if (input.sharedWithEmail) {
@@ -238,14 +239,12 @@ export async function shareEntity(input: {
       success: true,
       data: {
         share,
-        shareLink: inviteToken
-          ? `${process.env.NEXT_PUBLIC_APP_URL}/shared/${inviteToken}`
-          : null,
+        shareLink: inviteToken ? `${process.env.NEXT_PUBLIC_APP_URL}/shared/${inviteToken}` : null,
       },
     };
   } catch (error) {
-    console.error('Share entity error:', error);
-    return { success: false, error: 'Failed to share entity' };
+    console.error("Share entity error:", error);
+    return { success: false, error: "Failed to share entity" };
   }
 }
 ```
@@ -257,28 +256,26 @@ export async function shareEntity(input: {
 ```typescript
 export async function updateSharePermission(
   shareId: string,
-  permission: 'view' | 'comment' | 'edit'
+  permission: "view" | "comment" | "edit"
 ) {
   const session = await auth();
   if (!session?.user) {
-    return { success: false, error: 'Unauthorized' };
+    return { success: false, error: "Unauthorized" };
   }
 
   try {
     // Verify ownership of share
     const share = await db.query.shares.findFirst({
-      where: and(
-        eq(shares.id, shareId),
-        eq(shares.ownerId, session.user.id)
-      ),
+      where: and(eq(shares.id, shareId), eq(shares.ownerId, session.user.id)),
     });
 
     if (!share) {
-      return { success: false, error: 'Share not found' };
+      return { success: false, error: "Share not found" };
     }
 
     // Update
-    const [updated] = await db.update(shares)
+    const [updated] = await db
+      .update(shares)
       .set({ permission, updatedAt: new Date() })
       .where(eq(shares.id, shareId))
       .returning();
@@ -287,8 +284,8 @@ export async function updateSharePermission(
 
     return { success: true, data: updated };
   } catch (error) {
-    console.error('Update share error:', error);
-    return { success: false, error: 'Failed to update share' };
+    console.error("Update share error:", error);
+    return { success: false, error: "Failed to update share" };
   }
 }
 ```
@@ -301,32 +298,30 @@ export async function updateSharePermission(
 export async function revokeShare(shareId: string) {
   const session = await auth();
   if (!session?.user) {
-    return { success: false, error: 'Unauthorized' };
+    return { success: false, error: "Unauthorized" };
   }
 
   try {
     const share = await db.query.shares.findFirst({
-      where: and(
-        eq(shares.id, shareId),
-        eq(shares.ownerId, session.user.id)
-      ),
+      where: and(eq(shares.id, shareId), eq(shares.ownerId, session.user.id)),
     });
 
     if (!share) {
-      return { success: false, error: 'Share not found' };
+      return { success: false, error: "Share not found" };
     }
 
     // Set status to revoked instead of deleting (for audit trail)
-    await db.update(shares)
-      .set({ status: 'revoked', updatedAt: new Date() })
+    await db
+      .update(shares)
+      .set({ status: "revoked", updatedAt: new Date() })
       .where(eq(shares.id, shareId));
 
     revalidatePath(`/${share.entityType}s/${share.entityId}`);
 
     return { success: true, data: { id: shareId } };
   } catch (error) {
-    console.error('Revoke share error:', error);
-    return { success: false, error: 'Failed to revoke share' };
+    console.error("Revoke share error:", error);
+    return { success: false, error: "Failed to revoke share" };
   }
 }
 ```
@@ -339,31 +334,29 @@ export async function revokeShare(shareId: string) {
 export async function acceptShareInvite(token: string) {
   const session = await auth();
   if (!session?.user) {
-    return { success: false, error: 'Please login to accept share' };
+    return { success: false, error: "Please login to accept share" };
   }
 
   try {
     const share = await db.query.shares.findFirst({
-      where: and(
-        eq(shares.inviteToken, token),
-        eq(shares.status, 'pending')
-      ),
+      where: and(eq(shares.inviteToken, token), eq(shares.status, "pending")),
     });
 
     if (!share) {
-      return { success: false, error: 'Invalid or expired invite' };
+      return { success: false, error: "Invalid or expired invite" };
     }
 
     // Check expiration
     if (share.expiresAt && share.expiresAt < new Date()) {
-      return { success: false, error: 'Invite has expired' };
+      return { success: false, error: "Invite has expired" };
     }
 
     // Activate share
-    const [updated] = await db.update(shares)
+    const [updated] = await db
+      .update(shares)
       .set({
         sharedWithUserId: session.user.id,
-        status: 'active',
+        status: "active",
         acceptedAt: new Date(),
         updatedAt: new Date(),
       })
@@ -372,8 +365,8 @@ export async function acceptShareInvite(token: string) {
 
     return { success: true, data: updated };
   } catch (error) {
-    console.error('Accept share error:', error);
-    return { success: false, error: 'Failed to accept share' };
+    console.error("Accept share error:", error);
+    return { success: false, error: "Failed to accept share" };
   }
 }
 ```
@@ -387,25 +380,21 @@ export async function acceptShareInvite(token: string) {
 ```typescript
 export async function getTask(id: string) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
+  if (!session?.user) redirect("/login");
 
   const task = await db.query.tasks.findFirst({
     where: eq(tasks.id, id),
   });
 
   if (!task) {
-    throw new Error('Task not found');
+    throw new Error("Task not found");
   }
 
   // Check if user is owner or has share access
-  const permission = await getEntityPermission(
-    session.user.id,
-    'task',
-    id
-  );
+  const permission = await getEntityPermission(session.user.id, "task", id);
 
   if (permission === null) {
-    throw new Error('Access denied');
+    throw new Error("Access denied");
   }
 
   return {
@@ -419,11 +408,11 @@ async function getEntityPermission(
   userId: string,
   entityType: string,
   entityId: string
-): Promise<'owner' | 'view' | 'comment' | 'edit' | null> {
+): Promise<"owner" | "view" | "comment" | "edit" | null> {
   // Check ownership
   const entity = await getEntityByTypeAndId(entityType, entityId);
   if (entity?.userId === userId) {
-    return 'owner';
+    return "owner";
   }
 
   // Check share
@@ -432,7 +421,7 @@ async function getEntityPermission(
       eq(shares.entityType, entityType),
       eq(shares.entityId, entityId),
       eq(shares.sharedWithUserId, userId),
-      eq(shares.status, 'active')
+      eq(shares.status, "active")
     ),
   });
 
@@ -445,7 +434,7 @@ async function getEntityPermission(
     return null;
   }
 
-  return share.permission as 'view' | 'comment' | 'edit';
+  return share.permission as "view" | "comment" | "edit";
 }
 ```
 
@@ -456,13 +445,10 @@ async function getEntityPermission(
 ```typescript
 export async function getSharedWithMe() {
   const session = await auth();
-  if (!session?.user) redirect('/login');
+  if (!session?.user) redirect("/login");
 
   const activeShares = await db.query.shares.findMany({
-    where: and(
-      eq(shares.sharedWithUserId, session.user.id),
-      eq(shares.status, 'active')
-    ),
+    where: and(eq(shares.sharedWithUserId, session.user.id), eq(shares.status, "active")),
     with: {
       owner: true, // Include owner info
     },
@@ -471,10 +457,7 @@ export async function getSharedWithMe() {
   // Fetch actual entities
   const entities = await Promise.all(
     activeShares.map(async (share) => {
-      const entity = await getEntityByTypeAndId(
-        share.entityType,
-        share.entityId
-      );
+      const entity = await getEntityByTypeAndId(share.entityType, share.entityId);
 
       return {
         ...entity,
@@ -737,6 +720,7 @@ function TaskActions({ task, permission }: {
 ### Email Templates
 
 **Share Invite:**
+
 ```
 Subject: [User Name] shared a [entity] with you
 
@@ -753,6 +737,7 @@ This share will expire on [expiration date] if set.
 ```
 
 **Share Accepted:**
+
 ```
 Subject: [User Name] accepted your share
 

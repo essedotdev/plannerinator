@@ -6,8 +6,8 @@ import { z } from "zod";
  */
 export const updateUserRoleSchema = z.object({
   userId: z.string().uuid("Invalid user ID format"),
-  role: z.enum(["user", "editor", "admin"], {
-    message: "Role must be user, editor, or admin",
+  role: z.enum(["user", "admin"], {
+    message: "Role must be user or admin",
   }),
 });
 

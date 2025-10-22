@@ -15,6 +15,13 @@
       "when": 1760262256087,
       "tag": "0001_stormy_satana",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1761047954533,
+      "tag": "0002_majestic_captain_universe",
+      "breakpoints": true
     }
   ]
 }

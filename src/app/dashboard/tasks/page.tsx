@@ -1,0 +1,72 @@
+import { getTasks } from "@/features/tasks/queries";
+import { PageHeader } from "@/components/common";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import Link from "next/link";
+import { TaskList } from "@/components/tasks/TaskList";
+import { TaskFilters } from "@/components/tasks/TaskFilters";
+import type { TaskStatus, TaskPriority, TaskFilterInput } from "@/features/tasks/schema";
+
+/**
+ * Tasks list page
+ *
+ * Features:
+ * - Display all user tasks
+ * - Filter by status, priority, project, date
+ * - Sort tasks
+ * - Quick actions (complete, delete)
+ * - Create new task
+ */
+
+interface TasksPageProps {
+  searchParams: Promise<{
+    status?: string;
+    priority?: string;
+    projectId?: string;
+    search?: string;
+    sortBy?: string;
+    sortOrder?: string;
+  }>;
+}
+
+export default async function TasksPage({ searchParams }: TasksPageProps) {
+  const params = await searchParams;
+
+  // Fetch tasks with filters from URL params
+  const { tasks, pagination } = await getTasks({
+    status: params.status as TaskStatus | undefined,
+    priority: params.priority as TaskPriority | undefined,
+    projectId: params.projectId,
+    search: params.search,
+    sortBy: params.sortBy as TaskFilterInput["sortBy"],
+    sortOrder: params.sortOrder as TaskFilterInput["sortOrder"],
+  });
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <PageHeader title="Tasks" description={`${pagination.total} total tasks`} />
+        <Button asChild>
+          <Link href="/dashboard/tasks/new">
+            <Plus className="h-4 w-4 mr-2" />
+            New Task
+          </Link>
+        </Button>
+      </div>
+
+      {/* Filters */}
+      <TaskFilters />
+
+      {/* Task List */}
+      <TaskList tasks={tasks} />
+
+      {/* Pagination Info */}
+      {pagination.hasMore && (
+        <div className="text-center text-sm text-muted-foreground">
+          Showing {tasks.length} of {pagination.total} tasks
+        </div>
+      )}
+    </div>
+  );
+}

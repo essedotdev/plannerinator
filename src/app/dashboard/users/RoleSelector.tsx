@@ -20,11 +20,10 @@ interface RoleSelectorProps {
   disabled?: boolean;
 }
 
-const ROLES: Role[] = ["user", "editor", "admin"];
+const ROLES: Role[] = ["user", "admin"];
 
 const ROLE_LABELS: Record<Role, string> = {
   user: "User",
-  editor: "Editor",
   admin: "Admin",
 };
 
@@ -55,15 +54,7 @@ export function RoleSelector({ userId, currentRole, disabled }: RoleSelectorProp
     <Select value={currentRole} onValueChange={handleRoleChange} disabled={disabled || isUpdating}>
       <SelectTrigger className="w-[130px]">
         <SelectValue>
-          <Badge
-            variant={
-              currentRole === "admin"
-                ? "default"
-                : currentRole === "editor"
-                  ? "secondary"
-                  : "outline"
-            }
-          >
+          <Badge variant={currentRole === "admin" ? "default" : "outline"}>
             {ROLE_LABELS[currentRole]}
           </Badge>
         </SelectValue>

@@ -10,7 +10,8 @@ export function Footer() {
           <div className="space-y-4">
             <h3 className="text-lg font-bold">Plannerinator</h3>
             <p className="text-sm text-muted-foreground">
-              Complete life management system: tasks, events, notes, projects, and custom collections.
+              Complete life management system: tasks, events, notes, projects, and custom
+              collections.
             </p>
           </div>
 

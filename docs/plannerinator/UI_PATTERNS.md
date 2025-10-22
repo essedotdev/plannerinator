@@ -31,6 +31,7 @@ Pattern UI/UX ricorrenti in Plannerinator per consistenza e best practices.
 ```
 
 **Caratteristiche:**
+
 - Sidebar fissa desktop (collapsible)
 - Sheet mobile (hamburger menu)
 - Top bar con global actions
@@ -47,30 +48,31 @@ Pattern UI/UX ricorrenti in Plannerinator per consistenza e best practices.
 // components/layout/DashboardSidebar.tsx
 const navigation = [
   {
-    name: 'Overview',
-    href: '/dashboard',
+    name: "Overview",
+    href: "/dashboard",
     icon: LayoutDashboard,
   },
   {
-    section: 'Main',
+    section: "Main",
     items: [
-      { name: 'Tasks', href: '/tasks', icon: CheckSquare, badge: taskCount },
-      { name: 'Calendar', href: '/calendar', icon: Calendar },
-      { name: 'Notes', href: '/notes', icon: FileText },
+      { name: "Tasks", href: "/tasks", icon: CheckSquare, badge: taskCount },
+      { name: "Calendar", href: "/calendar", icon: Calendar },
+      { name: "Notes", href: "/notes", icon: FileText },
     ],
   },
   {
-    section: 'Organize',
+    section: "Organize",
     items: [
-      { name: 'Projects', href: '/projects', icon: Folder },
-      { name: 'Collections', href: '/collections', icon: Package },
-      { name: 'Tags', href: '/tags', icon: Tag },
+      { name: "Projects", href: "/projects", icon: Folder },
+      { name: "Collections", href: "/collections", icon: Package },
+      { name: "Tags", href: "/tags", icon: Tag },
     ],
   },
 ];
 ```
 
 **Features:**
+
 - Active state highlight
 - Icon + label
 - Badge per counts (es. pending tasks)
@@ -116,6 +118,7 @@ const navigation = [
 ```
 
 **Features:**
+
 - Keyboard-first (fuzzy search)
 - Multiple sections (actions, recent, search)
 - Icon per entity type
@@ -123,6 +126,7 @@ const navigation = [
 - Arrow navigation + Enter to select
 
 **Implementation:**
+
 - `cmdk` library (shadcn/ui)
 - Debounced search
 - Recent items stored in localStorage
@@ -146,11 +150,13 @@ const navigation = [
 ```
 
 **Varianti:**
+
 - Compact (solo title + metadata)
 - Expanded (con description)
 - Kanban (drag handle + minimal)
 
 **Interactions:**
+
 - Click → open detail
 - Checkbox → toggle complete
 - Menu (⋯) → edit, delete, duplicate, move
@@ -173,6 +179,7 @@ const navigation = [
 ```
 
 **Color coding:**
+
 - Left border color = calendar type (work/personal/etc.)
 
 ---
@@ -192,6 +199,7 @@ const navigation = [
 ```
 
 **Features:**
+
 - Favorite star (top right)
 - Markdown rendering in preview
 - Type badge (note/document/research/etc.)
@@ -213,6 +221,7 @@ const navigation = [
 ```
 
 **Features:**
+
 - Progress bar (% tasks done)
 - Color accent (customizable)
 - Stats summary
@@ -256,6 +265,7 @@ const navigation = [
 ```
 
 **Best Practices:**
+
 - Label sempre presente
 - Description per campi complessi
 - Error messages inline
@@ -306,6 +316,7 @@ function InlineEdit({ value, onSave }) {
 ```
 
 **Use cases:**
+
 - Task title
 - Note title
 - Project name
@@ -341,6 +352,7 @@ function InlineEdit({ value, onSave }) {
 ```
 
 **When to use:**
+
 - Delete actions
 - Irreversible actions
 - Important confirmations
@@ -365,6 +377,7 @@ function InlineEdit({ value, onSave }) {
 ```
 
 **Best Practices:**
+
 - Max width responsive (sm:max-w-[600px])
 - Close on ESC
 - Close on overlay click (optional, per form può essere disabled)
@@ -392,6 +405,7 @@ function InlineEdit({ value, onSave }) {
 ```
 
 **When to use:**
+
 - Entity detail views
 - Multi-step forms
 - Rich content preview
@@ -486,6 +500,7 @@ function TaskListSkeleton() {
 ```
 
 **When to use:**
+
 - Initial page load
 - Infinite scroll loading more
 - Better than spinners per list/cards
@@ -507,6 +522,7 @@ function TaskListSkeleton() {
 ```
 
 **When to use:**
+
 - Form submission
 - Refreshing data
 - Actions che potrebbero fallire
@@ -543,6 +559,7 @@ function EmptyState({ entityType, onCreateNew }) {
 ```
 
 **Variants:**
+
 - Empty search results (suggerisci clear filters)
 - Empty project (suggerisci add task)
 - Empty collection (suggerisci add item)
@@ -592,31 +609,32 @@ function ErrorFallback({ error, resetErrorBoundary }) {
 ## Toast Notifications
 
 ```typescript
-import { toast } from 'sonner';
+import { toast } from "sonner";
 
 // Success
-toast.success('Task created successfully');
+toast.success("Task created successfully");
 
 // Error
-toast.error('Failed to create task', {
+toast.error("Failed to create task", {
   description: error.message,
 });
 
 // Loading
-const toastId = toast.loading('Creating task...');
+const toastId = toast.loading("Creating task...");
 // Later
-toast.success('Task created', { id: toastId });
+toast.success("Task created", { id: toastId });
 
 // With action
-toast('Task completed', {
+toast("Task completed", {
   action: {
-    label: 'Undo',
+    label: "Undo",
     onClick: () => undoComplete(taskId),
   },
 });
 ```
 
 **Best Practices:**
+
 - Success messages brevissime (2-3 parole)
 - Error messages con dettagli
 - Loading toast con ID per update
@@ -661,6 +679,7 @@ function SortableTaskItem({ task }) {
 ```
 
 **Use cases:**
+
 - Reorder tasks
 - Reorder projects
 - Custom sort collections
@@ -761,24 +780,25 @@ function ResponsiveTaskList({ tasks }) {
 useEffect(() => {
   function handleKeyDown(e: KeyboardEvent) {
     // Cmd+K: Open command palette
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    if ((e.metaKey || e.ctrlKey) && e.key === "k") {
       e.preventDefault();
       openCommandPalette();
     }
 
     // Cmd+T: New task
-    if ((e.metaKey || e.ctrlKey) && e.key === 't') {
+    if ((e.metaKey || e.ctrlKey) && e.key === "t") {
       e.preventDefault();
       openNewTaskDialog();
     }
   }
 
-  window.addEventListener('keydown', handleKeyDown);
-  return () => window.removeEventListener('keydown', handleKeyDown);
+  window.addEventListener("keydown", handleKeyDown);
+  return () => window.removeEventListener("keydown", handleKeyDown);
 }, []);
 ```
 
 **Common shortcuts:**
+
 - `Cmd+K` - Command palette
 - `Cmd+T` - New task
 - `Cmd+E` - New event
@@ -869,6 +889,7 @@ export default function Page() {
 ```
 
 **Best Practices:**
+
 - Animazioni brevi (200-300ms)
 - Respect `prefers-reduced-motion`
 - Layout animations per drag & drop

@@ -1,575 +1,1026 @@
-# Features
+# Plannerinator - Features Documentation
 
-Lista completa delle feature di Plannerinator, organizzate per priorità di sviluppo.
+Documentazione tecnica dettagliata di tutte le feature implementate e pianificate.
 
-## Phase 1: Foundation (MVP)
-
-### 1.1 Task Management ⭐⭐⭐
-
-**CRUD Operations**
-- [x] Create task con form validato
-- [x] Edit task (inline e modal)
-- [x] Delete task con confirmation
-- [x] Mark as complete/incomplete
-
-**Task Fields**
-- [x] Titolo (required)
-- [x] Descrizione (markdown, optional)
-- [x] Due date (optional)
-- [x] Start date (optional)
-- [x] Duration stimata in minuti (optional)
-- [x] Status (todo, in_progress, done, cancelled)
-- [x] Priority (low, medium, high, urgent)
-
-**Organization**
-- [x] Assegna task a progetto
-- [x] Subtasks (parent_task_id)
-- [x] Drag & drop ordering
-
-**Views**
-- [x] Lista (default)
-  - Filtri: status, priority, project, due date range
-  - Ordinamento: due date, priority, created date
-  - Group by: project, status, priority
-- [x] Kanban (todo | in progress | done)
-  - Drag & drop tra colonne
-  - Colonne configurabili
-- [ ] Calendario (task con due date)
-  - Vista mese/settimana/giorno
-  - Drag & drop per cambio data
-- [ ] Timeline (Gantt-like)
-  - Task con start/end date
-  - Dependencies visualizzate
-
-**Quick Actions**
-- [x] Quick add task (Cmd+K → "new task")
-- [x] Inline edit title/due date
-- [x] Batch actions (mark multiple as done, delete, move to project)
+> **Per roadmap high-level e timeline, vedi [ROADMAP.md](./ROADMAP.md)**
 
 ---
 
-### 1.2 Event Management ⭐⭐⭐
+## Table of Contents
 
-**CRUD Operations**
-- [x] Create event
-- [x] Edit event
-- [x] Delete event
-- [x] Duplicate event
-
-**Event Fields**
-- [x] Titolo (required)
-- [x] Descrizione (optional)
-- [x] Start time (required)
-- [x] End time (optional)
-- [x] All-day flag
-- [x] Location (text + optional URL)
-- [x] Calendar type (personal, work, family, other)
-
-**Organization**
-- [x] Assegna event a progetto
-- [x] Link event a task
-
-**Views**
-- [x] Calendario
-  - Vista mese (default)
-  - Vista settimana
-  - Vista giorno
-  - Vista agenda (lista)
-- [x] Lista eventi
-  - Filtri: calendar type, project, date range
-  - Oggi / Questa settimana / Questo mese
-
-**Integrations (Futuro)**
-- [ ] Import Google Calendar (read-only)
-- [ ] Export .ics file
-- [ ] Sync bidirezionale con Google Calendar
+- [Core Entities](#core-entities)
+  - [Task Management](#task-management)
+  - [Event Management](#event-management)
+  - [Note Management](#note-management)
+  - [Project Management](#project-management)
+- [Universal Features](#universal-features)
+  - [Tagging System](#tagging-system)
+  - [Comments System](#comments-system)
+  - [Linking System](#linking-system)
+  - [Global Search](#global-search)
+- [Future Features](#future-features)
 
 ---
 
-### 1.3 Note Management ⭐⭐⭐
+# Core Entities
 
-**CRUD Operations**
-- [x] Create note
-- [x] Edit note
-- [x] Delete note
-- [x] Archive note
+## Task Management
 
-**Note Fields**
-- [x] Titolo (optional)
-- [x] Contenuto markdown (required)
-- [x] Tipo (note, document, research, idea, snippet)
+### Overview
 
-**Editor**
-- [x] Markdown editor con preview
-- [x] Syntax highlighting per code blocks
-- [x] Toolbar (bold, italic, lists, links, code)
-- [x] Autosave (debounced)
+Sistema completo per gestione task con subtasks, priorità, stati, e collegamenti a progetti.
 
-**Organization**
-- [x] Assegna note a progetto
-- [x] Nested notes (parent_note_id)
-- [x] Favorites (quick access)
+### Status: ✅ Completato (MVP)
 
-**Views**
-- [x] Lista note
-  - Filtri: tipo, project, favorite
-  - Ordinamento: updated, created, title
-- [x] Grid view (card preview)
-- [ ] Graph view (connessioni tra note)
+### File Structure
 
-**Search**
-- [x] Full-text search (title + content)
-- [x] Search dentro note aperta (Cmd+F)
+```
+src/
+├── features/tasks/
+│   ├── schema.ts         # Zod validation (34 tests)
+│   ├── actions.ts        # Server Actions (~330 LOC)
+│   └── queries.ts        # Database queries (~320 LOC)
+├── components/tasks/
+│   ├── TaskList.tsx      # Lista task con empty state
+│   ├── TaskCard.tsx      # Card singola task con actions
+│   ├── TaskForm.tsx      # Form create/edit con validation
+│   └── TaskFilters.tsx   # Filtri con URL sync
+└── app/dashboard/tasks/
+    ├── page.tsx          # Lista task
+    ├── [id]/page.tsx     # Dettaglio + edit
+    └── new/page.tsx      # Creazione
+```
+
+### Features Implemented
+
+**Core Fields:**
+
+- ✅ Title (required)
+- ✅ Description (optional, rich text)
+- ✅ Due date (optional)
+- ✅ Start date (optional)
+- ✅ Duration in minutes (optional)
+- ✅ Status: `todo`, `in_progress`, `done`, `cancelled`
+- ✅ Priority: `low`, `medium`, `high`, `urgent` (optional)
+
+**Relationships:**
+
+- ✅ Assign to project (foreign key + JOIN)
+- ✅ Subtasks (parent-child relationship via `parentTaskId`)
+- ✅ Parent task display
+
+**Actions:**
+
+- ✅ Create task
+- ✅ Update task (with auto `completedAt` management)
+- ✅ Delete task
+- ✅ Mark as complete/incomplete (quick toggle)
+- ✅ Bulk operations:
+  - Bulk delete
+  - Bulk complete
+  - Bulk update status
+  - Bulk update priority
+
+**Queries:**
+
+- ✅ Get tasks with filters:
+  - Status (single or multiple)
+  - Priority (single or multiple)
+  - Project ID
+  - Date range (due date)
+  - Search query (title + description full-text)
+  - Parent task ID (for subtasks)
+- ✅ Get single task with relations (project, subtasks, parent)
+- ✅ Get subtasks for task
+- ✅ Get tasks by project
+- ✅ Get tasks due today
+- ✅ Get overdue tasks
+- ✅ Search tasks (full-text)
+
+**UI Features:**
+
+- ✅ Task card with:
+  - Checkbox per quick completion
+  - Status badge con colori
+  - Priority badge con colori
+  - Project badge con colore custom
+  - Due date con overdue detection
+  - Actions menu (edit, delete, mark complete)
+- ✅ Filters con URL sync:
+  - Status filter (multi-select)
+  - Priority filter (multi-select)
+  - Search input (debounced)
+- ✅ Empty states
+- ✅ Toast notifications
+- ✅ Responsive design (mobile-friendly)
+- ✅ Overdue detection con visual highlight
+
+**Database Indexes:**
+
+```typescript
+index("task_user_id_idx").on(table.userId);
+index("task_project_id_idx").on(table.projectId);
+index("task_due_date_idx").on(table.dueDate);
+index("task_status_idx").on(table.status);
+index("task_parent_task_id_idx").on(table.parentTaskId);
+```
+
+### API Reference
+
+**Server Actions:**
+
+```typescript
+// Create
+createTask(data: CreateTaskInput): Promise<{ id: string }>
+
+// Update (auto-manages completedAt)
+updateTask(id: string, data: UpdateTaskInput): Promise<void>
+
+// Delete
+deleteTask(id: string): Promise<void>
+
+// Quick actions
+markTaskComplete(id: string): Promise<void>
+markTaskIncomplete(id: string): Promise<void>
+
+// Bulk operations
+bulkTaskOperations(operation: BulkTaskOperation): Promise<void>
+// Operations: 'delete' | 'complete' | 'updateStatus' | 'updatePriority'
+```
+
+**Queries:**
+
+```typescript
+// Get tasks with filters
+getTasks(filters?: TaskFilters): Promise<Task[]>
+// Filters: status, priority, projectId, dueDateFrom, dueDateTo, search, parentTaskId, limit, offset
+
+// Get single task
+getTaskById(id: string): Promise<TaskWithRelations | null>
+// Returns: task + project + subtasks + parentTask
+
+// Specialized queries
+getTasksByProject(projectId: string): Promise<Task[]>
+getTasksDueToday(userId: string): Promise<Task[]>
+getOverdueTasks(userId: string): Promise<Task[]>
+searchTasks(query: string): Promise<Task[]>
+```
+
+### User Stories
+
+- ✅ As a user, I can create a task with title and optional description
+- ✅ As a user, I can set a due date and priority for my tasks
+- ✅ As a user, I can assign tasks to projects
+- ✅ As a user, I can create subtasks under a parent task
+- ✅ As a user, I can quickly mark tasks as complete with a checkbox
+- ✅ As a user, I can filter tasks by status, priority, and project
+- ✅ As a user, I can search tasks by title or description
+- ✅ As a user, I can see overdue tasks highlighted in red
+- ✅ As a user, I can bulk delete or complete multiple tasks
+- ✅ As a user, I can edit and update task details
+
+### Limitations / Known Issues
+
+- ⚠️ No drag & drop ordering yet
+- ⚠️ No recurring tasks
+- ⚠️ No time tracking
+- ⚠️ No task dependencies (blocked by / blocks)
+- ⚠️ No assignees (single user app for now)
+
+### Future Enhancements
+
+- 💭 Kanban view (todo/in_progress/done columns)
+- 💭 Calendar view (tasks con due date)
+- 💭 Timeline view (Gantt-like)
+- 💭 Drag & drop ordering
+- 💭 Recurring tasks
+- 💭 Reminders
+- 💭 Time tracking
+- 💭 Task dependencies via Links system
 
 ---
 
-### 1.4 Project Management ⭐⭐
+## Event Management
 
-**CRUD Operations**
-- [x] Create project
-- [x] Edit project
-- [x] Archive/Complete project
-- [x] Delete project
+### Overview
 
-**Project Fields**
-- [x] Nome (required)
-- [x] Descrizione (optional)
-- [x] Status (active, on_hold, completed, archived, cancelled)
-- [x] Start/end date (optional)
-- [x] Colore + icon
+Sistema completo per gestione eventi con calendario, location, e tipi personalizzabili.
 
-**Organization**
-- [x] Sub-projects (parent_project_id)
-- [x] Project metadata JSONB (budget, client, hours, etc.)
+### Status: ✅ Completato (MVP)
 
-**Views**
-- [x] Lista progetti
-  - Filtri: status
-  - Ordinamento: name, created, start date
-- [x] Project detail page
-  - Overview (stats, timeline, description)
+### File Structure
+
+```
+src/
+├── features/events/
+│   ├── schema.ts         # Zod validation (35 tests)
+│   ├── actions.ts        # Server Actions (~320 LOC)
+│   └── queries.ts        # Database queries (~310 LOC)
+├── components/events/
+│   ├── EventList.tsx     # Lista eventi con empty state
+│   ├── EventCard.tsx     # Card singola evento
+│   ├── EventForm.tsx     # Form create/edit
+│   └── EventFilters.tsx  # Filtri con URL sync
+└── app/dashboard/events/
+    ├── page.tsx          # Lista eventi
+    ├── [id]/page.tsx     # Dettaglio + edit
+    └── new/page.tsx      # Creazione
+```
+
+### Features Implemented
+
+**Core Fields:**
+
+- ✅ Title (required)
+- ✅ Description (optional)
+- ✅ Start time (required)
+- ✅ End time (optional)
+- ✅ Location (optional)
+- ✅ Location URL (optional, for maps)
+- ✅ All day flag (boolean)
+- ✅ Calendar type: `personal`, `work`, `family`, `other`
+
+**Relationships:**
+
+- ✅ Assign to project (foreign key + JOIN)
+
+**Actions:**
+
+- ✅ Create event
+- ✅ Update event
+- ✅ Delete event
+
+**Queries:**
+
+- ✅ Get events with filters:
+  - Calendar type (single or multiple)
+  - All day filter
+  - Date range (start/end time)
+  - Project ID
+  - Search query (title + description + location)
+- ✅ Get single event with relations (project)
+- ✅ Get events by date range (for calendar view)
+- ✅ Get upcoming events
+- ✅ Get events by project
+- ✅ Get today's events
+- ✅ Search events (full-text)
+
+**UI Features:**
+
+- ✅ Event card with:
+  - Calendar type badge con colori
+  - Start/end time display
+  - Location with optional map link
+  - Project badge con colore custom
+  - Actions menu (edit, delete)
+  - All-day badge
+- ✅ Filters con URL sync:
+  - Calendar type filter
+  - All day toggle
+  - Search input (debounced)
+- ✅ Empty states
+- ✅ Toast notifications
+- ✅ Responsive design
+
+**Database Indexes:**
+
+```typescript
+index("event_user_id_idx").on(table.userId);
+index("event_project_id_idx").on(table.projectId);
+index("event_start_time_idx").on(table.startTime);
+index("event_calendar_type_idx").on(table.calendarType);
+```
+
+### API Reference
+
+**Server Actions:**
+
+```typescript
+createEvent(data: CreateEventInput): Promise<{ id: string }>
+updateEvent(id: string, data: UpdateEventInput): Promise<void>
+deleteEvent(id: string): Promise<void>
+```
+
+**Queries:**
+
+```typescript
+getEvents(filters?: EventFilters): Promise<Event[]>
+getEventById(id: string): Promise<EventWithRelations | null>
+getEventsByDateRange(from: Date, to: Date): Promise<Event[]>
+getUpcomingEvents(userId: string, limit?: number): Promise<Event[]>
+getTodaysEvents(userId: string): Promise<Event[]>
+```
+
+### Limitations / Known Issues
+
+- ⚠️ No recurring events
+- ⚠️ No reminders
+- ⚠️ No attendees
+- ⚠️ No calendar sync (Google, Outlook)
+
+### Future Enhancements
+
+- 💭 Calendar view (month/week/day/agenda) con react-big-calendar
+- 💭 Recurring events
+- 💭 Reminders (email/push)
+- 💭 Google Calendar sync (read-only)
+- 💭 Export .ics file
+- 💭 Attendees/participants
+
+---
+
+## Note Management
+
+### Overview
+
+Sistema completo per gestione note con markdown, tipi, gerarchie, e favorites.
+
+### Status: ✅ Completato (MVP)
+
+### File Structure
+
+```
+src/
+├── features/notes/
+│   ├── schema.ts         # Zod validation (39 tests)
+│   ├── actions.ts        # Server Actions (~380 LOC)
+│   └── queries.ts        # Database queries (~340 LOC)
+├── components/notes/
+│   ├── NoteList.tsx      # Lista note con empty state
+│   ├── NoteCard.tsx      # Card singola nota
+│   ├── NoteForm.tsx      # Form create/edit
+│   └── NoteFilters.tsx   # Filtri con URL sync
+└── app/dashboard/notes/
+    ├── page.tsx          # Lista note
+    ├── [id]/page.tsx     # Dettaglio + edit
+    └── new/page.tsx      # Creazione
+```
+
+### Features Implemented
+
+**Core Fields:**
+
+- ✅ Title (optional - note can have only content)
+- ✅ Content (markdown, required if no title)
+- ✅ Type: `note`, `document`, `research`, `idea`, `snippet`
+- ✅ Is favorite (boolean)
+
+**Relationships:**
+
+- ✅ Assign to project (foreign key + JOIN)
+- ✅ Nested notes (parent-child via `parentNoteId`)
+
+**Actions:**
+
+- ✅ Create note
+- ✅ Update note
+- ✅ Delete note
+- ✅ Toggle favorite
+- ✅ Bulk operations:
+  - Bulk delete
+  - Bulk favorite
+  - Bulk unfavorite
+  - Bulk update type
+  - Bulk move to project
+
+**Queries:**
+
+- ✅ Get notes with filters:
+  - Type (single or multiple)
+  - Is favorite
+  - Project ID
+  - Parent note ID
+  - Search query (title + content full-text)
+- ✅ Get single note with relations (project, child notes)
+- ✅ Get favorite notes
+- ✅ Get recent notes
+- ✅ Get notes by project
+- ✅ Get child notes (hierarchical)
+- ✅ Search notes (full-text)
+
+**UI Features:**
+
+- ✅ Note card with:
+  - Type badge
+  - Favorite star (toggle)
+  - Project badge con colore custom
+  - Content preview (truncated)
+  - Actions menu (edit, delete, favorite)
+- ✅ Filters con URL sync:
+  - Type filter
+  - Favorites toggle
+  - Search input (debounced)
+- ✅ Empty states
+- ✅ Toast notifications
+- ✅ Responsive design
+- ✅ Bulk selection and actions
+
+**Database Indexes:**
+
+```typescript
+index("note_user_id_idx").on(table.userId);
+index("note_project_id_idx").on(table.projectId);
+index("note_parent_note_id_idx").on(table.parentNoteId);
+index("note_type_idx").on(table.type);
+index("note_is_favorite_idx").on(table.isFavorite);
+```
+
+### API Reference
+
+**Server Actions:**
+
+```typescript
+createNote(data: CreateNoteInput): Promise<{ id: string }>
+updateNote(id: string, data: UpdateNoteInput): Promise<void>
+deleteNote(id: string): Promise<void>
+toggleNoteFavorite(id: string): Promise<void>
+bulkNoteOperations(operation: BulkNoteOperation): Promise<void>
+```
+
+**Queries:**
+
+```typescript
+getNotes(filters?: NoteFilters): Promise<Note[]>
+getNoteById(id: string): Promise<NoteWithRelations | null>
+getFavoriteNotes(userId: string): Promise<Note[]>
+getRecentNotes(userId: string, limit?: number): Promise<Note[]>
+getChildNotes(parentNoteId: string): Promise<Note[]>
+```
+
+### Limitations / Known Issues
+
+- ⚠️ Basic textarea editor (no markdown preview in edit mode)
+- ⚠️ No syntax highlighting per code blocks
+- ⚠️ No autosave
+- ⚠️ No version history
+
+### Future Enhancements
+
+- 💭 Markdown editor avanzato con toolbar e preview (react-markdown)
+- 💭 Syntax highlighting per code blocks
+- 💭 Autosave (debounced)
+- 💭 Full-text search con PostgreSQL tsvector
+- 💭 Graph view (connections)
+- 💭 Note templates
+- 💭 Version history
+
+---
+
+## Project Management
+
+### Overview
+
+Sistema completo per gestione progetti con stats, progress tracking, e gerarchie.
+
+### Status: ✅ Completato (MVP)
+
+### File Structure
+
+```
+src/
+├── features/projects/
+│   ├── schema.ts         # Zod validation (35 tests)
+│   ├── actions.ts        # Server Actions (~340 LOC)
+│   └── queries.ts        # Database queries (~420 LOC)
+├── components/projects/
+│   ├── ProjectList.tsx        # Grid progetti
+│   ├── ProjectCard.tsx        # Card singolo progetto
+│   ├── ProjectForm.tsx        # Form create/edit con color picker
+│   ├── ProjectFilters.tsx     # Filtri
+│   └── DeleteProjectButton.tsx # Conferma delete
+└── app/dashboard/projects/
+    ├── page.tsx               # Lista progetti
+    ├── [id]/page.tsx          # Dettaglio con tabs
+    └── new/page.tsx           # Creazione
+```
+
+### Features Implemented
+
+**Core Fields:**
+
+- ✅ Name (required)
+- ✅ Description (optional)
+- ✅ Status: `active`, `on_hold`, `completed`, `archived`, `cancelled`
+- ✅ Start date (optional)
+- ✅ End date (optional)
+- ✅ Color (hex color picker)
+- ✅ Icon (emoji picker)
+- ✅ Metadata (JSONB for custom fields)
+
+**Relationships:**
+
+- ✅ Sub-projects (parent-child via `parentProjectId`)
+- ✅ Related tasks (reverse relation)
+- ✅ Related events (reverse relation)
+- ✅ Related notes (reverse relation)
+
+**Actions:**
+
+- ✅ Create project
+- ✅ Update project
+- ✅ Delete project (cascade to tasks, events, notes)
+- ✅ Archive/unarchive project
+- ✅ Complete project (sets status + completedAt)
+
+**Queries:**
+
+- ✅ Get projects with filters:
+  - Status (single or multiple)
+  - Parent project ID
+  - Date range (start/end date)
+  - Search query (name + description)
+- ✅ Get single project with relations
+- ✅ Get project statistics:
+  - Task counts by status
+  - Completion percentage
+  - Upcoming events count
+  - Notes count
+- ✅ Get subprojects
+- ✅ Get active projects (for dropdowns)
+- ✅ Get root projects (no parent)
+- ✅ Search projects (full-text)
+
+**UI Features:**
+
+- ✅ Project card with:
+  - Color border/badge
+  - Icon display
+  - Status badge con colori
+  - Progress bar (% tasks completed)
+  - Task breakdown (todo/in_progress/done)
+  - Overdue detection (days until end date)
+  - Actions menu (edit, archive, complete, delete)
+- ✅ Detail page with tabs:
+  - Overview (stats, completion %)
   - Tasks tab (filtered by project)
   - Events tab (filtered by project)
   - Notes tab (filtered by project)
-  - Activity tab (chronological log)
-
-**Stats & Analytics**
-- [x] Total tasks / completed tasks
-- [x] Total events
-- [x] Total notes
-- [ ] Progress % (completed tasks / total tasks)
-- [ ] Hours tracked (se metadata contiene hours_tracked)
-- [ ] Timeline view (start to end date)
-
----
-
-### 1.5 Universal Features ⭐⭐⭐
-
-**Linking System**
-- [x] Link qualsiasi entità a qualsiasi altra
-- [x] Relationship types:
-  - assigned_to (task → project)
-  - documented_by (task → note)
-  - scheduled_as (task → event)
-  - blocks / depends_on (task → task)
-  - related_to (generic)
-  - references (note → anything)
-  - inspired_by (creative)
-- [x] UI per gestire links:
-  - Modal "Add link" con entity search
-  - Lista links su entity detail
-  - Remove link
-- [ ] Link suggestions (AI-powered, futuro)
-
-**Tagging System**
-- [x] Create/edit/delete tags
-- [x] Tag colori personalizzati
-- [x] Assegna tags a qualsiasi entità
-- [x] Tag autocomplete con frecce
-- [x] Filter by tags (multi-select)
-- [x] Tag usage count
-
-**Comments**
-- [x] Add comment su qualsiasi entità
-- [x] Edit/delete proprio comment
-- [x] Nested comments (replies)
-- [ ] Mentions (@username, futuro quando multi-user)
-- [ ] Rich text comments (bold, italic, code)
-
-**Search & Filters**
-- [x] Global search (Cmd+K)
-  - Search across tasks, events, notes, projects
-  - Entity type filters
-  - Recent searches
-  - Keyboard navigation
-- [x] Advanced filters per entity
-  - Combine multiple filters (AND logic)
-  - Save filter presets (futuro)
-
----
-
-## Phase 2: Collections & Flexibility
-
-### 2.1 Collections System ⭐⭐
-
-**Collection Management**
-- [x] Create collection con schema custom
-- [x] Edit collection schema
-- [x] Delete collection (cascade items)
-- [x] Icon + nome
-
-**Schema Editor**
-- [x] Visual schema builder
-- [x] Field types supportati:
-  - text (single line)
-  - textarea (multi line)
-  - number
-  - date
-  - select (single choice)
-  - multiselect (multiple choices)
-  - checkbox (boolean)
-  - url
-  - email
-- [x] Field properties:
-  - Label
-  - Required/optional
-  - Default value
-  - Options (per select/multiselect)
-  - Validation rules (min/max per number, regex per text)
-
-**Collection Items**
-- [x] Add item con form dinamico basato su schema
-- [x] Edit item
-- [x] Delete item
-- [x] Duplicate item
-- [x] Bulk import (CSV, futuro)
-
-**Views**
-- [x] Table view (default)
-  - Sortable columns
-  - Column visibility toggle
-  - Column reordering (drag & drop)
-  - Pagination
-- [x] Card view (grid)
-- [x] List view
-- [ ] Custom views (salva configurazione colonne/filtri)
-
-**Examples Preset Collections**
-- Template "Servizi Freelance"
-  - Campi: nome, prezzo, durata, tecnologie, descrizione
-- Template "Libri"
-  - Campi: titolo, autore, voto, genere, note, data lettura
-- Template "Serie TV"
-  - Campi: titolo, stagioni, piattaforma, voto, status
-- Template "Clienti"
-  - Campi: nome, email, telefono, azienda, progetti associati
-
----
-
-## Phase 3: Advanced Features
-
-### 3.1 Activity Timeline ⭐
-
-**Activity Log**
-- [x] Track all entity changes (create, update, delete)
-- [x] Store JSON diff per update
-- [x] Store full snapshot per undo capability
-- [x] Timeline view per user
-  - Filtri: entity type, date range, action type
-  - Group by day
-- [ ] Timeline view per entity
-  - Mostra history completa di task/note/etc.
-
-**Undo System (Futuro)**
-- [ ] Undo last action (Cmd+Z)
-- [ ] Undo history (lista azioni reversibili)
-- [ ] Restore deleted entity
-
----
-
-### 3.2 Data Management ⭐
-
-**Export**
-- [ ] Export to JSON (tutte le entità o filtrate)
-- [ ] Export to CSV (per collection specifiche)
-- [ ] Export to Markdown (note)
-- [ ] Export to PDF (report, futuro)
-
-**Import**
-- [ ] Import from JSON (backup restore)
-- [ ] Import from CSV (collections)
-- [ ] Import from Markdown (bulk note creation)
-
-**Backup**
-- [ ] Manual backup (download JSON snapshot)
-- [ ] Automatic daily backup (Cloudflare R2, futuro)
-
----
-
-### 3.3 Advanced Search ⭐⭐
-
-**Full-Text Search**
-- [x] PostgreSQL full-text search (tsvector)
-- [x] Italiano language support
-- [x] Search ranking
-- [x] Highlight matches
-
-**Semantic Search (Futuro con AI)**
-- [ ] Embedding-based search (OpenAI/Cohere)
-- [ ] Natural language queries
-  - "Mostrami task urgenti del progetto X"
-  - "Note su Next.js scritte questo mese"
-- [ ] Similar content suggestions
-
-**Saved Searches**
-- [ ] Save complex filter combinations
-- [ ] Smart searches (dynamic, e.g., "Tasks due this week")
-- [ ] Pin favorite searches to sidebar
-
----
-
-### 3.4 Customization ⭐
-
-**Themes**
-- [x] Light/Dark mode
-- [ ] Custom color schemes
-- [ ] Accent color picker
-
-**Dashboard Layout**
-- [ ] Customizable homepage
-  - Widget: upcoming tasks
-  - Widget: today's events
-  - Widget: recent notes
-  - Widget: project progress
-  - Drag & drop positioning
-- [ ] Sidebar customization
-  - Reorder menu items
-  - Hide/show sections
-  - Pin favorite projects/collections
-
-**Notifications (Futuro)**
-- [ ] Email reminders per task scadenze
-- [ ] In-app notifications
-- [ ] Browser notifications (Push API)
-- [ ] Configurable per user
-
----
-
-## Phase 4: Collaboration
-
-### 4.1 Sharing System ⭐⭐
-
-**Share Entity**
-- [ ] Share task/event/note/project con altro user
-- [ ] Share via email (genera invite link)
-- [ ] Permission levels:
-  - View (solo lettura)
-  - Comment (può commentare)
-  - Edit (può modificare)
-- [ ] Expiration date per share
-
-**Shared Entities UI**
-- [ ] Badge "Shared" su entity card
-- [ ] Lista partecipanti su detail page
-- [ ] Revoke access
-- [ ] Transfer ownership
-
-**Collaboration Features**
-- [ ] Real-time presence (chi sta guardando)
-- [ ] Real-time updates (quando qualcuno modifica)
-- [ ] Comment mentions (@username)
-- [ ] Activity feed condiviso
-
----
-
-### 4.2 Team Workspaces (Futuro, Non Priority)
-
-**Multi-tenancy**
-- [ ] Workspaces (organizzazione)
-- [ ] Invite team members
-- [ ] Roles (owner, admin, member, guest)
-- [ ] Workspace-level settings
-- [ ] Billing per workspace
-
----
-
-## Phase 5: AI Assistant
-
-### 5.1 Chat Interface ⭐⭐⭐
-
-**UI**
-- [ ] Sidebar chat panel (toggle on/off)
-- [ ] Floating chat button
-- [ ] Chat history persistente
-- [ ] Markdown rendering in chat
-
-**Basic Commands**
-- [ ] Create task via natural language
-  - "Crea task chiamare Mario domani alle 15"
-  - "Aggiungi task fare la spesa per venerdì"
-- [ ] Create event
-  - "Aggiungi meeting con cliente lunedì ore 10"
-- [ ] Create note
-  - "Salva questa idea: app per gestire ricette"
-- [ ] Search
-  - "Mostrami i task del progetto X"
-  - "Cerca note su React"
-
----
-
-### 5.2 Advanced AI Features ⭐⭐
-
-**Smart Parsing**
-- [ ] Extract entities da testo libero
-  - "Devo chiamare Mario domani alle 15 per il progetto Sito Web"
-    → Task + link a progetto
-- [ ] Multi-entity creation
-  - "Crea progetto X con 3 task: A, B, C"
-    → Progetto + 3 task collegati
-
-**Suggestions**
-- [ ] Auto-tag suggestions basate su contenuto
-- [ ] Link suggestions (detect related entities)
-- [ ] Task breakdown
-  - "Come posso dividere questo task complesso?"
-  - AI suggerisce subtasks
-
-**Query Natural Language**
-- [ ] Filtri complessi via chat
-  - "Task urgenti del mese scorso non completati"
-  - "Eventi di lavoro della prossima settimana"
-- [ ] Stats & insights
-  - "Quanti task ho completato questo mese?"
-  - "Quale progetto ha più task aperti?"
-
----
-
-### 5.3 AI Automation (Futuro)
-
-**Smart Reminders**
-- [ ] AI suggerisce quando lavorare su task
-  - Basato su deadline, priority, calendario libero
-
-**Auto-categorization**
-- [ ] AI assegna automaticamente tags
-- [ ] AI suggerisce progetto per nuovo task
-
-**Templates**
-- [ ] AI genera template progetti ricorrenti
-  - "Crea progetto come quello fatto per cliente X"
-
----
-
-## Phase 6: Advanced Integrations
-
-### 6.1 Calendar Sync ⭐
-
-- [ ] Google Calendar sync (bidirezionale)
-- [ ] Outlook Calendar sync
-- [ ] Apple Calendar (.ics subscription)
-
-### 6.2 Email Integration
-
-- [ ] Forward email → create task
-- [ ] Email reminders
-- [ ] Daily digest
-
-### 6.3 File Uploads ⭐
-
-**Attachments**
-- [ ] Upload file (Cloudflare R2)
-- [ ] Attach a qualsiasi entità
-- [ ] Supported: immagini, PDF, documenti, video
-- [ ] Image preview
-- [ ] File size limits (100MB max)
-
-**File Management**
-- [ ] Storage usage dashboard
-- [ ] Delete unused files
-- [ ] File search
-
-### 6.4 API & Webhooks
-
-**Public API**
-- [ ] REST API per CRUD operations
-- [ ] API keys management
-- [ ] Rate limiting
-- [ ] API documentation (Swagger)
-
-**Webhooks**
-- [ ] Trigger webhook su eventi (task.created, etc.)
-- [ ] Webhook management UI
-- [ ] Retry logic
-
----
-
-## Technical Features (Cross-cutting)
-
-### Performance
-- [x] Server-side rendering (RSC)
-- [x] Server Actions per mutations
-- [x] Database connection pooling
-- [x] Indexed queries
-- [ ] Redis cache (futuro per heavy queries)
-- [x] Image optimization (quando aggiungiamo uploads)
-- [x] Code splitting
-- [x] Lazy loading components
-
-### Security
-- [x] Better Auth con RBAC
-- [x] CSRF protection
-- [x] XSS prevention (React auto-escape)
-- [x] SQL injection prevention (Drizzle parametrized queries)
-- [x] Rate limiting (Better Auth built-in)
-- [ ] Content Security Policy headers
-- [ ] Audit log per security events
-
-### Monitoring (Futuro)
-- [ ] Error tracking (Sentry)
-- [ ] Performance monitoring (Vercel Analytics alternative)
-- [ ] Database query monitoring
-- [ ] User analytics (privacy-friendly)
-
-### Accessibility
-- [x] Keyboard navigation (Cmd+K, Tab, Arrow keys)
-- [x] ARIA labels
-- [x] Focus management
-- [ ] Screen reader support test
-- [x] Color contrast (WCAG AA)
-- [ ] Reduced motion preference
-
-### Mobile
-- [x] Responsive design
-- [ ] PWA (install prompt)
-- [ ] Offline mode (service worker)
-- [ ] Mobile gestures (swipe to delete, etc.)
-- [ ] Touch-friendly targets (min 44px)
-
----
-
-## Feature Flags
-
-Per abilitare feature gradualmente:
+- ✅ Filters con URL sync:
+  - Status filter
+  - Search input
+- ✅ Color picker in form
+- ✅ Delete confirmation dialog
+- ✅ Empty states
+- ✅ Toast notifications
+- ✅ Responsive design
+
+**Database Indexes:**
 
 ```typescript
-// lib/features.ts
-export const FEATURES = {
-  TASKS: true,
-  EVENTS: true,
-  NOTES: true,
-  PROJECTS: true,
-  COLLECTIONS: false, // Phase 2
-  ACTIVITY_LOG: false, // Phase 3
-  SHARING: false, // Phase 4
-  AI_ASSISTANT: false, // Phase 5
-  FILE_UPLOADS: false, // Phase 6
-} as const;
+index("project_user_id_idx").on(table.userId);
+index("project_parent_project_id_idx").on(table.parentProjectId);
+index("project_status_idx").on(table.status);
 ```
 
-Usare in componenti:
+### API Reference
+
+**Server Actions:**
 
 ```typescript
-import { FEATURES } from '@/lib/features';
-
-{FEATURES.COLLECTIONS && <CollectionsMenu />}
+createProject(data: CreateProjectInput): Promise<{ id: string }>
+updateProject(id: string, data: UpdateProjectInput): Promise<void>
+deleteProject(id: string): Promise<void>
+archiveProject(id: string): Promise<void>
+unarchiveProject(id: string): Promise<void>
+completeProject(id: string): Promise<void>
 ```
+
+**Queries:**
+
+```typescript
+getProjects(filters?: ProjectFilters): Promise<Project[]>
+getProjectById(id: string): Promise<ProjectWithRelations | null>
+getProjectStats(options: { projectId: string }): Promise<ProjectStats>
+getActiveProjects(userId: string): Promise<Project[]>
+getRootProjects(userId: string): Promise<Project[]>
+```
+
+### Limitations / Known Issues
+
+- ⚠️ No budget tracking
+- ⚠️ No time tracking
+- ⚠️ No team members (single user)
+- ⚠️ No milestones
+
+### Future Enhancements
+
+- 💭 Timeline visualization (Gantt chart)
+- 💭 Budget tracking
+- 💭 Time tracking
+- 💭 Milestones
+- 💭 Team members (when multi-user)
+
+---
+
+# Universal Features
+
+## Tagging System
+
+### Overview
+
+Sistema di tagging polimorfico per categorizzare qualsiasi entità.
+
+### Status: ✅ Completato
+
+### File Structure
+
+```
+src/
+├── features/tags/
+│   ├── schema.ts         # Zod validation
+│   ├── actions.ts        # Tag CRUD + assignment (~280 LOC)
+│   └── queries.ts        # Tag queries (~220 LOC)
+└── components/tags/
+    ├── TagInput.tsx      # Autocomplete + create inline
+    └── TagBadge.tsx      # Display tag con color
+```
+
+### Features Implemented
+
+**Core:**
+
+- ✅ Tag creation con nome e colore
+- ✅ Duplicate name check
+- ✅ Tag colors (customizable hex colors)
+- ✅ Polymorphic assignment (via `entity_tags` join table)
+- ✅ Tag usage count
+- ✅ Popular tags query
+
+**Supported Entities:**
+
+- ✅ Tasks
+- ✅ Events
+- ✅ Notes
+- ✅ Projects
+
+**UI:**
+
+- ✅ TagInput component con:
+  - Autocomplete search (debounced)
+  - Create tag inline
+  - Assign/remove tags
+  - Color badges
+- ✅ Integration in detail pages
+
+**API:**
+
+```typescript
+// Tag management
+createTag(data: CreateTagInput): Promise<{ id: string }>
+updateTag(id: string, data: UpdateTagInput): Promise<void>
+deleteTag(id: string): Promise<void>
+
+// Assignment
+assignTagsToEntity(entityType, entityId, tagIds): Promise<void>
+removeTagsFromEntity(entityType, entityId, tagIds): Promise<void>
+
+// Queries
+getTags(filters?: TagFilters): Promise<Tag[]>
+getEntityTags(entityType, entityId): Promise<Tag[]>
+getPopularTags(limit?: number): Promise<Tag[]>
+searchTags(query: string): Promise<Tag[]>
+```
+
+### Future Enhancements
+
+- 💭 Filter by tags (multi-select in list views)
+- 💭 Tag analytics dashboard
+- 💭 Tag hierarchies (parent tags)
+- 💭 Smart tag suggestions (AI)
+
+---
+
+## Comments System
+
+### Overview
+
+Sistema di commenti polimorfico con nested replies.
+
+### Status: ✅ Completato
+
+### File Structure
+
+```
+src/
+├── features/comments/
+│   ├── schema.ts         # Zod validation
+│   ├── actions.ts        # Comment CRUD (~250 LOC)
+│   └── queries.ts        # Comment queries (~180 LOC)
+└── components/comments/
+    ├── CommentThread.tsx # Thread view con nested replies
+    ├── CommentForm.tsx   # Create/edit form
+    └── CommentCard.tsx   # Display single comment
+```
+
+### Features Implemented
+
+**Core:**
+
+- ✅ Comment on any entity (polymorphic)
+- ✅ Edit/delete own comments (ownership check)
+- ✅ Nested comments (replies via `parentCommentId`)
+- ✅ Character limit (5000 chars)
+- ✅ Pagination support
+
+**Supported Entities:**
+
+- ✅ Tasks
+- ✅ Events
+- ✅ Notes
+- ✅ Projects
+
+**UI:**
+
+- ✅ CommentThread component con:
+  - Thread view with nested replies
+  - User avatars (Next/Image)
+  - Timestamp ("2 hours ago" con date-fns)
+  - Edit/delete actions (own comments only)
+  - Reply button
+  - Empty states
+- ✅ Character counter (max 5000)
+- ✅ Integration in detail pages
+
+**API:**
+
+```typescript
+createComment(data: CreateCommentInput): Promise<{ id: string }>
+updateComment(id: string, data: UpdateCommentInput): Promise<void>
+deleteComment(id: string): Promise<void> // Cascade to replies
+
+getEntityComments(entityType, entityId, options?): Promise<CommentResponse>
+getCommentById(id: string): Promise<Comment | null>
+getCommentReplies(parentCommentId: string): Promise<Comment[]>
+getCommentCount(entityType, entityId): Promise<number>
+```
+
+### Future Enhancements
+
+- 💭 Rich text comments (markdown/WYSIWYG)
+- 💭 Mentions (@username, when multi-user)
+- 💭 Reactions (like, emoji)
+- 💭 Comment notifications
+
+---
+
+## Linking System
+
+### Overview
+
+Sistema di linking bidirezionale tra entità con relationship types.
+
+### Status: ✅ Completato
+
+### File Structure
+
+```
+src/
+├── features/links/
+│   ├── schema.ts         # Zod validation + relationship types
+│   ├── actions.ts        # Link CRUD (~220 LOC)
+│   └── queries.ts        # Link queries with entity resolution (~280 LOC)
+└── components/links/
+    ├── EntityLinksSection.tsx # Outgoing/incoming links
+    ├── AddLinkDialog.tsx      # Select entity + relationship
+    └── LinkCard.tsx           # Display link con entity info
+```
+
+### Features Implemented
+
+**Relationship Types:**
+
+1. ✅ `assigned_to` - Task → Project
+2. ✅ `documented_by` - Task → Note
+3. ✅ `scheduled_as` - Task → Event
+4. ✅ `blocks` - Task → Task (dependency)
+5. ✅ `depends_on` - Task → Task (reverse dependency)
+6. ✅ `related_to` - Generic relationship
+7. ✅ `references` - Note → Anything
+8. ✅ `inspired_by` - Creative inspiration
+
+**Core:**
+
+- ✅ Link any entity to any other (polymorphic bidirectional)
+- ✅ Duplicate link prevention
+- ✅ Relationship labels and descriptions
+- ✅ Entity resolution (fetch titles/names)
+
+**Supported Entities:**
+
+- ✅ Tasks ↔ Tasks, Events, Projects, Notes
+- ✅ Events ↔ Projects, Notes
+- ✅ Projects ↔ Projects (sub-projects alternative)
+- ✅ Notes ↔ Notes, Tasks, Events, Projects
+
+**UI:**
+
+- ✅ EntityLinksSection con:
+  - Outgoing links (this → other)
+  - Incoming links (other → this)
+  - Relationship badges
+  - Entity preview (title/name)
+  - Delete button
+- ✅ AddLinkDialog con:
+  - Entity type selector
+  - Entity ID input (autocomplete future)
+  - Relationship type selector
+  - Link preview before creation
+- ✅ Empty states
+- ✅ Integration in detail pages
+
+**API:**
+
+```typescript
+createLink(data: CreateLinkInput): Promise<{ id: string }>
+updateLink(id: string, data: UpdateLinkInput): Promise<void>
+deleteLink(id: string): Promise<void>
+
+getEntityLinks(entityType, entityId, direction?): Promise<LinkWithEntities[]>
+// direction: 'outgoing' | 'incoming' | 'both'
+getLinkById(id: string): Promise<Link | null>
+```
+
+### Future Enhancements
+
+- 💭 Smart link suggestions (AI-powered)
+- 💭 Graph visualization of links
+- 💭 Link strength/weight
+- 💭 Auto-link detection (detect references in text)
+
+---
+
+## Global Search
+
+### Overview
+
+Command palette (Cmd+K) per ricerca veloce cross-entity.
+
+### Status: ✅ Completato
+
+### File Structure
+
+```
+src/
+├── features/search/
+│   └── queries.ts        # Global search queries (~370 LOC)
+└── components/search/
+    └── CommandPalette.tsx # Cmd+K component (~340 LOC)
+```
+
+### Features Implemented
+
+**Core:**
+
+- ✅ Command palette con Cmd+K (macOS) / Ctrl+K (Windows)
+- ✅ Search across all entities (Tasks, Events, Notes, Projects)
+- ✅ Full-text search (title + description/content)
+- ✅ Debounced search (300ms)
+- ✅ Recent items (quando query vuota)
+- ✅ Keyboard navigation (↑↓ Enter Esc)
+
+**UI:**
+
+- ✅ Entity icons (CheckSquare, Calendar, FileText, FolderOpen)
+- ✅ Entity type grouping (Tasks, Events, Notes, Projects)
+- ✅ Metadata display:
+  - Status, priority badges (tasks)
+  - Calendar type badge (events)
+  - Note type badge (notes)
+  - Project status badge (projects)
+  - Project badges con colori
+  - Dates (due date, start time)
+- ✅ Loading state
+- ✅ Empty state
+- ✅ Keyboard shortcuts legend
+
+**Search Fields:**
+
+- Tasks: title, description
+- Events: title, description, location
+- Notes: title, content
+- Projects: name, description
+
+**API:**
+
+```typescript
+globalSearch(query: string, options?: {
+  limit?: number;
+  entityTypes?: SearchEntityType[];
+}): Promise<GroupedSearchResults>
+
+getRecentItems(limit?: number): Promise<GroupedSearchResults>
+```
+
+### Limitations
+
+- ⚠️ No advanced filters (entity type, date range)
+- ⚠️ No search history
+- ⚠️ No saved searches
+
+### Future Enhancements
+
+- 💭 Entity type filters (show only tasks/events/etc)
+- 💭 Recent searches history
+- 💭 Saved searches
+- 💭 Search highlighting
+- 💭 Fuzzy search
+- 💭 Search shortcuts (e.g., "t:" for tasks only)
+
+---
+
+# Future Features
+
+## Collections System
+
+### Status: ⏳ Pianificato (Phase 2)
+
+Sistema flessibile per liste personalizzate con schema definibile dall'utente.
+
+**Planned Features:**
+
+- Visual schema builder
+- Dynamic form generation
+- Multiple view types (table, card, list)
+- Template collections (books, clients, services, recipes)
+- Import/Export CSV
+- Custom validation rules
+
+**Use Cases:**
+
+- Freelance services (name, price, duration, tech stack)
+- Books library (title, author, rating, genre, notes)
+- TV series tracker (title, seasons, platform, status)
+- Clients database (name, email, phone, company)
+- Recipes collection (name, ingredients, instructions, prep time)
+
+---
+
+## Activity Timeline
+
+### Status: ⏳ Next (Phase 3)
+
+Sistema di tracking automatico di tutte le modifiche.
+
+**Planned Features:**
+
+- Auto-track create/update/delete per tutte le entità
+- JSON diff per updates
+- Timeline view per user
+- Timeline view per entity
+- Filter by entity type, date range, action
+- Undo system (Cmd+Z)
+- Restore deleted entities
+
+---
+
+## Advanced Search
+
+### Status: 💭 Future (Phase 3)
+
+**Planned Features:**
+
+- PostgreSQL full-text search (tsvector)
+- Search ranking
+- Highlight matches
+- Saved searches
+- Smart searches ("Tasks due this week")
+- Semantic search (AI-powered, embeddings)
+
+---
+
+## Collaboration
+
+### Status: 💭 Future (Phase 4)
+
+Sistema di condivisione e collaborazione multi-user.
+
+**Planned Features:**
+
+- Share entities con altri utenti
+- Permission levels (view, comment, edit)
+- Expiration dates
+- Transfer ownership
+- Real-time presence
+- Real-time updates
+- Team workspaces
+
+---
+
+## AI Assistant
+
+### Status: 💭 Future (Phase 5)
+
+Assistente AI per automazione e insights.
+
+**Planned Features:**
+
+- Chat interface (sidebar)
+- Natural language task creation
+- Auto-categorization (tags, projects)
+- Smart suggestions
+- Meeting notes summarization
+- Project template generation
+
+---
+
+**Ultimo aggiornamento:** 2025-01-22

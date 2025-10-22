@@ -1,0 +1,72 @@
+import { getEvents } from "@/features/events/queries";
+import { PageHeader } from "@/components/common";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import Link from "next/link";
+import { EventList } from "@/components/events/EventList";
+import { EventFilters } from "@/components/events/EventFilters";
+import type { EventCalendarType, EventFilterInput } from "@/features/events/schema";
+
+/**
+ * Events list page
+ *
+ * Features:
+ * - Display all user events
+ * - Filter by calendar type, project, date range
+ * - Sort events
+ * - Quick actions (edit, delete)
+ * - Create new event
+ */
+
+interface EventsPageProps {
+  searchParams: Promise<{
+    calendarType?: string;
+    projectId?: string;
+    search?: string;
+    sortBy?: string;
+    sortOrder?: string;
+    allDay?: string;
+  }>;
+}
+
+export default async function EventsPage({ searchParams }: EventsPageProps) {
+  const params = await searchParams;
+
+  // Fetch events with filters from URL params
+  const { events, pagination } = await getEvents({
+    calendarType: params.calendarType as EventCalendarType | undefined,
+    projectId: params.projectId,
+    search: params.search,
+    allDay: params.allDay === "true" ? true : params.allDay === "false" ? false : undefined,
+    sortBy: params.sortBy as EventFilterInput["sortBy"],
+    sortOrder: params.sortOrder as EventFilterInput["sortOrder"],
+  });
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <PageHeader title="Events" description={`${pagination.total} total events`} />
+        <Button asChild>
+          <Link href="/dashboard/events/new">
+            <Plus className="h-4 w-4 mr-2" />
+            New Event
+          </Link>
+        </Button>
+      </div>
+
+      {/* Filters */}
+      <EventFilters />
+
+      {/* Event List */}
+      <EventList events={events} />
+
+      {/* Pagination Info */}
+      {pagination.hasMore && (
+        <div className="text-center text-sm text-muted-foreground">
+          Showing {events.length} of {pagination.total} events
+        </div>
+      )}
+    </div>
+  );
+}

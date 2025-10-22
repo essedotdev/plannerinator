@@ -7,6 +7,7 @@ Sistema completo per la gestione di tutti gli aspetti della vita: task, eventi, 
 **Flessibilità totale senza caos**
 
 Plannerinator adotta un approccio **hybrid multi-model**:
+
 - **Entità core rigide** (task, eventi, note) con campi specifici e type-safe
 - **Sistema di linking universale** per connettere qualsiasi entità a qualsiasi altra
 - **Metadata JSONB** per campi custom senza sacrificare performance
@@ -15,9 +16,11 @@ Plannerinator adotta un approccio **hybrid multi-model**:
 ## Entità Principali
 
 ### 1. Tasks
+
 Cose da fare, con o senza scadenza, assegnabili a progetti, collegabili a note/eventi.
 
 **Campi core:**
+
 - Titolo, descrizione
 - Data di scadenza (opzionale)
 - Durata stimata (opzionale)
@@ -25,9 +28,11 @@ Cose da fare, con o senza scadenza, assegnabili a progetti, collegabili a note/e
 - Priorità (low, medium, high, urgent)
 
 ### 2. Events
+
 Eventi nel tempo, visualizzabili in calendario o lista.
 
 **Campi core:**
+
 - Titolo, descrizione
 - Data/ora inizio (obbligatorio)
 - Data/ora fine (opzionale)
@@ -35,26 +40,32 @@ Eventi nel tempo, visualizzabili in calendario o lista.
 - All-day flag
 
 ### 3. Notes
+
 Note, documenti, ricerche, knowledge base.
 
 **Campi core:**
+
 - Titolo (opzionale)
 - Contenuto (markdown)
 - Tipo (note, document, research, idea)
 
 ### 4. Projects
+
 Contenitori logici per organizzare task/eventi/note.
 
 **Campi core:**
+
 - Nome, descrizione
 - Status (active, archived, completed)
 - Date inizio/fine (opzionali)
 - Colore
 
 ### 5. Collections
+
 Liste personalizzate con schema definibile dall'utente.
 
 **Esempi:**
+
 - Pacchetti servizi freelance (nome, prezzo, descrizione, durata)
 - Libri letti (titolo, autore, voto, note)
 - Serie TV (titolo, stagioni viste, piattaforma)
@@ -65,6 +76,7 @@ Liste personalizzate con schema definibile dall'utente.
 Qualsiasi entità può essere collegata a qualsiasi altra con una relazione tipizzata:
 
 **Esempi:**
+
 - Task → Project (relationship: "assigned_to")
 - Task → Note (relationship: "documented_by")
 - Task → Event (relationship: "scheduled_as")
@@ -74,6 +86,7 @@ Qualsiasi entità può essere collegata a qualsiasi altra con una relazione tipi
 ## Features Universali
 
 Tutte le entità supportano:
+
 - **Tags** - organizzazione flessibile (#urgent, #work, #personal)
 - **Comments** - conversazioni su qualsiasi risorsa
 - **Attachments** - file collegati (futuro con R2)
@@ -92,12 +105,14 @@ Tutte le entità supportano:
 ## Roadmap
 
 ### Phase 1: Foundation ✅ (Current)
+
 - Database schema
 - CRUD operations per tutte le entità
 - Dashboard con sidebar navigation
 - Sistema di linking
 
 ### Phase 2: Core Features 🚧
+
 - Task views (lista, kanban, calendario)
 - Event calendar
 - Note editor (markdown)
@@ -105,17 +120,20 @@ Tutte le entità supportano:
 - Collections CRUD
 
 ### Phase 3: Advanced Features 📋
+
 - Advanced search & filters
 - Bulk operations
 - Activity timeline
 - Data export/import
 
 ### Phase 4: Collaboration 📋
+
 - Sharing entities con altri utenti
 - Permissions granulari
 - Comments & mentions
 
 ### Phase 5: AI Assistant 📋
+
 - Chat interface
 - Natural language task creation
 - Smart suggestions
@@ -123,10 +141,20 @@ Tutte le entità supportano:
 
 ## Documentazione
 
+### Core Documentation
+
 - [Database Schema](./DATABASE_SCHEMA.md) - Schema completo con esempi
 - [Architecture](./ARCHITECTURE.md) - Architettura applicazione
 - [Features](./FEATURES.md) - Lista feature dettagliata
 - [UI Patterns](./UI_PATTERNS.md) - Pattern e componenti UI
 - [API Design](./API_DESIGN.md) - Server Actions e validazione
+
+### Development
+
+- [Roadmap](./ROADMAP.md) - Roadmap completa delle feature e progress tracking
+- [Code Quality & Standards](./CODE_QUALITY.md) - Best practice e standard del codice
+
+### Future Features
+
 - [Sharing System](./SHARING.md) - Sistema di condivisione (futuro)
 - [AI Assistant](./AI_ASSISTANT.md) - Integrazione AI (futuro)

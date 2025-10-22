@@ -5,6 +5,7 @@ Design delle API (Server Actions) per Plannerinator.
 ## Filosofia
 
 **Type-Safe Server Actions**
+
 - Ogni mutation è un Server Action
 - Validation con Zod prima di database ops
 - Return type consistente `{ success, data?, error? }`
@@ -33,7 +34,7 @@ return { success: true, data: newTask };
 return { success: false, error: parsed.error.format() };
 
 // Generic error
-return { success: false, error: 'Failed to create task' };
+return { success: false, error: "Failed to create task" };
 ```
 
 ---
@@ -44,19 +45,19 @@ return { success: false, error: 'Failed to create task' };
 
 ```typescript
 // features/tasks/actions.ts
-'use server';
+"use server";
 
-import { auth } from '@/lib/auth';
-import { db } from '@/db';
-import { tasks } from '@/db/schema';
-import { createTaskSchema } from './schema';
-import { revalidatePath } from 'next/cache';
+import { auth } from "@/lib/auth";
+import { db } from "@/db";
+import { tasks } from "@/db/schema";
+import { createTaskSchema } from "./schema";
+import { revalidatePath } from "next/cache";
 
 export async function createTask(input: unknown) {
   // 1. Auth
   const session = await auth();
   if (!session?.user) {
-    return { success: false, error: 'Unauthorized' };
+    return { success: false, error: "Unauthorized" };
   }
 
   // 2. Validation
@@ -67,21 +68,24 @@ export async function createTask(input: unknown) {
 
   // 3. Database
   try {
-    const [task] = await db.insert(tasks).values({
-      userId: session.user.id,
-      ...parsed.data,
-    }).returning();
+    const [task] = await db
+      .insert(tasks)
+      .values({
+        userId: session.user.id,
+        ...parsed.data,
+      })
+      .returning();
 
     // 4. Revalidate
-    revalidatePath('/tasks');
+    revalidatePath("/tasks");
     if (parsed.data.projectId) {
       revalidatePath(`/projects/${parsed.data.projectId}`);
     }
 
     return { success: true, data: task };
   } catch (error) {
-    console.error('Create task error:', error);
-    return { success: false, error: 'Failed to create task' };
+    console.error("Create task error:", error);
+    return { success: false, error: "Failed to create task" };
   }
 }
 ```
@@ -90,16 +94,16 @@ export async function createTask(input: unknown) {
 
 ```typescript
 // features/tasks/schema.ts
-import { z } from 'zod';
+import { z } from "zod";
 
 export const createTaskSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(500),
+  title: z.string().min(1, "Title is required").max(500),
   description: z.string().max(10000).optional(),
   dueDate: z.date().optional(),
   startDate: z.date().optional(),
   duration: z.number().int().positive().optional(), // minutes
-  status: z.enum(['todo', 'in_progress', 'done', 'cancelled']).default('todo'),
-  priority: z.enum(['low', 'medium', 'high', 'urgent']).default('medium'),
+  status: z.enum(["todo", "in_progress", "done", "cancelled"]).default("todo"),
+  priority: z.enum(["low", "medium", "high", "urgent"]).default("medium"),
   projectId: z.string().uuid().optional(),
   parentTaskId: z.string().uuid().optional(),
   metadata: z.record(z.unknown()).optional(),
@@ -116,7 +120,7 @@ export type CreateTaskInput = z.infer<typeof createTaskSchema>;
 export async function updateTask(id: string, input: unknown) {
   const session = await auth();
   if (!session?.user) {
-    return { success: false, error: 'Unauthorized' };
+    return { success: false, error: "Unauthorized" };
   }
 
   const parsed = updateTaskSchema.safeParse(input);
@@ -127,18 +131,16 @@ export async function updateTask(id: string, input: unknown) {
   try {
     // Check ownership
     const existing = await db.query.tasks.findFirst({
-      where: (tasks, { eq, and }) => and(
-        eq(tasks.id, id),
-        eq(tasks.userId, session.user.id)
-      ),
+      where: (tasks, { eq, and }) => and(eq(tasks.id, id), eq(tasks.userId, session.user.id)),
     });
 
     if (!existing) {
-      return { success: false, error: 'Task not found' };
+      return { success: false, error: "Task not found" };
     }
 
     // Update
-    const [task] = await db.update(tasks)
+    const [task] = await db
+      .update(tasks)
       .set({
         ...parsed.data,
         updatedAt: new Date(),
@@ -147,7 +149,7 @@ export async function updateTask(id: string, input: unknown) {
       .returning();
 
     // Revalidate
-    revalidatePath('/tasks');
+    revalidatePath("/tasks");
     revalidatePath(`/tasks/${id}`);
     if (task.projectId) {
       revalidatePath(`/projects/${task.projectId}`);
@@ -155,8 +157,8 @@ export async function updateTask(id: string, input: unknown) {
 
     return { success: true, data: task };
   } catch (error) {
-    console.error('Update task error:', error);
-    return { success: false, error: 'Failed to update task' };
+    console.error("Update task error:", error);
+    return { success: false, error: "Failed to update task" };
   }
 }
 ```
@@ -175,35 +177,32 @@ export const updateTaskSchema = createTaskSchema.partial();
 export async function deleteTask(id: string) {
   const session = await auth();
   if (!session?.user) {
-    return { success: false, error: 'Unauthorized' };
+    return { success: false, error: "Unauthorized" };
   }
 
   try {
     // Check ownership
     const existing = await db.query.tasks.findFirst({
-      where: (tasks, { eq, and }) => and(
-        eq(tasks.id, id),
-        eq(tasks.userId, session.user.id)
-      ),
+      where: (tasks, { eq, and }) => and(eq(tasks.id, id), eq(tasks.userId, session.user.id)),
     });
 
     if (!existing) {
-      return { success: false, error: 'Task not found' };
+      return { success: false, error: "Task not found" };
     }
 
     // Delete (cascade will handle subtasks, links, tags, comments)
     await db.delete(tasks).where(eq(tasks.id, id));
 
     // Revalidate
-    revalidatePath('/tasks');
+    revalidatePath("/tasks");
     if (existing.projectId) {
       revalidatePath(`/projects/${existing.projectId}`);
     }
 
     return { success: true, data: { id } };
   } catch (error) {
-    console.error('Delete task error:', error);
-    return { success: false, error: 'Failed to delete task' };
+    console.error("Delete task error:", error);
+    return { success: false, error: "Failed to delete task" };
   }
 }
 ```
@@ -216,38 +215,36 @@ export async function deleteTask(id: string) {
 export async function toggleTaskComplete(id: string) {
   const session = await auth();
   if (!session?.user) {
-    return { success: false, error: 'Unauthorized' };
+    return { success: false, error: "Unauthorized" };
   }
 
   try {
     const task = await db.query.tasks.findFirst({
-      where: (tasks, { eq, and }) => and(
-        eq(tasks.id, id),
-        eq(tasks.userId, session.user.id)
-      ),
+      where: (tasks, { eq, and }) => and(eq(tasks.id, id), eq(tasks.userId, session.user.id)),
     });
 
     if (!task) {
-      return { success: false, error: 'Task not found' };
+      return { success: false, error: "Task not found" };
     }
 
-    const newStatus = task.status === 'done' ? 'todo' : 'done';
-    const [updated] = await db.update(tasks)
+    const newStatus = task.status === "done" ? "todo" : "done";
+    const [updated] = await db
+      .update(tasks)
       .set({
         status: newStatus,
-        completedAt: newStatus === 'done' ? new Date() : null,
+        completedAt: newStatus === "done" ? new Date() : null,
         updatedAt: new Date(),
       })
       .where(eq(tasks.id, id))
       .returning();
 
-    revalidatePath('/tasks');
+    revalidatePath("/tasks");
     revalidatePath(`/tasks/${id}`);
 
     return { success: true, data: updated };
   } catch (error) {
-    console.error('Toggle task error:', error);
-    return { success: false, error: 'Failed to toggle task' };
+    console.error("Toggle task error:", error);
+    return { success: false, error: "Failed to toggle task" };
   }
 }
 ```
@@ -257,59 +254,50 @@ export async function toggleTaskComplete(id: string) {
 ### Bulk Operations
 
 ```typescript
-export async function bulkUpdateTasks(
-  ids: string[],
-  updates: Partial<CreateTaskInput>
-) {
+export async function bulkUpdateTasks(ids: string[], updates: Partial<CreateTaskInput>) {
   const session = await auth();
   if (!session?.user) {
-    return { success: false, error: 'Unauthorized' };
+    return { success: false, error: "Unauthorized" };
   }
 
   if (ids.length === 0) {
-    return { success: false, error: 'No tasks provided' };
+    return { success: false, error: "No tasks provided" };
   }
 
   try {
-    const updated = await db.update(tasks)
+    const updated = await db
+      .update(tasks)
       .set({
         ...updates,
         updatedAt: new Date(),
       })
-      .where(and(
-        inArray(tasks.id, ids),
-        eq(tasks.userId, session.user.id)
-      ))
+      .where(and(inArray(tasks.id, ids), eq(tasks.userId, session.user.id)))
       .returning();
 
-    revalidatePath('/tasks');
+    revalidatePath("/tasks");
 
     return { success: true, data: updated };
   } catch (error) {
-    console.error('Bulk update error:', error);
-    return { success: false, error: 'Failed to update tasks' };
+    console.error("Bulk update error:", error);
+    return { success: false, error: "Failed to update tasks" };
   }
 }
 
 export async function bulkDeleteTasks(ids: string[]) {
   const session = await auth();
   if (!session?.user) {
-    return { success: false, error: 'Unauthorized' };
+    return { success: false, error: "Unauthorized" };
   }
 
   try {
-    await db.delete(tasks)
-      .where(and(
-        inArray(tasks.id, ids),
-        eq(tasks.userId, session.user.id)
-      ));
+    await db.delete(tasks).where(and(inArray(tasks.id, ids), eq(tasks.userId, session.user.id)));
 
-    revalidatePath('/tasks');
+    revalidatePath("/tasks");
 
     return { success: true, data: { count: ids.length } };
   } catch (error) {
-    console.error('Bulk delete error:', error);
-    return { success: false, error: 'Failed to delete tasks' };
+    console.error("Bulk delete error:", error);
+    return { success: false, error: "Failed to delete tasks" };
   }
 }
 ```
@@ -322,10 +310,10 @@ export async function bulkDeleteTasks(ids: string[]) {
 
 ```typescript
 // features/tasks/queries.ts
-import { db } from '@/db';
-import { tasks } from '@/db/schema';
-import { auth } from '@/lib/auth';
-import { redirect } from 'next/navigation';
+import { db } from "@/db";
+import { tasks } from "@/db/schema";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export async function getTasks(filters?: {
   status?: string;
@@ -336,7 +324,7 @@ export async function getTasks(filters?: {
   dueBefore?: Date;
 }) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
+  if (!session?.user) redirect("/login");
 
   const conditions = [eq(tasks.userId, session.user.id)];
 
@@ -361,10 +349,7 @@ export async function getTasks(filters?: {
     with: {
       project: true, // Include project relation
     },
-    orderBy: (tasks, { asc, desc }) => [
-      asc(tasks.dueDate),
-      desc(tasks.priority),
-    ],
+    orderBy: (tasks, { asc, desc }) => [asc(tasks.dueDate), desc(tasks.priority)],
   });
 
   // Full-text search (se implementato)
@@ -382,13 +367,10 @@ export async function getTasks(filters?: {
 
 export async function getTask(id: string) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
+  if (!session?.user) redirect("/login");
 
   const task = await db.query.tasks.findFirst({
-    where: and(
-      eq(tasks.id, id),
-      eq(tasks.userId, session.user.id)
-    ),
+    where: and(eq(tasks.id, id), eq(tasks.userId, session.user.id)),
     with: {
       project: true,
       subtasks: true,
@@ -397,7 +379,7 @@ export async function getTask(id: string) {
   });
 
   if (!task) {
-    throw new Error('Task not found');
+    throw new Error("Task not found");
   }
 
   return task;
@@ -439,7 +421,7 @@ export const createEventSchema = z.object({
   allDay: z.boolean().default(false),
   location: z.string().max(500).optional(),
   locationUrl: z.string().url().optional(),
-  calendarType: z.enum(['personal', 'work', 'family', 'other']).default('personal'),
+  calendarType: z.enum(["personal", "work", "family", "other"]).default("personal"),
   projectId: z.string().uuid().optional(),
   metadata: z.record(z.unknown()).optional(),
 });
@@ -472,8 +454,8 @@ export async function getNote(id: string) { ... }
 ```typescript
 export const createNoteSchema = z.object({
   title: z.string().max(500).optional(),
-  content: z.string().min(1, 'Content is required'),
-  type: z.enum(['note', 'document', 'research', 'idea', 'snippet']).default('note'),
+  content: z.string().min(1, "Content is required"),
+  type: z.enum(["note", "document", "research", "idea", "snippet"]).default("note"),
   projectId: z.string().uuid().optional(),
   parentNoteId: z.string().uuid().optional(),
   isFavorite: z.boolean().default(false),
@@ -539,10 +521,13 @@ export async function getProjectStats(id: string) {
 export const createProjectSchema = z.object({
   name: z.string().min(1).max(200),
   description: z.string().max(5000).optional(),
-  status: z.enum(['active', 'on_hold', 'completed', 'archived', 'cancelled']).default('active'),
+  status: z.enum(["active", "on_hold", "completed", "archived", "cancelled"]).default("active"),
   startDate: z.date().optional(),
   endDate: z.date().optional(),
-  color: z.string().regex(/^#[0-9A-F]{6}$/i).default('#3b82f6'),
+  color: z
+    .string()
+    .regex(/^#[0-9A-F]{6}$/i)
+    .default("#3b82f6"),
   icon: z.string().max(50).optional(),
   parentProjectId: z.string().uuid().optional(),
   metadata: z.record(z.unknown()).optional(),
@@ -611,7 +596,16 @@ export async function deleteCollectionItem(id: string) { ... }
 
 ```typescript
 // lib/collection-schema.ts
-type FieldType = 'text' | 'textarea' | 'number' | 'date' | 'select' | 'multiselect' | 'checkbox' | 'url' | 'email';
+type FieldType =
+  | "text"
+  | "textarea"
+  | "number"
+  | "date"
+  | "select"
+  | "multiselect"
+  | "checkbox"
+  | "url"
+  | "email";
 
 interface Field {
   id: string;
@@ -635,29 +629,29 @@ export function validateAgainstSchema(data: Record<string, unknown>, schema: { f
     const value = data[field.id];
 
     // Required check
-    if (field.required && (value === undefined || value === null || value === '')) {
+    if (field.required && (value === undefined || value === null || value === "")) {
       errors[field.id] = `${field.label} is required`;
       continue;
     }
 
     // Skip validation if not required and empty
-    if (!field.required && (value === undefined || value === null || value === '')) {
+    if (!field.required && (value === undefined || value === null || value === "")) {
       continue;
     }
 
     // Type-specific validation
     switch (field.type) {
-      case 'text':
-      case 'textarea':
-        if (typeof value !== 'string') {
+      case "text":
+      case "textarea":
+        if (typeof value !== "string") {
           errors[field.id] = `${field.label} must be text`;
         } else if (field.validation?.max && value.length > field.validation.max) {
           errors[field.id] = `${field.label} must be less than ${field.validation.max} characters`;
         }
         break;
 
-      case 'number':
-        if (typeof value !== 'number') {
+      case "number":
+        if (typeof value !== "number") {
           errors[field.id] = `${field.label} must be a number`;
         } else if (field.validation?.min && value < field.validation.min) {
           errors[field.id] = `${field.label} must be at least ${field.validation.min}`;
@@ -666,26 +660,26 @@ export function validateAgainstSchema(data: Record<string, unknown>, schema: { f
         }
         break;
 
-      case 'email':
-        if (typeof value !== 'string' || !value.includes('@')) {
+      case "email":
+        if (typeof value !== "string" || !value.includes("@")) {
           errors[field.id] = `${field.label} must be a valid email`;
         }
         break;
 
-      case 'url':
-        if (typeof value !== 'string' || !value.startsWith('http')) {
+      case "url":
+        if (typeof value !== "string" || !value.startsWith("http")) {
           errors[field.id] = `${field.label} must be a valid URL`;
         }
         break;
 
-      case 'select':
+      case "select":
         if (!field.options?.includes(value as string)) {
-          errors[field.id] = `${field.label} must be one of: ${field.options?.join(', ')}`;
+          errors[field.id] = `${field.label} must be one of: ${field.options?.join(", ")}`;
         }
         break;
 
-      case 'multiselect':
-        if (!Array.isArray(value) || !value.every(v => field.options?.includes(v))) {
+      case "multiselect":
+        if (!Array.isArray(value) || !value.every((v) => field.options?.includes(v))) {
           errors[field.id] = `${field.label} contains invalid options`;
         }
         break;
@@ -766,19 +760,19 @@ export async function getEntityLinks(entityType: string, entityId: string) {
 
 ```typescript
 export const createLinkSchema = z.object({
-  fromType: z.enum(['task', 'event', 'note', 'project', 'collection_item']),
+  fromType: z.enum(["task", "event", "note", "project", "collection_item"]),
   fromId: z.string().uuid(),
-  toType: z.enum(['task', 'event', 'note', 'project', 'collection_item']),
+  toType: z.enum(["task", "event", "note", "project", "collection_item"]),
   toId: z.string().uuid(),
   relationship: z.enum([
-    'assigned_to',
-    'related_to',
-    'documented_by',
-    'scheduled_as',
-    'blocks',
-    'depends_on',
-    'references',
-    'inspired_by',
+    "assigned_to",
+    "related_to",
+    "documented_by",
+    "scheduled_as",
+    "blocks",
+    "depends_on",
+    "references",
+    "inspired_by",
   ]),
   metadata: z.record(z.unknown()).optional(),
 });
@@ -811,19 +805,21 @@ try {
   // Database operation
 } catch (error) {
   // Log full error per debugging
-  console.error('Operation failed:', error);
+  console.error("Operation failed:", error);
 
   // Return user-friendly message
   if (error instanceof DatabaseError) {
-    if (error.code === '23505') { // Unique constraint
-      return { success: false, error: 'Item already exists' };
+    if (error.code === "23505") {
+      // Unique constraint
+      return { success: false, error: "Item already exists" };
     }
-    if (error.code === '23503') { // Foreign key
-      return { success: false, error: 'Related item not found' };
+    if (error.code === "23503") {
+      // Foreign key
+      return { success: false, error: "Related item not found" };
     }
   }
 
-  return { success: false, error: 'Operation failed. Please try again.' };
+  return { success: false, error: "Operation failed. Please try again." };
 }
 ```
 
@@ -832,18 +828,18 @@ try {
 ## Rate Limiting (Futuro)
 
 ```typescript
-import { rateLimit } from '@/lib/rate-limit';
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function createTask(input: unknown) {
   const session = await auth();
   if (!session?.user) {
-    return { success: false, error: 'Unauthorized' };
+    return { success: false, error: "Unauthorized" };
   }
 
   // Rate limit: 100 tasks per hour
   const { success, remaining } = await rateLimit({
     userId: session.user.id,
-    action: 'create_task',
+    action: "create_task",
     limit: 100,
     window: 3600, // seconds
   });
@@ -851,7 +847,7 @@ export async function createTask(input: unknown) {
   if (!success) {
     return {
       success: false,
-      error: 'Rate limit exceeded. Please try again later.'
+      error: "Rate limit exceeded. Please try again later.",
     };
   }
 

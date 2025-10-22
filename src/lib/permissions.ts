@@ -24,13 +24,6 @@ export type Permission =
  */
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   user: ["view_dashboard", "view_own_content"],
-  editor: [
-    "view_dashboard",
-    "view_own_content",
-    "manage_blog",
-    "manage_newsletter",
-    "view_contacts",
-  ],
   admin: [
     "view_dashboard",
     "view_own_content",
@@ -45,7 +38,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
 /**
  * Gerarchia ruoli (dal più basso al più alto)
  */
-export const ROLE_HIERARCHY: Role[] = ["user", "editor", "admin"];
+export const ROLE_HIERARCHY: Role[] = ["user", "admin"];
 
 /**
  * Verifica se un utente ha un permesso specifico
@@ -92,13 +85,6 @@ export function hasRole(userRole: Role | undefined | null, requiredRole: Role): 
  */
 export function isAdmin(userRole: Role | undefined | null): boolean {
   return userRole === "admin";
-}
-
-/**
- * Verifica se un utente è almeno un editor
- */
-export function isEditor(userRole: Role | undefined | null): boolean {
-  return hasRole(userRole, "editor");
 }
 
 /**

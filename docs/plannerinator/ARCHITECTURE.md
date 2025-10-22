@@ -5,6 +5,7 @@ Architettura applicazione Plannerinator su Next.js 15 + Cloudflare Workers.
 ## Stack Tecnologico
 
 ### Frontend
+
 - **Next.js 15.5** - App Router, React Server Components, Server Actions
 - **React 19** - Client components per interattività
 - **TypeScript 5.9** - Type safety completo
@@ -14,12 +15,14 @@ Architettura applicazione Plannerinator su Next.js 15 + Cloudflare Workers.
 - **Zod** - Validation schema
 
 ### Backend
+
 - **Next.js Server Actions** - API layer type-safe
 - **Drizzle ORM** - Database queries con TypeScript
 - **PostgreSQL (Neon)** - Database serverless
 - **Better Auth** - Autenticazione + RBAC
 
 ### Deploy
+
 - **Cloudflare Workers** - Edge runtime
 - **OpenNext** - Next.js adapter per Cloudflare
 - **Neon** - PostgreSQL edge-compatible
@@ -176,28 +179,28 @@ Tutte le mutation usano Server Actions per type-safety e ottimizzazioni automati
 
 ```typescript
 // features/tasks/actions.ts
-'use server';
+"use server";
 
-import { auth } from '@/lib/auth';
-import { db } from '@/db';
-import { tasks, links } from '@/db/schema';
-import { createTaskSchema } from './schema';
-import { revalidatePath } from 'next/cache';
+import { auth } from "@/lib/auth";
+import { db } from "@/db";
+import { tasks, links } from "@/db/schema";
+import { createTaskSchema } from "./schema";
+import { revalidatePath } from "next/cache";
 
 export async function createTask(data: FormData) {
   // 1. Auth check
   const session = await auth();
   if (!session?.user) {
-    return { error: 'Non autenticato' };
+    return { error: "Non autenticato" };
   }
 
   // 2. Validation
   const parsed = createTaskSchema.safeParse({
-    title: data.get('title'),
-    description: data.get('description'),
-    dueDate: data.get('dueDate'),
-    projectId: data.get('projectId'),
-    tags: data.getAll('tags'),
+    title: data.get("title"),
+    description: data.get("description"),
+    dueDate: data.get("dueDate"),
+    projectId: data.get("projectId"),
+    tags: data.getAll("tags"),
   });
 
   if (!parsed.success) {
@@ -208,23 +211,26 @@ export async function createTask(data: FormData) {
   try {
     const [task] = await db.transaction(async (tx) => {
       // Insert task
-      const [newTask] = await tx.insert(tasks).values({
-        userId: session.user.id,
-        title: parsed.data.title,
-        description: parsed.data.description,
-        dueDate: parsed.data.dueDate,
-        projectId: parsed.data.projectId,
-      }).returning();
+      const [newTask] = await tx
+        .insert(tasks)
+        .values({
+          userId: session.user.id,
+          title: parsed.data.title,
+          description: parsed.data.description,
+          dueDate: parsed.data.dueDate,
+          projectId: parsed.data.projectId,
+        })
+        .returning();
 
       // Create links if projectId provided
       if (parsed.data.projectId) {
         await tx.insert(links).values({
           userId: session.user.id,
-          fromType: 'task',
+          fromType: "task",
           fromId: newTask.id,
-          toType: 'project',
+          toType: "project",
           toId: parsed.data.projectId,
-          relationship: 'assigned_to',
+          relationship: "assigned_to",
         });
       }
 
@@ -234,13 +240,13 @@ export async function createTask(data: FormData) {
     });
 
     // 4. Revalidate cache
-    revalidatePath('/tasks');
+    revalidatePath("/tasks");
     revalidatePath(`/projects/${parsed.data.projectId}`);
 
     return { success: true, data: task };
   } catch (error) {
-    console.error('Error creating task:', error);
-    return { error: 'Errore durante la creazione del task' };
+    console.error("Error creating task:", error);
+    return { error: "Errore durante la creazione del task" };
   }
 }
 ```
@@ -350,19 +356,19 @@ function TaskListClient() {
 
 ```typescript
 // lib/auth.ts
-import { betterAuth } from 'better-auth';
+import { betterAuth } from "better-auth";
 
 export const auth = betterAuth({
   database: {
-    provider: 'postgres',
+    provider: "postgres",
     url: process.env.DATABASE_URL!,
   },
   user: {
     additionalFields: {
       role: {
-        type: 'string',
+        type: "string",
         required: false,
-        defaultValue: 'user',
+        defaultValue: "user",
       },
     },
   },
@@ -372,7 +378,7 @@ export const auth = betterAuth({
 export async function requireAuth() {
   const session = await auth();
   if (!session?.user) {
-    redirect('/login');
+    redirect("/login");
   }
   return session;
 }
@@ -388,10 +394,11 @@ export async function getTasks(filters: TaskFilters) {
   const session = await requireAuth();
 
   return db.query.tasks.findMany({
-    where: (tasks, { eq, and }) => and(
-      eq(tasks.userId, session.user.id), // SEMPRE
-      filters.status ? eq(tasks.status, filters.status) : undefined,
-    ),
+    where: (tasks, { eq, and }) =>
+      and(
+        eq(tasks.userId, session.user.id), // SEMPRE
+        filters.status ? eq(tasks.status, filters.status) : undefined
+      ),
   });
 }
 ```
@@ -403,7 +410,7 @@ export async function getTasks(filters: TaskFilters) {
 ### Server Components (RSC Cache)
 
 ```typescript
-import { unstable_cache } from 'next/cache';
+import { unstable_cache } from "next/cache";
 
 export const getCachedProjects = unstable_cache(
   async (userId: string) => {
@@ -411,10 +418,10 @@ export const getCachedProjects = unstable_cache(
       where: eq(projects.userId, userId),
     });
   },
-  ['projects'], // cache key
+  ["projects"], // cache key
   {
     revalidate: 60, // 1 minuto
-    tags: ['projects'], // per invalidation
+    tags: ["projects"], // per invalidation
   }
 );
 ```
@@ -423,11 +430,11 @@ export const getCachedProjects = unstable_cache(
 
 ```typescript
 // Dopo mutation
-import { revalidateTag, revalidatePath } from 'next/cache';
+import { revalidateTag, revalidatePath } from "next/cache";
 
 await createTask(data);
-revalidateTag('tasks');
-revalidatePath('/tasks');
+revalidateTag("tasks");
+revalidatePath("/tasks");
 ```
 
 ---
@@ -438,7 +445,7 @@ revalidatePath('/tasks');
 
 ```typescript
 const { data } = useQuery({
-  queryKey: ['tasks'],
+  queryKey: ["tasks"],
   queryFn: getTasks,
   refetchInterval: 30000, // 30s
 });
@@ -458,8 +465,8 @@ export async function GET(req: Request) {
 
   return new Response(stream, {
     headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
     },
   });
 }
@@ -469,14 +476,18 @@ export async function GET(req: Request) {
 
 ```typescript
 const channel = supabase
-  .channel('tasks-changes')
-  .on('postgres_changes', {
-    event: '*',
-    schema: 'public',
-    table: 'tasks',
-  }, (payload) => {
-    queryClient.invalidateQueries(['tasks']);
-  })
+  .channel("tasks-changes")
+  .on(
+    "postgres_changes",
+    {
+      event: "*",
+      schema: "public",
+      table: "tasks",
+    },
+    (payload) => {
+      queryClient.invalidateQueries(["tasks"]);
+    }
+  )
   .subscribe();
 ```
 
@@ -513,7 +524,7 @@ try {
   await createTask(data);
 } catch (error) {
   if (error instanceof DbError) {
-    return { error: 'Errore database' };
+    return { error: "Errore database" };
   }
   if (error instanceof ValidationError) {
     return { error: error.message };
@@ -549,10 +560,7 @@ const tasksWithProjects = await db.query.tasks.findMany({
 ### Pagination
 
 ```typescript
-export async function getTasks({
-  page = 1,
-  limit = 50,
-}: PaginationParams) {
+export async function getTasks({ page = 1, limit = 50 }: PaginationParams) {
   const offset = (page - 1) * limit;
 
   return db.query.tasks.findMany({
@@ -568,7 +576,7 @@ export async function getTasks({
 Per liste lunghe, usa `@tanstack/react-virtual`:
 
 ```typescript
-import { useVirtualizer } from '@tanstack/react-virtual';
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 function TaskList({ tasks }) {
   const virtualizer = useVirtualizer({
@@ -636,13 +644,13 @@ export function DashboardSidebar() {
 ### Unit Tests (Vitest)
 
 ```typescript
-import { describe, it, expect } from 'vitest';
-import { createTaskSchema } from '@/features/tasks/schema';
+import { describe, it, expect } from "vitest";
+import { createTaskSchema } from "@/features/tasks/schema";
 
-describe('Task Schema', () => {
-  it('should validate valid task', () => {
+describe("Task Schema", () => {
+  it("should validate valid task", () => {
     const result = createTaskSchema.safeParse({
-      title: 'Test task',
+      title: "Test task",
     });
 
     expect(result.success).toBe(true);
@@ -653,13 +661,13 @@ describe('Task Schema', () => {
 ### Integration Tests (Playwright)
 
 ```typescript
-test('create task flow', async ({ page }) => {
-  await page.goto('/tasks/new');
-  await page.fill('[name="title"]', 'New task');
+test("create task flow", async ({ page }) => {
+  await page.goto("/tasks/new");
+  await page.fill('[name="title"]', "New task");
   await page.click('[type="submit"]');
 
-  await expect(page).toHaveURL('/tasks');
-  await expect(page.getByText('New task')).toBeVisible();
+  await expect(page).toHaveURL("/tasks");
+  await expect(page.getByText("New task")).toBeVisible();
 });
 ```
 

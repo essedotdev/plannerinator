@@ -2,6 +2,7 @@ import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import { Separator } from "@/components/ui/separator";
+import { CommandPalette } from "@/components/search/CommandPalette";
 
 /**
  * Dashboard layout - UNICO punto di controllo autenticazione per /dashboard/*
@@ -23,18 +24,23 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="container py-8">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Sidebar */}
-        <aside className="md:col-span-1">
-          <DashboardNav />
-        </aside>
+    <>
+      <div className="container py-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* Sidebar */}
+          <aside className="md:col-span-1">
+            <DashboardNav />
+          </aside>
 
-        <Separator className="md:hidden" />
+          <Separator className="md:hidden" />
 
-        {/* Main content */}
-        <main className="md:col-span-3">{children}</main>
+          {/* Main content */}
+          <main className="md:col-span-3">{children}</main>
+        </div>
       </div>
-    </div>
+
+      {/* Global Command Palette (Cmd+K) */}
+      <CommandPalette />
+    </>
   );
 }

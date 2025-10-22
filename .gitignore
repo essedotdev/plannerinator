@@ -1,0 +1,22 @@
+# Dependencies
+node_modules
+
+# Environment variables (only local secrets)
+.env.local
+.dev.vars
+
+# Note: wrangler.jsonc IS committed - it contains production config
+
+# Next.js
+.next
+out
+
+# OpenNext / Cloudflare Workers
+.open-next
+.wrangler
+
+# Drizzle
+drizzle
+
+# TypeScript
+*.tsbuildinfo
