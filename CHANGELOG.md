@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2025-10-23
+
+### Added
+
+- Logout button in sidebar footer with icon and proper accessibility
+- Dedicated calendar.css stylesheet for React Big Calendar customization
+
+### Changed
+
+- Moved React Big Calendar styles from globals.css to dedicated src/styles/calendar.css
+- Improved sidebar footer layout with better spacing and visual hierarchy
+- Redesigned sidebar footer with separated user info and actions sections
+- Enhanced filter layouts across all entity types (tasks, events, notes, projects) with flexbox wrapping for better responsive behavior
+- Updated calendar styles to use CSS custom properties for better theme integration
+- Improved calendar view toggle buttons with modern pill-style design
+- Added visual separation in sidebar footer with divider line
+
+### Fixed
+
+- Filter components now properly align and wrap on smaller screens
+- Calendar container now has proper card styling with border and padding
+- Breadcrumb list now has proper left margin spacing
+- Sidebar footer actions are now properly accessible in collapsed state
+
 ## [0.5.0] - 2025-10-23
 
 ### Added
@@ -539,7 +563,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code splitting
 - Lazy loading for components
 
-[unreleased]: https://github.com/essedev/plannerinator/compare/v0.5.0...HEAD
+[unreleased]: https://github.com/essedev/plannerinator/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/essedev/plannerinator/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/essedev/plannerinator/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/essedev/plannerinator/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/essedev/plannerinator/compare/v0.2.0...v0.3.0

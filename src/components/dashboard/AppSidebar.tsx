@@ -1,32 +1,35 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  CheckSquare,
-  Calendar,
-  FileText,
-  FolderKanban,
-  Users,
-  UserCircle,
-  type LucideIcon,
-} from "lucide-react";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useSession } from "@/lib/auth-client";
+import { signOut, useSession } from "@/lib/auth-client";
 import { hasPermission, type Permission } from "@/lib/permissions";
 import type { AppUser } from "@/types/auth.d";
-import { ThemeToggle } from "@/components/layout/ThemeToggle";
-import { Badge } from "@/components/ui/badge";
+import {
+  Calendar,
+  CheckSquare,
+  FileText,
+  FolderKanban,
+  LayoutDashboard,
+  LogOut,
+  UserCircle,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 
 interface NavItem {
   label: string;
@@ -76,6 +79,7 @@ const navItems: NavItem[] = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { data: session } = useSession();
   const { state } = useSidebar();
   const user = session?.user as AppUser | undefined;
@@ -88,6 +92,12 @@ export function AppSidebar() {
   });
 
   const isCollapsed = state === "collapsed";
+
+  const handleLogout = async () => {
+    await signOut();
+    router.push("/");
+    router.refresh();
+  };
 
   return (
     <Sidebar collapsible="icon">
@@ -129,27 +139,60 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Footer */}
-      <SidebarFooter className="border-t border-sidebar-border p-2">
-        <div className="flex items-center gap-2 px-2 py-2">
-          {!isCollapsed && user ? (
-            <>
-              <div className="flex flex-1 flex-col overflow-hidden">
-                <p className="text-sm font-medium truncate">{user.name}</p>
-                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-                {user.role && (
-                  <Badge variant={user.role === "admin" ? "default" : "outline"} className="mt-1 w-fit text-xs">
+      <SidebarFooter className="border-t border-sidebar-border">
+        {!isCollapsed && user ? (
+          <div className="p-3 space-y-3">
+            {/* User Info */}
+            <div className="space-y-1.5">
+              <p className="text-sm font-medium leading-none truncate">{user.name}</p>
+              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+              {user.role && (
+                <div className="pt-1">
+                  <Badge
+                    variant={user.role === "admin" ? "default" : "outline"}
+                    className="text-xs"
+                  >
                     {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                   </Badge>
-                )}
-              </div>
-              <ThemeToggle />
-            </>
-          ) : (
-            <div className="flex w-full justify-center">
-              <ThemeToggle />
+                </div>
+              )}
             </div>
-          )}
-        </div>
+
+            <Separator className="bg-sidebar-border" />
+
+            {/* Actions */}
+            <div className="flex items-center gap-2">
+              <span className="mr-auto text-xs text-muted-foreground">
+                Actions
+              </span>
+              <ThemeToggle />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleLogout}
+                aria-label="Logout"
+                className="h-9 w-9"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-2 py-3">
+            <ThemeToggle />
+            {user && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleLogout}
+                aria-label="Logout"
+                className="h-9 w-9"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        )}
       </SidebarFooter>
     </Sidebar>
   );

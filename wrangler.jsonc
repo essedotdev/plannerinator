@@ -7,14 +7,14 @@
   "keep_names": false,
   "assets": {
     "directory": ".open-next/assets",
-    "binding": "ASSETS",
+    "binding": "ASSETS"
   },
   "vars": {
-    "BETTER_AUTH_URL": "https://plannerinator.essedev.it",
-    "NEXT_PUBLIC_APP_URL": "https://plannerinator.essedev.it",
+    "BETTER_AUTH_URL": "https://planner.essedev.it",
+    "NEXT_PUBLIC_APP_URL": "https://planner.essedev.it",
     "EMAIL_PROVIDER": "mock",
-    "EMAIL_FROM": "noreply@plannerinator.essedev.it",
-    "EMAIL_REPLY_TO": "support@plannerinator.essedev.it",
-    "ADMIN_EMAIL": "admin@plannerinator.essedev.it",
-  },
+    "EMAIL_FROM": "noreply@planner.essedev.it",
+    "EMAIL_REPLY_TO": "support@planner.essedev.it",
+    "ADMIN_EMAIL": "admin@planner.essedev.it"
+  }
 }

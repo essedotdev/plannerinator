@@ -5,6 +5,7 @@ import { format, parse, startOfWeek, getDay } from "date-fns";
 import { it } from "date-fns/locale";
 import { useState, useCallback, useMemo } from "react";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import "@/styles/calendar.css";
 import { useRouter } from "next/navigation";
 
 // Configure date-fns localizer with Italian locale
@@ -153,7 +154,7 @@ export function EventCalendar({ events, onSelectSlot }: EventCalendarProps) {
   };
 
   return (
-    <div className="h-[calc(100vh-280px)] min-h-[600px]">
+    <div className="h-[calc(100vh-280px)] min-h-[600px] bg-card border border-border rounded-lg p-6">
       <Calendar
         localizer={localizer}
         events={calendarEvents}

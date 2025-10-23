@@ -54,65 +54,63 @@ export function EventFilters() {
     searchParams.has("tags");
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-col sm:flex-row gap-3">
-        {/* Search */}
-        <div className="flex-1">
-          <Input
-            type="search"
-            placeholder="Search events..."
-            defaultValue={searchParams.get("search") || ""}
-            onChange={(e) => {
-              const value = e.target.value;
-              // Debounce search
-              setTimeout(() => updateFilter("search", value || null), 300);
-            }}
-            className="w-full"
-          />
-        </div>
-
-        {/* Calendar Type Filter */}
-        <Select
-          value={searchParams.get("calendarType") || "all"}
-          onValueChange={(value) => updateFilter("calendarType", value === "all" ? null : value)}
-        >
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="All calendars" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All calendars</SelectItem>
-            <SelectItem value="personal">Personal</SelectItem>
-            <SelectItem value="work">Work</SelectItem>
-            <SelectItem value="family">Family</SelectItem>
-            <SelectItem value="other">Other</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* All Day Filter */}
-        <Select
-          value={searchParams.get("allDay") || "all"}
-          onValueChange={(value) => updateFilter("allDay", value === "all" ? null : value)}
-        >
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="All events" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All events</SelectItem>
-            <SelectItem value="true">All-day only</SelectItem>
-            <SelectItem value="false">Timed only</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* Clear Filters */}
-        {hasFilters && (
-          <Button variant="outline" size="icon" onClick={clearFilters}>
-            <X className="h-4 w-4" />
-          </Button>
-        )}
+    <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center flex-wrap">
+      {/* Search */}
+      <div className="flex-1 min-w-[200px]">
+        <Input
+          type="search"
+          placeholder="Search events..."
+          defaultValue={searchParams.get("search") || ""}
+          onChange={(e) => {
+            const value = e.target.value;
+            // Debounce search
+            setTimeout(() => updateFilter("search", value || null), 300);
+          }}
+          className="w-full"
+        />
       </div>
+
+      {/* Calendar Type Filter */}
+      <Select
+        value={searchParams.get("calendarType") || "all"}
+        onValueChange={(value) => updateFilter("calendarType", value === "all" ? null : value)}
+      >
+        <SelectTrigger className="w-full sm:w-[180px]">
+          <SelectValue placeholder="All calendars" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All calendars</SelectItem>
+          <SelectItem value="personal">Personal</SelectItem>
+          <SelectItem value="work">Work</SelectItem>
+          <SelectItem value="family">Family</SelectItem>
+          <SelectItem value="other">Other</SelectItem>
+        </SelectContent>
+      </Select>
+
+      {/* All Day Filter */}
+      <Select
+        value={searchParams.get("allDay") || "all"}
+        onValueChange={(value) => updateFilter("allDay", value === "all" ? null : value)}
+      >
+        <SelectTrigger className="w-full sm:w-[180px]">
+          <SelectValue placeholder="All events" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All events</SelectItem>
+          <SelectItem value="true">All-day only</SelectItem>
+          <SelectItem value="false">Timed only</SelectItem>
+        </SelectContent>
+      </Select>
 
       {/* Tag Filter */}
       <TagFilter basePath="/dashboard/events" />
+
+      {/* Clear Filters */}
+      {hasFilters && (
+        <Button variant="outline" size="icon" onClick={clearFilters}>
+          <X className="h-4 w-4" />
+        </Button>
+      )}
     </div>
   );
 }

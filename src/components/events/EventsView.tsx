@@ -31,11 +31,11 @@ export function EventsView({ events, defaultView = "list" }: EventsViewProps) {
   const [view, setView] = useState<"list" | "calendar">(defaultView);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* View Toggle */}
-      <div className="flex items-center gap-2">
+      <div className="inline-flex items-center gap-1 bg-muted/50 p-1 rounded-lg border border-border">
         <Button
-          variant={view === "list" ? "default" : "outline"}
+          variant={view === "list" ? "default" : "ghost"}
           size="sm"
           onClick={() => setView("list")}
         >
@@ -43,7 +43,7 @@ export function EventsView({ events, defaultView = "list" }: EventsViewProps) {
           List
         </Button>
         <Button
-          variant={view === "calendar" ? "default" : "outline"}
+          variant={view === "calendar" ? "default" : "ghost"}
           size="sm"
           onClick={() => setView("calendar")}
         >
