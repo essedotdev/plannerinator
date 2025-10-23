@@ -595,5 +595,3 @@ Quando aggiungi nuove feature, assicurati di:
 8. ✅ Aggiornare `FEATURES` flag se necessario
 
 ---
-
-**Ultimo aggiornamento:** 2025-01-22

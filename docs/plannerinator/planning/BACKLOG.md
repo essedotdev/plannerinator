@@ -7,13 +7,13 @@ Lista completa di feature ideas e enhancement per Plannerinator. Questo file rac
 
 **Legenda:**
 
-- 🔥 **High Priority** - Feature molto richieste, candidati per Phase 4 (3-6 mesi)
-- ⭐ **Medium Priority** - Feature utili ma non urgenti (6-12 mesi)
-- 💭 **Nice to Have** - Idee interessanti ma bassa priorità (12+ mesi)
+- 🔥 **High Priority** - Feature molto richieste, candidati per Phase 4
+- ⭐ **Medium Priority** - Feature utili ma non urgenti
+- 💭 **Nice to Have** - Idee interessanti ma bassa priorità
 
 ---
 
-## 🔥 High Priority (Phase 4 - Next)
+## 🔥 High Priority (Phase 4)
 
 ### Collaboration & Sharing System ⭐⭐⭐
 
@@ -112,7 +112,7 @@ Sistema completo di time tracking integrato:
 
 ---
 
-## ⭐ Medium Priority (Phase 5 - 6-12 mesi)
+## ⭐ Medium Priority (Phase 5)
 
 ### AI Assistant ⭐⭐⭐
 
@@ -197,7 +197,7 @@ Features per preparare collaborazione multi-user:
 
 ---
 
-## 💭 Nice to Have (Phase 6+ - 12+ mesi)
+## 💭 Nice to Have (Phase 6+)
 
 ### Advanced Integrations
 
@@ -298,7 +298,7 @@ Sistema multi-tenancy completo:
 
 ## 📊 Implementation Complexity
 
-### Quick Wins (1-2 giorni)
+### Quick Wins
 
 - Duplicate functions
 - Archive task/project
@@ -306,7 +306,7 @@ Sistema multi-tenancy completo:
 - Due Soon warnings
 - Manual Backup download
 
-### Medium (1 settimana)
+### Medium
 
 - Templates system (task/event/note)
 - Trash/Recycle Bin
@@ -314,7 +314,7 @@ Sistema multi-tenancy completo:
 - Tag filters enhancements
 - Custom view presets
 
-### Large (2-4 settimane)
+### Large
 
 - Recurring Tasks/Events
 - Time Tracking system completo
@@ -324,7 +324,7 @@ Sistema multi-tenancy completo:
 - Pomodoro + Habit Tracker
 - Graph View
 
-### Very Large (1-2 mesi)
+### Very Large
 
 - **Collaboration System** (sharing, permissions, real-time)
 - **AI Assistant** (LLM integration, function calling, chat UI)
@@ -375,7 +375,7 @@ Quick reference per trovare feature per tipo di entità:
 ## 🔗 Related Documentation
 
 - **Current development:** [ROADMAP.md](./ROADMAP.md) (Phase 3 focus)
-- **Completed features:** [CHANGELOG.md](../../../CHANGELOG.md) (v0.1.0-v0.3.0)
+- **Completed features:** [CHANGELOG.md](../../../CHANGELOG.md) (v0.1.0-v0.4.0)
 - **Technical specs:**
   - [AI Assistant](../future/AI_ASSISTANT.md) - 947 lines
   - [Sharing System](../future/SHARING.md) - 799 lines
@@ -383,8 +383,6 @@ Quick reference per trovare feature per tipo di entità:
   - [Code Quality](../technical/CODE_QUALITY.md)
 
 ---
-
-**Ultimo aggiornamento:** 2025-10-23
 
 **Note:** Questo file è un backlog di idee. Per feature in sviluppo attivo, consulta [ROADMAP.md](./ROADMAP.md).
 

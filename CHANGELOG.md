@@ -7,7 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.4.0] - 2025-10-23
+## [0.5.0] - 2025-10-23
+
+### Added
+
+**Modern Dashboard Layout**
+
+- AppSidebar component with collapsible sidebar (Cmd+B shortcut)
+- DashboardBreadcrumbs component with dynamic breadcrumb generation
+- ConditionalLayout component for separating public and dashboard layouts
+- Sidebar component from shadcn/ui with mobile responsive Sheet support
+- State persistence for sidebar collapsed/expanded state via cookies
+- Sticky header in dashboard with sidebar trigger and breadcrumbs
+- Full-width content area in dashboard (removed max-width constraint)
+
+### Changed
+
+**Dashboard UX Improvements**
+
+- Dashboard layout now uses SidebarProvider for state management
+- Removed footer from dashboard pages (footer only on public pages)
+- Removed navbar from dashboard pages (navbar only on public pages)
+- Dashboard content area now uses full viewport width for better space utilization
+- Sidebar collapses to icon-only mode with tooltips on hover
+- Mobile sidebar opens as slide-in Sheet for better mobile UX
+- Breadcrumbs automatically generated from current pathname with smart labeling
+- Breadcrumbs hidden on dashboard root page for cleaner UI
+
+### Removed
+
+- DashboardNav component (replaced by AppSidebar)
+- Container constraint in dashboard layout (now full-width)
+
+## [0.4.0]
 
 ### Added
 
@@ -73,7 +105,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Form validation error messages use semantic `text-destructive` color
 - Task server actions now properly handle form data and validations
 
-## [0.3.0] - 2025-10-23
+## [0.3.0]
 
 ### Added
 
@@ -133,7 +165,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - @types/react-big-calendar (^1.16.3) - TypeScript types for calendar
 - @types/react-syntax-highlighter (^15.5.13) - TypeScript types for syntax highlighter
 
-## [0.2.0] - 2025-10-22
+## [0.2.0]
 
 ### Added - Phase 1: Core Entities & Universal Features
 
@@ -396,7 +428,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Drizzle ORM queries with relations
 - URL-synced filters with search params
 
-## [0.1.0] - 2025-01-21
+## [0.1.0]
 
 ### Added - Phase 0: Foundation (100% Complete)
 
@@ -507,7 +539,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code splitting
 - Lazy loading for components
 
-[unreleased]: https://github.com/essedev/plannerinator/compare/v0.4.0...HEAD
+[unreleased]: https://github.com/essedev/plannerinator/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/essedev/plannerinator/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/essedev/plannerinator/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/essedev/plannerinator/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/essedev/plannerinator/compare/v0.1.0...v0.2.0

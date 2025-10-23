@@ -19,9 +19,10 @@ Roadmap delle feature di Plannerinator, focalizzata sul presente e futuro prossi
 
 **Overall Progress: ~70%**
 
-- ✅ **Phase 0 (Foundation):** 100% Complete - [v0.1.0](../../../CHANGELOG.md#010---2025-01-21)
-- ✅ **Phase 1 (Core Entities):** 100% Complete - [v0.2.0](../../../CHANGELOG.md#020---2025-10-22)
-- ✅ **Phase 2 (Critical UX):** 100% Complete - [v0.3.0](../../../CHANGELOG.md#030---2025-10-23)
+- ✅ **Phase 0 (Foundation):** 100% Complete - [v0.1.0](../../../CHANGELOG.md#010)
+- ✅ **Phase 1 (Core Entities):** 100% Complete - [v0.2.0](../../../CHANGELOG.md#020)
+- ✅ **Phase 2 (Critical UX):** 100% Complete - [v0.3.0](../../../CHANGELOG.md#030)
+- ✅ **Phase 2.5 (Dashboard & Kanban):** 100% Complete - [v0.4.0](../../../CHANGELOG.md#040)
 - ⏳ **Phase 3 (Collections & Advanced):** 5% Complete - **CURRENT FOCUS**
 - 💭 **Phase 4+ (Collaboration/AI):** Pianificate - vedi [BACKLOG.md](./BACKLOG.md)
 
@@ -32,8 +33,6 @@ Roadmap delle feature di Plannerinator, focalizzata sul presente e futuro prossi
 Le prime tre fasi sono state completate con successo. Per dettagli completi su implementazione, feature e date di rilascio, consulta il [CHANGELOG.md](../../../CHANGELOG.md).
 
 ### Phase 0: Foundation (100% - v0.1.0)
-
-**Completata:** Gennaio 21, 2025
 
 Sistema base completo con auth, database, UI infrastructure:
 
@@ -48,8 +47,6 @@ Sistema base completo con auth, database, UI infrastructure:
 - Cloudflare Workers deployment config
 
 ### Phase 1: Core Entities (100% - v0.2.0)
-
-**Completata:** Ottobre 22, 2025
 
 Implementazione CRUD completo per le 4 entità principali + Universal Features:
 
@@ -69,8 +66,6 @@ Implementazione CRUD completo per le 4 entità principali + Universal Features:
 
 ### Phase 2: Critical UX Improvements (100% - v0.3.0)
 
-**Completata:** Ottobre 23, 2025
-
 Miglioramenti essenziali all'usabilità delle feature esistenti:
 
 - ✅ **Calendar View per Eventi:** react-big-calendar, drag & drop, multiple views
@@ -79,6 +74,14 @@ Miglioramenti essenziali all'usabilità delle feature esistenti:
 - ✅ **Dashboard Homepage:** QuickStats, TodayView, UpcomingDeadlines, QuickActions
 - ✅ **Kanban View per Task:** Drag & drop, 3 colonne (Todo/In Progress/Done)
 
+### Phase 2.5: Dashboard & Kanban (100% - v0.4.0)
+
+Miglioramenti alla dashboard e gestione task:
+
+- ✅ **Dashboard Enhancements:** QuickStats, QuickActions, TodayView, UpcomingDeadlines
+- ✅ **Kanban Board:** Drag & drop task management, status-based columns
+- ✅ **UI/UX Consistency:** PageHeader standardization (100% coverage), EmptyState component, form button patterns
+
 ---
 
 ## ⏳ Phase 3: Collections & Advanced Features (CURRENT FOCUS)
@@ -86,8 +89,6 @@ Miglioramenti essenziali all'usabilità delle feature esistenti:
 **Obiettivo:** Sistema Collections + Activity tracking + data management avanzato.
 
 **Status:** 5% Complete - Database schema pronto, implementazione in corso
-
-**Timeline stimata:** 1-2 mesi
 
 ### 3.1 Collections System ⭐⭐⭐
 
@@ -256,6 +257,8 @@ Vedi [BACKLOG.md](./BACKLOG.md) per lista completa feature ideas.
 ### Mobile
 
 - ✅ Responsive design (mobile-first)
+- ✅ Collapsible sidebar with mobile Sheet support
+- ✅ Full-width dashboard layout for optimal space utilization
 - ⏳ Touch-friendly targets (min 44px)
 - 💭 PWA (install prompt, offline mode)
 - 💭 Mobile gestures (swipe actions)
@@ -270,7 +273,7 @@ Tutte le feature foundation, core entities e UX improvements sono completate. Ve
 
 ### 🚀 Current Sprint (Phase 3)
 
-**Prossimi 1-2 mesi - In ordine di priorità:**
+**In ordine di priorità:**
 
 1. **Collections System MVP**
    - Schema builder UI
@@ -293,7 +296,7 @@ Tutte le feature foundation, core entities e UX improvements sono completate. Ve
    - Search ranking
    - Advanced filters
 
-### 💭 Next Quarter (Phase 4+)
+### 💭 Phase 4+ (Pianificate)
 
 Vedi [BACKLOG.md](./BACKLOG.md) per:
 
@@ -339,45 +342,50 @@ export const FEATURES = {
 
 ## 📝 Recent Milestones
 
-### UI/UX Consistency Improvements (Ottobre 23, 2025)
+### Post v0.4.0 - Modern Dashboard Layout (In Progress)
 
-Standardizzazione completa dell'interfaccia utente per massima consistenza:
+Redesign completo del layout dashboard per ottimizzare lo spazio e migliorare UX:
 
-- **PageHeader standardizzato** in tutte le 15 pagine (100% coverage)
-- **Back buttons** aggiunti a tutte le detail pages
-- **EmptyState component** applicato a tutte le liste
-- **Form button layout** unificato in tutti i form
-- **Error colors** semantici (`text-destructive`)
+- Sidebar collassabile con shadcn/ui (Cmd+B)
+- Full-width content area (rimossa constraint max-width)
+- Breadcrumbs dinamici per navigazione contestuale
+- Layout separato per pagine pubbliche vs dashboard
+- Mobile-responsive con Sheet sidebar
 
-**Risultato:** UI/UX consistency al 95%+ con pattern chiari e documentati
+### v0.4.0 - Dashboard & Kanban
 
-Dettagli completi: [CHANGELOG.md](../../../CHANGELOG.md#unreleased)
+Dashboard enhancements e kanban board:
 
-### v0.3.0 - Phase 2 Complete (Ottobre 23, 2025)
+- Dashboard components (QuickStats, TodayView, UpcomingDeadlines, QuickActions)
+- Kanban board con drag & drop
+- UI/UX consistency improvements
+
+Dettagli completi: [CHANGELOG.md](../../../CHANGELOG.md#040)
+
+### v0.3.0 - Phase 2 Complete
 
 Tutte le 5 feature UX critiche implementate:
 
 - Calendar View, Tag Filters, Markdown Editor, Dashboard, Kanban View
 
-Dettagli completi: [CHANGELOG.md](../../../CHANGELOG.md#030---2025-10-23)
+Dettagli completi: [CHANGELOG.md](../../../CHANGELOG.md#030)
 
-### v0.2.0 - Phase 1 Complete (Ottobre 22, 2025)
+### v0.2.0 - Phase 1 Complete
 
 Core entities (Tasks, Events, Notes, Projects) + Universal Features (Tags, Comments, Links, Search)
 
-Dettagli completi: [CHANGELOG.md](../../../CHANGELOG.md#020---2025-10-22)
+Dettagli completi: [CHANGELOG.md](../../../CHANGELOG.md#020)
 
-### v0.1.0 - Phase 0 Complete (Gennaio 21, 2025)
+### v0.1.0 - Phase 0 Complete
 
 Foundation completa: Auth, Database, UI, Testing infrastructure
 
-Dettagli completi: [CHANGELOG.md](../../../CHANGELOG.md#010---2025-01-21)
+Dettagli completi: [CHANGELOG.md](../../../CHANGELOG.md#010)
 
 ---
 
-**Ultimo aggiornamento:** 2025-10-23
 **Milestone attuale:** Phase 3 - Collections System & Advanced Features (5%)
-**Prossimo release:** v0.4.0 (Collections MVP)
+**Prossima release:** v0.5.0 (Collections MVP)
 
 > **📋 Per lista completa di enhancement e feature ideas, vedi [BACKLOG.md](./BACKLOG.md)**
 > **📖 Per storico release complete, vedi [CHANGELOG.md](../../../CHANGELOG.md)**

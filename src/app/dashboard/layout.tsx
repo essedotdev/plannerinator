@@ -1,8 +1,10 @@
+import { AppSidebar } from "@/components/dashboard/AppSidebar";
+import { DashboardBreadcrumbs } from "@/components/dashboard/DashboardBreadcrumbs";
+import { CommandPalette } from "@/components/search/CommandPalette";
+import { Separator } from "@/components/ui/separator";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { DashboardNav } from "@/components/dashboard/DashboardNav";
-import { Separator } from "@/components/ui/separator";
-import { CommandPalette } from "@/components/search/CommandPalette";
 
 /**
  * Dashboard layout - UNICO punto di controllo autenticazione per /dashboard/*
@@ -15,6 +17,11 @@ import { CommandPalette } from "@/components/search/CommandPalette";
  * - Verifica firma del cookie, scadenza, e integrità del token
  * - Redirect a /login se la sessione non è valida
  * - RBAC (controllo ruoli) gestito nei singoli componenti tramite RoleGate
+ *
+ * Layout:
+ * - Sidebar collassabile (Cmd+B) con persistenza stato
+ * - Full-width content area per dashboard ottimale
+ * - Responsive con Sheet mobile
  */
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
@@ -24,23 +31,24 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <>
-      <div className="container py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Sidebar */}
-          <aside className="md:col-span-1">
-            <DashboardNav />
-          </aside>
+    <SidebarProvider defaultOpen={true}>
+      <AppSidebar />
+      <SidebarInset>
+        {/* Header con trigger e breadcrumbs */}
+        <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
+          <SidebarTrigger />
+          <Separator orientation="vertical" className="h-6" />
+          <DashboardBreadcrumbs />
+        </header>
 
-          <Separator className="md:hidden" />
-
-          {/* Main content */}
-          <main className="md:col-span-3">{children}</main>
-        </div>
-      </div>
+        {/* Main content - full width senza container */}
+        <main className="flex-1 overflow-auto">
+          <div className="p-4 md:p-6 lg:p-8">{children}</div>
+        </main>
+      </SidebarInset>
 
       {/* Global Command Palette (Cmd+K) */}
       <CommandPalette />
-    </>
+    </SidebarProvider>
   );
 }

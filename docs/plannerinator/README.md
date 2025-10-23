@@ -104,38 +104,52 @@ Tutte le entità supportano:
 
 ## Roadmap
 
-### Phase 1: Foundation ✅ (Current)
+### Phase 0: Foundation ✅
 
 - Database schema
-- CRUD operations per tutte le entità
-- Dashboard con sidebar navigation
-- Sistema di linking
+- Better Auth (RBAC, email/password)
+- UI infrastructure (Tailwind, shadcn/ui)
+- Server Actions & Server Components
 
-### Phase 2: Core Features 🚧
+### Phase 1: Core Entities ✅
 
-- Task views (lista, kanban, calendario)
-- Event calendar
-- Note editor (markdown)
-- Project management
-- Collections CRUD
+- Tasks (CRUD, subtasks, bulk operations)
+- Events (CRUD, calendar types)
+- Notes (CRUD, markdown, favorites)
+- Projects (CRUD, stats, progress tracking)
 
-### Phase 3: Advanced Features 📋
+### Phase 2: Universal Features ✅
 
-- Advanced search & filters
-- Bulk operations
-- Activity timeline
-- Data export/import
+- Tags system (create, autocomplete, usage stats)
+- Comments system (nested, edit/delete)
+- Links system (8 relationship types)
+- Global search (Cmd+K command palette)
+
+### Phase 2.5: UX Improvements ✅
+
+- Calendar view per eventi
+- Tag filters (multi-select AND/OR)
+- Markdown editor (split view, live preview)
+- Dashboard (QuickStats, TodayView)
+- Kanban board per task
+
+### Phase 3: Collections & Advanced 🚧 (Current)
+
+- Collections system (schema builder, dynamic forms)
+- Activity timeline (auto-tracking, history)
+- Data export/import (JSON, CSV, Markdown)
+- Advanced search (full-text, ranking)
 
 ### Phase 4: Collaboration 📋
 
-- Sharing entities con altri utenti
-- Permissions granulari
-- Comments & mentions
+- Sharing system (permissions granulari)
+- Real-time collaboration
+- Comments & mentions avanzati
 
 ### Phase 5: AI Assistant 📋
 
-- Chat interface
-- Natural language task creation
+- Chat interface per gestione entità
+- Natural language commands
 - Smart suggestions
 - Semantic search
 
@@ -143,7 +157,7 @@ Tutte le entità supportano:
 
 ### 📋 Planning
 
-- [Roadmap](./planning/ROADMAP.md) - Status attuale, priorità e timeline
+- [Roadmap](./planning/ROADMAP.md) - Status attuale e priorità
 - [Backlog](./planning/BACKLOG.md) - Feature ideas e enhancement futuri
 
 ### 🔧 Technical Reference
