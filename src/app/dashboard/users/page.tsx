@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
+import { PageHeader } from "@/components/common";
 import { RoleSelector } from "./RoleSelector";
 import { formatFullDate } from "@/lib/dates";
 
@@ -39,10 +40,10 @@ export default async function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold">User Management</h2>
-        <p className="text-muted-foreground">Manage users and their roles (Admin only)</p>
-      </div>
+      <PageHeader
+        title="User Management"
+        description={`${allUsers.length} total users - Manage users and their roles`}
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

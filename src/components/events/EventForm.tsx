@@ -113,7 +113,7 @@ export function EventForm({ mode, initialData }: EventFormProps) {
           {/* Title */}
           <div className="space-y-2">
             <Label htmlFor="title">
-              Title <span className="text-red-500">*</span>
+              Title <span className="text-destructive">*</span>
             </Label>
             <Input
               id="title"
@@ -190,7 +190,7 @@ export function EventForm({ mode, initialData }: EventFormProps) {
           {/* Start Time */}
           <div className="space-y-2">
             <Label htmlFor="startTime">
-              Start Time <span className="text-red-500">*</span>
+              Start Time <span className="text-destructive">*</span>
             </Label>
             <Input
               id="startTime"
@@ -247,10 +247,7 @@ export function EventForm({ mode, initialData }: EventFormProps) {
           </div>
 
           {/* Form Actions */}
-          <div className="flex gap-4">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : mode === "create" ? "Create Event" : "Update Event"}
-            </Button>
+          <div className="flex gap-2 justify-end pt-4">
             <Button
               type="button"
               variant="outline"
@@ -258,6 +255,9 @@ export function EventForm({ mode, initialData }: EventFormProps) {
               disabled={isSubmitting}
             >
               Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : mode === "create" ? "Create Event" : "Update Event"}
             </Button>
           </div>
         </form>

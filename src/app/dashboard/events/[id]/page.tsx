@@ -55,7 +55,11 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <PageHeader title="Event Details" description={`Viewing event: ${eventData.title}`} />
+      <PageHeader
+        title="Event Details"
+        description={`Viewing event: ${eventData.title}`}
+        backButton
+      />
 
       {/* Edit Form */}
       <EventForm mode="edit" initialData={eventData} />

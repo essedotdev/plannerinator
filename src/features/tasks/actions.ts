@@ -157,6 +157,20 @@ export async function markTaskIncomplete(id: string) {
   return updateTask(id, { status: "todo" });
 }
 
+/**
+ * Update task status (for Kanban drag & drop)
+ *
+ * @param id - Task UUID
+ * @param status - New status (todo, in_progress, done)
+ * @returns Updated task object
+ */
+export async function updateTaskStatus(
+  id: string,
+  status: "todo" | "in_progress" | "done" | "cancelled"
+) {
+  return updateTask(id, { status });
+}
+
 // ============================================================================
 // DELETE OPERATIONS
 // ============================================================================

@@ -56,7 +56,7 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <PageHeader title="Task Details" description={`Viewing task: ${taskData.title}`} />
+      <PageHeader title="Task Details" description={`Viewing task: ${taskData.title}`} backButton />
 
       {/* Edit Form */}
       <TaskForm mode="edit" initialData={taskData} />

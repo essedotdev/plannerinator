@@ -58,6 +58,7 @@ export default async function NoteDetailPage({ params }: NoteDetailPageProps) {
       <PageHeader
         title="Note Details"
         description={noteData.title ? `Viewing note: ${noteData.title}` : "Viewing note"}
+        backButton
       />
 
       {/* Edit Form */}

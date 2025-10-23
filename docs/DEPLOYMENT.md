@@ -1,10 +1,10 @@
 # Deployment Guide - Cloudflare Workers
 
-Complete guide to deploying Templator on Cloudflare Workers with OpenNext.
+Complete guide to deploying Plannerinator on Cloudflare Workers with OpenNext.
 
 ## Overview
 
-This template is optimized for **Cloudflare Workers** deployment with:
+Plannerinator is optimized for **Cloudflare Workers** deployment with:
 
 - ✅ **Edge-native architecture** - Better Auth + Neon PostgreSQL
 - ✅ **Zero cold starts** - Global edge network

@@ -1,3 +1,7 @@
+import Link from "next/link";
+import { Plus, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/common";
 import { NoteCard } from "./NoteCard";
 
 interface NoteListProps {
@@ -20,10 +24,19 @@ interface NoteListProps {
 export function NoteList({ notes }: NoteListProps) {
   if (notes.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground text-lg">No notes found</p>
-        <p className="text-sm text-muted-foreground mt-2">Create your first note to get started</p>
-      </div>
+      <EmptyState
+        icon={FileText}
+        title="No notes found"
+        description="Create your first note to capture your thoughts and ideas"
+        action={
+          <Button asChild>
+            <Link href="/dashboard/notes/new">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Note
+            </Link>
+          </Button>
+        }
+      />
     );
   }
 

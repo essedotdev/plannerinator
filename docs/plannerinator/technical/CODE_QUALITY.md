@@ -113,6 +113,165 @@ if (!FEATURES.COLLECTIONS) {
 
 ---
 
+### ✅ UI/UX Consistency (`src/components/common/`)
+
+Sistema di componenti standardizzati per interfaccia utente consistente.
+
+#### PageHeader Component
+
+Component unificato per tutti i titoli di pagina con navigazione e azioni.
+
+```typescript
+// ❌ SBAGLIATO - header custom inconsistente
+<div>
+  <h1 className="text-3xl font-bold tracking-tight">Projects</h1>
+  <p className="text-muted-foreground mt-1">Description</p>
+</div>
+
+// ✅ CORRETTO - usare PageHeader
+import { PageHeader } from '@/components/common';
+
+// Header semplice
+<PageHeader
+  title="Projects"
+  description="Manage your projects"
+/>
+
+// Con back button (detail pages)
+<PageHeader
+  title="Task Details"
+  description="Edit task information"
+  backButton
+/>
+
+// Con action buttons
+<PageHeader
+  title="Project Details"
+  backButton
+  actions={
+    <>
+      <Button variant="outline">Edit</Button>
+      <Button variant="destructive">Delete</Button>
+    </>
+  }
+/>
+```
+
+**Features:**
+
+- ✅ `backButton` prop - navigazione indietro automatica
+- ✅ `actions` prop - action buttons posizionati a destra
+- ✅ Responsive design
+- ✅ Stili consistenti (text-4xl, spacing, border)
+
+#### EmptyState Component
+
+Component riutilizzabile per stati vuoti con call-to-action.
+
+```typescript
+// ❌ SBAGLIATO - empty state inline
+if (tasks.length === 0) {
+  return (
+    <div className="text-center py-12">
+      <p className="text-muted-foreground">No tasks found</p>
+    </div>
+  );
+}
+
+// ✅ CORRETTO - usare EmptyState
+import { EmptyState } from '@/components/common';
+import { CheckSquare, Plus } from 'lucide-react';
+
+if (tasks.length === 0) {
+  return (
+    <EmptyState
+      icon={CheckSquare}
+      title="No tasks found"
+      description="Create your first task to get started"
+      action={
+        <Button asChild>
+          <Link href="/dashboard/tasks/new">
+            <Plus className="h-4 w-4 mr-2" />
+            Create Task
+          </Link>
+        </Button>
+      }
+    />
+  );
+}
+```
+
+**Features:**
+
+- ✅ Icon da lucide-react per visual consistency
+- ✅ Title + description standardizzati
+- ✅ Optional action button (CTA)
+- ✅ Responsive e accessibile
+
+#### Form Action Buttons
+
+Pattern standardizzato per tutti i form buttons.
+
+```typescript
+// ❌ SBAGLIATO - inconsistente
+<div className="flex gap-4">
+  <Button type="submit">Save</Button>
+  <Button variant="outline">Cancel</Button>
+</div>
+
+// ✅ CORRETTO - standard pattern
+<div className="flex gap-2 justify-end pt-4">
+  <Button
+    type="button"
+    variant="outline"
+    onClick={() => router.back()}
+  >
+    Cancel
+  </Button>
+  <Button type="submit" disabled={isSubmitting}>
+    {isSubmitting ? "Saving..." : "Save"}
+  </Button>
+</div>
+```
+
+**Standard:**
+
+- ✅ `gap-2` spacing
+- ✅ `justify-end` alignment
+- ✅ `pt-4` top padding
+- ✅ Cancel (outline) prima, Submit dopo
+- ✅ Loading states gestiti
+
+#### Error Colors
+
+Usare sempre colori semantici di Tailwind/shadcn invece di hardcoded.
+
+```typescript
+// ❌ SBAGLIATO - hardcoded red
+<p className="text-red-500">{error.message}</p>
+<span className="text-red-500">*</span>
+
+// ✅ CORRETTO - semantic color
+<p className="text-destructive">{error.message}</p>
+<span className="text-destructive">*</span>
+```
+
+**Benefici:**
+
+- ✅ Consistenza UI al 100% in tutte le pagine
+- ✅ Manutenibilità migliorata (singolo punto di modifica)
+- ✅ Onboarding veloce per nuovi sviluppatori (pattern chiari)
+- ✅ Accessibilità migliorata (ARIA, focus management)
+- ✅ Mobile-friendly di default
+
+**Coverage:**
+
+- 15/15 pagine usano PageHeader (100%)
+- 4/4 list components usano EmptyState (100%)
+- 4/4 form components seguono standard (100%)
+
+---
+
 ## Type Safety
 
 ### ✅ TypeScript Strict Mode

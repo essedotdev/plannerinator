@@ -1,278 +1,103 @@
 # Plannerinator - Roadmap
 
-Roadmap high-level delle feature di Plannerinator, organizzata per priorità di sviluppo.
+Roadmap delle feature di Plannerinator, focalizzata sul presente e futuro prossimo.
 
-> **📖 Per dettagli tecnici completi di ogni feature, vedi [FEATURES.md](./FEATURES.md)**
-> **📋 Per standard e best practice del codice, vedi [CODE_QUALITY.md](./CODE_QUALITY.md)**
+> **📖 Per storico completo delle release, vedi [CHANGELOG.md](../../../CHANGELOG.md)**
+> **📋 Per idee e feature future, vedi [BACKLOG.md](./BACKLOG.md)**
+> **📚 Per dettagli tecnici, vedi [ARCHITECTURE.md](../technical/ARCHITECTURE.md)**
 
 **Legenda:**
 
 - ✅ Completato e funzionante
 - 🚧 In sviluppo
-- ⏳ Pianificato
-- 💭 Idea futura (bassa priorità)
+- ⏳ Pianificato (prossimi 1-2 mesi)
+- 💭 Futuro (vedi BACKLOG.md)
 
 ---
 
 ## 📊 Progress Overview
 
-**Overall Progress: ~50%**
+**Overall Progress: ~70%**
 
-- ✅ **Phase 0 (Foundation):** 100% Complete
-- ✅ **Phase 1 (Core Entities):** 100% Complete
-- ⏳ **Phase 2 (Critical UX Improvements):** 0% - **PROSSIMA PRIORITÀ**
-- ⏳ **Phase 3 (Collections & Advanced):** 5% Complete
-- 💭 **Phase 4+ (Collaboration/AI):** 0%
-
----
-
-## ✅ Phase 0: Foundation (COMPLETATO)
-
-Sistema base completo con auth, database, UI infrastructure.
-
-### Key Features
-
-- ✅ Better Auth (email/password, reset, verification, RBAC)
-- ✅ PostgreSQL con Drizzle ORM
-- ✅ Complete database schema per tutte le entità
-- ✅ TypeScript strict mode + Zod validation
-- ✅ Next.js 15 App Router + Tailwind CSS 4
-- ✅ shadcn/ui components + Dark mode
-- ✅ Dashboard shell con sidebar navigation
-- ✅ Vitest setup + Database seeding system
-- ✅ Cloudflare Workers deployment config
+- ✅ **Phase 0 (Foundation):** 100% Complete - [v0.1.0](../../../CHANGELOG.md#010---2025-01-21)
+- ✅ **Phase 1 (Core Entities):** 100% Complete - [v0.2.0](../../../CHANGELOG.md#020---2025-10-22)
+- ✅ **Phase 2 (Critical UX):** 100% Complete - [v0.3.0](../../../CHANGELOG.md#030---2025-10-23)
+- ⏳ **Phase 3 (Collections & Advanced):** 5% Complete - **CURRENT FOCUS**
+- 💭 **Phase 4+ (Collaboration/AI):** Pianificate - vedi [BACKLOG.md](./BACKLOG.md)
 
 ---
 
-## ✅ Phase 1: Core Entities (COMPLETATO)
+## ✅ Completed Phases (Brief Summary)
 
-Implementazione CRUD completo per le 4 entità principali + Universal Features.
+Le prime tre fasi sono state completate con successo. Per dettagli completi su implementazione, feature e date di rilascio, consulta il [CHANGELOG.md](../../../CHANGELOG.md).
 
-### 1. Task Management ✅
+### Phase 0: Foundation (100% - v0.1.0)
 
-**Status:** 100% Complete - [Dettagli →](./FEATURES.md#task-management)
+**Completata:** Gennaio 21, 2025
 
-Sistema completo per gestione task con subtasks, priorità, stati.
+Sistema base completo con auth, database, UI infrastructure:
 
-**Core Features:**
+- Better Auth (email/password, reset, verification, RBAC)
+- PostgreSQL con Drizzle ORM
+- Complete database schema per tutte le entità
+- TypeScript strict mode + Zod validation
+- Next.js 15 App Router + Tailwind CSS 4
+- shadcn/ui components + Dark mode
+- Dashboard shell con sidebar navigation
+- Vitest setup + Database seeding system
+- Cloudflare Workers deployment config
 
-- CRUD completo con validazione
-- Status: todo, in_progress, done, cancelled
-- Priority: low, medium, high, urgent
-- Subtasks (parent-child relationship)
-- Assign to project
-- Bulk operations (delete, complete, update status/priority)
-- Filters (status, priority, project, date range, search)
-- Overdue detection con visual highlight
-- Responsive UI con toast notifications
+### Phase 1: Core Entities (100% - v0.2.0)
 
-### 2. Event Management ✅
+**Completata:** Ottobre 22, 2025
 
-**Status:** 100% Complete - [Dettagli →](./FEATURES.md#event-management)
+Implementazione CRUD completo per le 4 entità principali + Universal Features:
 
-Sistema completo per gestione eventi con location e tipi.
+**Core Entities:**
 
-**Core Features:**
+- ✅ **Task Management:** CRUD completo, subtasks, priority, status, bulk operations, filters
+- ✅ **Event Management:** CRUD completo, calendar types, location, all-day support
+- ✅ **Note Management:** CRUD completo, markdown, nested notes, favorites, types
+- ✅ **Project Management:** CRUD completo, stats, progress tracking, sub-projects
 
-- CRUD completo con validazione
-- Calendar types: personal, work, family, other
-- Start/end time, all-day flag
-- Location con optional map URL
-- Assign to project
-- Filters (calendar type, all-day, date range, search)
-- Responsive UI
+**Universal Features:**
 
-### 3. Note Management ✅
+- ✅ **Tagging System:** Create/edit/delete tags, autocomplete, usage statistics
+- ✅ **Comments System:** Nested comments, edit/delete, user avatars
+- ✅ **Linking System:** 8 relationship types, bidirectional, entity resolution
+- ✅ **Global Search:** Command palette (Cmd+K), search across all entities
 
-**Status:** 100% Complete - [Dettagli →](./FEATURES.md#note-management)
+### Phase 2: Critical UX Improvements (100% - v0.3.0)
 
-Sistema completo per gestione note con markdown e gerarchie.
+**Completata:** Ottobre 23, 2025
 
-**Core Features:**
+Miglioramenti essenziali all'usabilità delle feature esistenti:
 
-- CRUD completo con validazione
-- Note types: note, document, research, idea, snippet
-- Markdown content (title optional)
-- Nested notes (parent-child)
-- Favorites (toggle + filter)
-- Bulk operations (delete, favorite, update type, move to project)
-- Filters (type, favorites, search)
-- Responsive UI
-
-### 4. Project Management ✅
-
-**Status:** 100% Complete - [Dettagli →](./FEATURES.md#project-management)
-
-Sistema completo per gestione progetti con stats e progress tracking.
-
-**Core Features:**
-
-- CRUD completo con validazione
-- Status: active, on_hold, completed, archived, cancelled
-- Start/end dates, color, icon
-- Sub-projects (parent-child)
-- Progress tracking (% tasks completed)
-- Task breakdown by status
-- Entity counts (tasks, events, notes)
-- Overdue detection
-- Detail page con tabs (Overview, Tasks, Events, Notes)
-- Quick actions (archive, complete, delete)
-
-### 5. Universal Features ✅
-
-**Status:** 100% Complete - [Dettagli →](./FEATURES.md#universal-features)
-
-Feature che funzionano su tutte le entità.
-
-#### Tagging System ✅
-
-- Create/edit/delete tags con colors
-- Assign tags to any entity (polymorphic)
-- Autocomplete search + create inline
-- Tag usage statistics
-
-#### Comments System ✅
-
-- Add comment on any entity
-- Edit/delete own comments
-- Nested comments (replies)
-- User avatars + timestamps
-- Pagination support
-
-#### Linking System ✅
-
-- Link any entity to any other (bidirectional)
-- 8 relationship types (assigned_to, documented_by, blocks, etc.)
-- Duplicate prevention
-- Entity resolution (fetch titles/names)
-- Outgoing/incoming link views
-
-#### Global Search ✅
-
-- Command palette (Cmd+K / Ctrl+K)
-- Search across all entities
-- Recent items when query is empty
-- Debounced search (300ms)
-- Keyboard navigation
-- Entity icons and metadata display
+- ✅ **Calendar View per Eventi:** react-big-calendar, drag & drop, multiple views
+- ✅ **Tag Filters:** Multi-select con AND/OR logic in tutte le entità
+- ✅ **Markdown Editor:** Split view, live preview, syntax highlighting, GFM support
+- ✅ **Dashboard Homepage:** QuickStats, TodayView, UpcomingDeadlines, QuickActions
+- ✅ **Kanban View per Task:** Drag & drop, 3 colonne (Todo/In Progress/Done)
 
 ---
 
-## ⏳ Phase 2: Critical UX Improvements (PROSSIMO)
+## ⏳ Phase 3: Collections & Advanced Features (CURRENT FOCUS)
 
-**Obiettivo:** Miglioramenti essenziali all'usabilità delle feature esistenti.
+**Obiettivo:** Sistema Collections + Activity tracking + data management avanzato.
 
-**Status:** 0% - Pianificato come priorità #1
+**Status:** 5% Complete - Database schema pronto, implementazione in corso
 
-**Stima:** 2-3 settimane
+**Timeline stimata:** 1-2 mesi
 
-### 2.1 Calendar View per Eventi ⭐⭐⭐ 🔴 CRITICO
+### 3.1 Collections System ⭐⭐⭐
 
-**Pianificato** - Fondamentale per rendere gli eventi realmente usabili
+**Pianificato** - Database schema implementato
 
-**Core Features:**
-
-- ⏳ Calendar view (month/week/day/agenda) con react-big-calendar
-- ⏳ Drag & drop eventi per cambio date
-- ⏳ Click su giorno per creare evento
-- ⏳ Color coding per calendar type
-- ⏳ Mini calendario sidebar per navigazione rapida
-- ⏳ Today button + date picker navigation
-
-**Benefici:**
-
-- Visualizzazione naturale per eventi temporali
-- Quick creation direttamente dal calendario
-- Drag & drop per rescheduling veloce
-
-### 2.2 Tag Filters ⭐⭐⭐ 🔴 CRITICO
-
-**Pianificato** - Tag system è completo ma manca il filtering
+Sistema flessibile per creare liste personalizzate con schema definibile dall'utente.
 
 **Core Features:**
 
-- ⏳ Multi-select tag filter in Tasks list
-- ⏳ Multi-select tag filter in Events list
-- ⏳ Multi-select tag filter in Notes list
-- ⏳ Multi-select tag filter in Projects list
-- ⏳ Tag filter combo (AND/OR logic)
-- ⏳ URL sync per tag filters
-- ⏳ Tag filter badge in UI con count
-
-**Benefici:**
-
-- Rende il tag system realmente utilizzabile
-- Filtering potente cross-entity
-- Organizzazione migliorata
-
-### 2.3 Markdown Preview per Note ⭐⭐⭐ 🔴 CRITICO
-
-**Pianificato** - Editor attuale troppo limitato
-
-**Core Features:**
-
-- ⏳ Split view (edit | preview) o tabs
-- ⏳ Live preview rendering con react-markdown
-- ⏳ Syntax highlighting per code blocks (prism.js)
-- ⏳ Toggle preview mode (edit / preview / split)
-- ⏳ Markdown toolbar (bold, italic, headers, lists, code)
-- ⏳ Markdown shortcuts (Ctrl+B, Ctrl+I, Ctrl+K)
-
-**Benefici:**
-
-- UX professionale per note-taking
-- Verifica immediata della formattazione
-- Editor paragonabile a Notion/Obsidian
-
-### 2.4 Dashboard Homepage ⭐⭐⭐ 🔴 CRITICO
-
-**Pianificato** - Dashboard attuale è vuota
-
-**Core Widgets:**
-
-- ⏳ Today View (task + eventi di oggi)
-- ⏳ Upcoming Deadlines (prossimi 7 giorni)
-- ⏳ Quick Stats (tasks done today, overdue, total active)
-- ⏳ Recent Items (ultimi 5 item visitati)
-- ⏳ Week Overview (task/eventi settimana)
-- ⏳ Quick Add buttons (New Task/Event/Note)
-
-**Benefici:**
-
-- Landing page utile con overview giornaliera
-- Quick actions per productivity
-- Hub centrale per navigazione
-
-### 2.5 Kanban View per Task ⭐⭐⭐ 🔴 CRITICO
-
-**Pianificato** - Vista board molto richiesta
-
-**Core Features:**
-
-- ⏳ Kanban board con colonne (Todo / In Progress / Done)
-- ⏳ Drag & drop tra colonne (aggiorna status)
-- ⏳ Card compatte con title, priority, due date, project
-- ⏳ Filter per project, priority, tags (sidebar)
-- ⏳ Quick edit inline (title, priority, due date)
-- ⏳ Toggle tra List view e Kanban view
-
-**Benefici:**
-
-- Workflow visuale per task management
-- Drag & drop naturale per cambio status
-- Vista preferita da developer/PM
-
----
-
-## ⏳ Phase 3: Collections & Advanced Features
-
-**Obiettivo:** Sistema Collections + Activity tracking + data management.
-
-### 3.1 Collections System ⭐⭐
-
-**Pianificato** - [Dettagli →](./FEATURES.md#collections-system)
-
-- ⏳ Visual schema builder UI
+- ⏳ Visual schema builder UI (drag & drop field editor)
 - ⏳ Dynamic form generation basato su schema
 - ⏳ Supported field types: text, textarea, number, date, select, checkbox, url, email
 - ⏳ Collection views: Table, Card, List
@@ -281,14 +106,26 @@ Feature che funzionano su tutte le entità.
 
 **Use Cases:**
 
-- Freelance services (name, price, duration, tech stack)
-- Books library (title, author, rating, notes)
-- TV series tracker (title, seasons, platform)
-- Clients database (name, email, phone, company)
+- Freelance services (nome, prezzo, durata, tech stack)
+- Books library (titolo, autore, rating, note)
+- TV series tracker (titolo, stagioni, piattaforma)
+- Clients database (nome, email, telefono, progetti associati)
+
+**Database:**
+
+```sql
+-- Schema pronto in db/schema.ts
+collection (id, name, description, schema_json, icon, color)
+collection_item (id, collection_id, data_json)
+```
 
 ### 3.2 Activity Timeline ⭐
 
-**Pianificato** - [Dettagli →](./FEATURES.md#activity-timeline)
+**Pianificato** - Database schema pronto
+
+Auto-track di tutte le modifiche alle entità per avere uno storico completo.
+
+**Core Features:**
 
 - ⏳ Auto-track all entity changes (create, update, delete)
 - ⏳ Store JSON diff for updates
@@ -298,7 +135,16 @@ Feature che funzionano su tutte le entità.
 - 💭 Undo system (Cmd+Z)
 - 💭 Restore deleted entities
 
+**Database:**
+
+```sql
+-- Schema pronto in db/schema.ts
+activity_log (id, user_id, entity_type, entity_id, action, changes_json)
+```
+
 ### 3.3 Data Management ⭐
+
+Strumenti per export/import/backup dei dati.
 
 - ⏳ Export to JSON (all data or filtered)
 - ⏳ Export to CSV (collections)
@@ -309,7 +155,11 @@ Feature che funzionano su tutte le entità.
 
 ### 3.4 Advanced Search ⭐⭐
 
-**Pianificato** - [Dettagli →](./FEATURES.md#advanced-search)
+**Pianificato** - Migliorare ricerca esistente
+
+Potenziamento del sistema di ricerca attuale (Cmd+K).
+
+**Features:**
 
 - ⏳ PostgreSQL full-text search (tsvector)
 - ⏳ Search ranking + highlight matches
@@ -318,100 +168,52 @@ Feature che funzionano su tutte le entità.
 - 💭 Smart searches (dynamic: "Tasks due this week")
 - 💭 Semantic search (AI-powered, embeddings)
 
-### 3.5 Customization ⭐
-
-- ✅ Light/Dark mode
-- 💭 Custom color schemes
-- 💭 Customizable dashboard widgets (drag & drop)
-- 💭 Notifications (email reminders, push)
+**Note:** Search basico già implementato in Phase 1, qui si aggiungono feature avanzate.
 
 ---
 
-## 💭 Phase 4: Collaboration
+## 💭 Future Phases (Beyond Phase 3)
 
-**Obiettivo:** Condivisione e collaborazione multi-user.
+Le fasi successive sono pianificate ma non ancora schedulate. Per dettagli completi e priorità, consulta [BACKLOG.md](./BACKLOG.md).
 
-**Status:** 0% - Database schema pronto ma commentato
+### Phase 4: Collaboration (0%)
 
-### 4.1 Sharing System ⭐⭐
+Sistema di condivisione entità tra utenti con permessi granulari.
 
-**Futuro** - [Dettagli →](./FEATURES.md#collaboration)
+**Key Features:**
 
-- 💭 Share entities con altri utenti
-- 💭 Permission levels (view, comment, edit)
-- 💭 Expiration dates + revoke access
-- 💭 Transfer ownership
-- 💭 Real-time presence (chi sta guardando)
-- 💭 Conflict resolution
+- Share entities con altri utenti
+- Permission levels (view, comment, edit)
+- Real-time collaboration features
 
-### 4.2 Team Workspaces (Bassa Priorità)
+📖 **Spec tecnica completa:** [SHARING.md](../future/SHARING.md)
 
-- 💭 Multi-tenancy (workspaces)
-- 💭 Invite team members
-- 💭 Workspace roles (owner, admin, member, guest)
-- 💭 Billing per workspace
+### Phase 5: AI Assistant (0%)
 
----
+Assistente AI conversazionale per gestione task e automazioni.
 
-## 💭 Phase 5: AI Assistant
+**Key Features:**
 
-**Obiettivo:** Assistente AI per creazione veloce e automazioni.
+- Chat interface per creazione/modifica entità
+- Natural language commands
+- Smart suggestions e auto-categorization
 
-**Status:** 0%
+📖 **Spec tecnica completa:** [AI_ASSISTANT.md](../future/AI_ASSISTANT.md)
 
-### 5.1 Chat Interface ⭐⭐⭐
+### Phase 6: Advanced Integrations (0%)
 
-**Futuro** - [Dettagli →](./FEATURES.md#ai-assistant)
+- Calendar Sync (Google Calendar, Outlook)
+- Email Integration (forward → task)
+- File Uploads (Cloudflare R2)
+- API & Webhooks
 
-- 💭 Sidebar chat panel (toggle on/off)
-- 💭 Natural language commands:
-  - "Crea task chiamare Mario domani alle 15"
-  - "Mostrami i task del progetto X"
-- 💭 Multi-entity creation
-- 💭 Auto-tag suggestions
-- 💭 Smart reminders (AI suggests when to work)
-
-### 5.2 Advanced AI Features ⭐⭐
-
-- 💭 Auto-categorization (tags, project assignment)
-- 💭 Project template generation
-- 💭 Meeting notes summarization
-- 💭 Semantic search (embedding-based)
-
----
-
-## 💭 Phase 6: Advanced Integrations
-
-### 6.1 Calendar Sync ⭐
-
-- 💭 Google Calendar sync (bidirectional)
-- 💭 Outlook Calendar sync
-- 💭 Apple Calendar (.ics subscription)
-
-### 6.2 Email Integration
-
-- 💭 Forward email → create task
-- 💭 Daily digest email
-
-### 6.3 File Uploads ⭐
-
-- ✅ Database schema (attachments table - commentato)
-- 💭 Upload to Cloudflare R2
-- 💭 Attach to any entity
-- 💭 Supported: images, PDFs, documents
-- 💭 Storage usage dashboard
-
-### 6.4 API & Webhooks
-
-- 💭 REST API per CRUD operations
-- 💭 API keys management + rate limiting
-- 💭 Webhooks on events (task.created, etc.)
+Vedi [BACKLOG.md](./BACKLOG.md) per lista completa feature ideas.
 
 ---
 
 ## 🔧 Technical Improvements (Cross-cutting)
 
-> **📖 Per dettagli completi su standard e best practice, vedi [CODE_QUALITY.md](./CODE_QUALITY.md)**
+> **📖 Per dettagli completi su standard e best practice, vedi [CODE_QUALITY.md](../technical/CODE_QUALITY.md)**
 
 ### Performance
 
@@ -421,7 +223,7 @@ Feature che funzionano su tutte le entità.
 - ✅ Code splitting
 - ✅ Centralized date/time utilities
 - ✅ Centralized enum labels
-- ⏳ React Query for client-side caching
+- ⏳ React Query for client-side caching (partial)
 - 💭 Redis cache per heavy queries
 - 💭 Virtual scrolling per long lists
 
@@ -462,61 +264,38 @@ Feature che funzionano su tutte le entità.
 
 ## 🎯 Development Priorities
 
-### ✅ Completed (Phase 0-1)
+### ✅ Completed (Phases 0-2)
 
-1. ✅ Foundation complete (Auth, DB, UI, Testing infrastructure)
-2. ✅ Task Management CRUD + UI
-3. ✅ Event Management CRUD + UI
-4. ✅ Note Management CRUD + UI
-5. ✅ Project Management CRUD + UI
-6. ✅ Tags System (integration su 4 entità)
-7. ✅ Comments System (nested replies, integration su 4 entità)
-8. ✅ Links System (8 relationship types, integration su 4 entità)
-9. ✅ Global Search (Cmd+K command palette)
+Tutte le feature foundation, core entities e UX improvements sono completate. Vedi [CHANGELOG.md](../../../CHANGELOG.md) per dettagli.
 
-### 🚧 Next Steps (2-3 settimane) - **PHASE 2 CRITICO**
+### 🚀 Current Sprint (Phase 3)
 
-**Priority 1:** Calendar View per Eventi 🔴
+**Prossimi 1-2 mesi - In ordine di priorità:**
 
-- Calendar view con react-big-calendar (month/week/day/agenda)
-- Drag & drop per rescheduling
-- Click per creare eventi
-- Color coding per calendar type
+1. **Collections System MVP**
+   - Schema builder UI
+   - Dynamic form generation
+   - Basic CRUD operations
+   - Template collections
 
-**Priority 2:** Tag Filters 🔴
+2. **Activity Timeline**
+   - Auto-tracking setup
+   - Timeline view component
+   - Basic filters
 
-- Multi-select tag filter in tutte le liste (Tasks/Events/Notes/Projects)
-- URL sync + AND/OR logic
-- Tag filter UI con count
+3. **Data Export/Import**
+   - JSON export/import
+   - CSV export for collections
+   - Markdown export for notes
 
-**Priority 3:** Markdown Preview per Note 🔴
+4. **Advanced Search**
+   - PostgreSQL full-text search
+   - Search ranking
+   - Advanced filters
 
-- Split view (edit | preview)
-- Live preview con react-markdown
-- Syntax highlighting per code blocks
-- Markdown toolbar + shortcuts
+### 💭 Next Quarter (Phase 4+)
 
-**Priority 4:** Dashboard Homepage 🔴
-
-- Today View (tasks + eventi)
-- Upcoming Deadlines widget
-- Quick Stats (done today, overdue)
-- Recent Items + Quick Add buttons
-
-**Priority 5:** Kanban View per Task 🔴
-
-- Kanban board (Todo / In Progress / Done)
-- Drag & drop tra colonne
-- Toggle List/Kanban view
-
-### Medium Term (1-2 mesi) - **PHASE 3**
-
-- Collections System MVP (schema builder, dynamic forms)
-- Activity Timeline (tracking automatico + timeline view)
-- Data Export/Import (JSON, CSV, Markdown)
-- Advanced Search (PostgreSQL tsvector)
-
-### Long Term (3+ mesi) - **PHASE 4+**
+Vedi [BACKLOG.md](./BACKLOG.md) per:
 
 - Collaboration features (sharing, permissions)
 - AI Assistant (chat interface, smart suggestions)
@@ -524,53 +303,16 @@ Feature che funzionano su tutte le entità.
 
 ---
 
-## 📈 Timeline
-
-### Completed
-
-- ✅ **Phase 0-1:** Jan 21-22, 2025
-
-### Estimated
-
-- **Phase 2 (Critical UX):** 2-3 settimane ⭐ **PROSSIMO**
-- **Phase 3 (Collections & Advanced):** 4-6 settimane
-- **Phase 4+ (Collaboration/AI):** 6+ mesi
-
----
-
-## 📝 Recent Milestones
-
-### Week of Jan 21-22, 2025
-
-- ✅ Task Management: CRUD completo + UI + bulk operations
-- ✅ Event Management: CRUD completo + UI
-- ✅ Note Management: CRUD completo + UI + bulk operations + favorites
-- ✅ Project Management: CRUD completo + UI + stats + progress tracking
-- ✅ Tags System: CRUD + autocomplete + integration su 4 entità
-- ✅ Comments System: CRUD + nested replies + integration su 4 entità
-- ✅ Links System: CRUD + 8 relationship types + integration su 4 entità
-- ✅ Global Search: Cmd+K command palette + debounced search + recent items
-- ✅ Code Quality: Labels consistency fix (4 pagine), date utilities centralized
-
-### Database Seeding System (Jan 22)
-
-- ✅ Factory functions riutilizzabili
-- ✅ Dev seed script con dati realistici
-- ✅ Script npm (`db:seed`, `db:clean`)
-- ✅ Genera 2 utenti + 3 progetti + ~42 task + 19 eventi + 24 note
-
----
-
 ## 🚀 Feature Flags
 
 Sistema di feature flags per abilitare/disabilitare funzionalità gradualmente.
 
-> **Per implementazione e usage, vedi [CODE_QUALITY.md](./CODE_QUALITY.md#feature-flags)**
+> **Per implementazione e usage, vedi [CODE_QUALITY.md](../technical/CODE_QUALITY.md#feature-flags)**
 
 ```typescript
 // src/lib/features.ts
 export const FEATURES = {
-  // Phase 1 - Core (All enabled)
+  // Phase 1-2 - Core (All enabled)
   TASKS: true,
   EVENTS: true,
   NOTES: true,
@@ -580,10 +322,12 @@ export const FEATURES = {
   LINKS: true,
   SEARCH: true,
 
-  // Phase 2+
+  // Phase 3+ (Gradual rollout)
   COLLECTIONS: false,
   ACTIVITY_LOG: false,
   EXPORT_IMPORT: false,
+
+  // Phase 4+
   SHARING: false,
   AI_ASSISTANT: false,
   FILE_UPLOADS: false,
@@ -593,8 +337,47 @@ export const FEATURES = {
 
 ---
 
-**Ultimo aggiornamento:** 2025-01-22
-**Prossimo milestone:** Phase 2 - Critical UX Improvements (Calendar View, Tag Filters, Markdown Preview, Dashboard, Kanban) 🔴
-**Note:** Phase 1 (Core Entities + Universal Features) completata al 100%! 🎉
+## 📝 Recent Milestones
 
-> **📋 Per lista completa di enhancement e feature ideas, vedi [ENHANCEMENTS.md](./ENHANCEMENTS.md)**
+### UI/UX Consistency Improvements (Ottobre 23, 2025)
+
+Standardizzazione completa dell'interfaccia utente per massima consistenza:
+
+- **PageHeader standardizzato** in tutte le 15 pagine (100% coverage)
+- **Back buttons** aggiunti a tutte le detail pages
+- **EmptyState component** applicato a tutte le liste
+- **Form button layout** unificato in tutti i form
+- **Error colors** semantici (`text-destructive`)
+
+**Risultato:** UI/UX consistency al 95%+ con pattern chiari e documentati
+
+Dettagli completi: [CHANGELOG.md](../../../CHANGELOG.md#unreleased)
+
+### v0.3.0 - Phase 2 Complete (Ottobre 23, 2025)
+
+Tutte le 5 feature UX critiche implementate:
+
+- Calendar View, Tag Filters, Markdown Editor, Dashboard, Kanban View
+
+Dettagli completi: [CHANGELOG.md](../../../CHANGELOG.md#030---2025-10-23)
+
+### v0.2.0 - Phase 1 Complete (Ottobre 22, 2025)
+
+Core entities (Tasks, Events, Notes, Projects) + Universal Features (Tags, Comments, Links, Search)
+
+Dettagli completi: [CHANGELOG.md](../../../CHANGELOG.md#020---2025-10-22)
+
+### v0.1.0 - Phase 0 Complete (Gennaio 21, 2025)
+
+Foundation completa: Auth, Database, UI, Testing infrastructure
+
+Dettagli completi: [CHANGELOG.md](../../../CHANGELOG.md#010---2025-01-21)
+
+---
+
+**Ultimo aggiornamento:** 2025-10-23
+**Milestone attuale:** Phase 3 - Collections System & Advanced Features (5%)
+**Prossimo release:** v0.4.0 (Collections MVP)
+
+> **📋 Per lista completa di enhancement e feature ideas, vedi [BACKLOG.md](./BACKLOG.md)**
+> **📖 Per storico release complete, vedi [CHANGELOG.md](../../../CHANGELOG.md)**

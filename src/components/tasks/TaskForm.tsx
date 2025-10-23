@@ -113,7 +113,7 @@ export function TaskForm({ mode, initialData }: TaskFormProps) {
           {/* Title */}
           <div className="space-y-2">
             <Label htmlFor="title">
-              Title <span className="text-red-500">*</span>
+              Title <span className="text-destructive">*</span>
             </Label>
             <Input
               id="title"
@@ -122,7 +122,7 @@ export function TaskForm({ mode, initialData }: TaskFormProps) {
               disabled={isSubmitting}
             />
             {formState.errors.title && (
-              <p className="text-sm text-red-500">{formState.errors.title.message}</p>
+              <p className="text-sm text-destructive">{formState.errors.title.message}</p>
             )}
           </div>
 
@@ -137,7 +137,7 @@ export function TaskForm({ mode, initialData }: TaskFormProps) {
               disabled={isSubmitting}
             />
             {formState.errors.description && (
-              <p className="text-sm text-red-500">{formState.errors.description.message}</p>
+              <p className="text-sm text-destructive">{formState.errors.description.message}</p>
             )}
           </div>
 
@@ -220,7 +220,7 @@ export function TaskForm({ mode, initialData }: TaskFormProps) {
                 disabled={isSubmitting}
               />
               {formState.errors.duration && (
-                <p className="text-sm text-red-500">{formState.errors.duration.message}</p>
+                <p className="text-sm text-destructive">{formState.errors.duration.message}</p>
               )}
             </div>
 
@@ -234,7 +234,7 @@ export function TaskForm({ mode, initialData }: TaskFormProps) {
                 disabled={isSubmitting}
               />
               {formState.errors.startDate && (
-                <p className="text-sm text-red-500">{formState.errors.startDate.message}</p>
+                <p className="text-sm text-destructive">{formState.errors.startDate.message}</p>
               )}
             </div>
 
@@ -248,7 +248,7 @@ export function TaskForm({ mode, initialData }: TaskFormProps) {
                 disabled={isSubmitting}
               />
               {formState.errors.dueDate && (
-                <p className="text-sm text-red-500">{formState.errors.dueDate.message}</p>
+                <p className="text-sm text-destructive">{formState.errors.dueDate.message}</p>
               )}
             </div>
           </div>

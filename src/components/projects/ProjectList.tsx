@@ -1,4 +1,7 @@
-import { FileX } from "lucide-react";
+import Link from "next/link";
+import { Plus, FolderX } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/common";
 import { ProjectCard } from "./ProjectCard";
 
 /**
@@ -32,16 +35,28 @@ interface ProjectListProps {
 export function ProjectList({ projects, pagination }: ProjectListProps) {
   // Empty state
   if (projects.length === 0) {
+    const hasFilters = pagination && pagination.total > 0;
+
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <FileX className="h-12 w-12 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-semibold">No projects found</h3>
-        <p className="text-muted-foreground mt-2">
-          {pagination && pagination.total > 0
-            ? "Try adjusting your filters"
-            : "Create your first project to get started"}
-        </p>
-      </div>
+      <EmptyState
+        icon={FolderX}
+        title="No projects found"
+        description={
+          hasFilters
+            ? "Try adjusting your filters to see more projects"
+            : "Create your first project to organize your work"
+        }
+        action={
+          !hasFilters ? (
+            <Button asChild>
+              <Link href="/dashboard/projects/new">
+                <Plus className="h-4 w-4 mr-2" />
+                Create Project
+              </Link>
+            </Button>
+          ) : undefined
+        }
+      />
     );
   }
 

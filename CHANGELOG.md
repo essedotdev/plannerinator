@@ -7,11 +7,78 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2025-10-23
+
+### Added
+
+**Dashboard Enhancements**
+
+- QuickStats component displaying task, event, note, and project counts
+- QuickActions component with shortcuts to create new entities
+- TodayView component showing today's tasks and events
+- UpcomingDeadlines component for tracking approaching due dates
+- Enhanced dashboard homepage with comprehensive overview of user's workflow
+- Skeleton loaders for dashboard components during data loading
+
+**Kanban Board for Tasks**
+
+- KanbanBoard component with drag-and-drop task management
+- KanbanColumn component for status-based task organization
+- KanbanCard component with compact task display
+- TasksView component to toggle between list and kanban views
+- Status-based columns (Todo, In Progress, Done, Cancelled)
+- Visual task management interface for improved productivity
+
+**UI Components**
+
+- Skeleton component for consistent loading states across the application
+
+### Changed
+
+**UI/UX Consistency Improvements**
+
+- Enhanced PageHeader component with `backButton` and `actions` props for consistent navigation
+- Migrated all pages to use standardized PageHeader component (100% coverage)
+- Added back buttons to all detail pages (Tasks, Events, Notes, Projects)
+- Standardized form action buttons layout (Cancel first, Submit last, consistent spacing)
+- Created reusable EmptyState component with icon, title, description, and optional action
+- Applied EmptyState component to all list views (Tasks, Events, Notes, Projects)
+- Standardized error colors to use `text-destructive` instead of `text-red-500`
+- Improved Projects detail page header with icon integration and action buttons
+
+**Component Enhancements**
+
+- PageHeader now supports back navigation and action buttons rendering
+- EmptyState provides consistent empty state UI across all entity lists
+- TaskList, EventList, NoteList empty states now include actionable "Create" buttons
+- ProjectList empty state adapts based on filter state (filtered vs. no data)
+- Tasks page now supports switching between list and kanban board views
+
+**Documentation**
+
+- Removed template-specific authentication documentation (AUTHENTICATION.md, AUTHENTICATION_ADVANCED.md)
+- Removed template-specific system documentation (EMAIL_SYSTEM.md, MIDDLEWARE.md, RBAC.md)
+- Updated DEPLOYMENT.md to reflect Plannerinator branding
+- Updated planning documents (BACKLOG.md, ROADMAP.md)
+- Updated CODE_QUALITY.md with current project standards
+
+### Added (Dependencies)
+
+- lucide-react (^0.468.0) - Icon library for consistent iconography throughout the app
+
+### Fixed
+
+- EventForm button order and spacing now consistent with other forms
+- All page headers now use consistent text size (`text-4xl`) and styling
+- Form validation error messages use semantic `text-destructive` color
+- Task server actions now properly handle form data and validations
+
 ## [0.3.0] - 2025-10-23
 
 ### Added
 
 **Tag Filtering System**
+
 - Universal TagFilter component for filtering entities by tags across all pages
 - Multi-select tag interface with checkboxes in popover
 - AND/OR logic toggle (match all tags vs. match any tag)
@@ -20,6 +87,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Integrated tag filtering in Tasks, Events, Notes, and Projects pages
 
 **Event Calendar View**
+
 - EventCalendar component with monthly calendar grid view
 - EventsView component to toggle between list and calendar views
 - Calendar navigation (previous/next month)
@@ -28,6 +96,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - react-big-calendar integration for calendar functionality
 
 **Rich Markdown Editor for Notes**
+
 - MarkdownEditor component with live preview
 - Syntax highlighting for code blocks (react-syntax-highlighter)
 - GitHub Flavored Markdown support (GFM) with tables, task lists, strikethrough
@@ -36,6 +105,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Integrated in note creation and editing forms
 
 **Developer Tools & Infrastructure**
+
 - Custom slash commands for common operations:
   - `/changelog` - Analyze changes and update CHANGELOG.md
   - `/release` - Create and publish version releases
@@ -44,6 +114,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated documentation structure (future/, planning/, technical/ folders)
 
 ### Changed
+
 - Event pages now support tag filtering with AND/OR logic
 - Event list page includes calendar/list view toggle
 - Note forms now use rich markdown editor instead of plain textarea
@@ -52,6 +123,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Database connection updated to new Neon PostgreSQL instance
 
 ### Added (Dependencies)
+
 - react-big-calendar (^1.19.4) - Calendar component library
 - react-markdown (^10.1.0) - Markdown rendering
 - react-syntax-highlighter (^16.0.0) - Code syntax highlighting in markdown
@@ -435,7 +507,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code splitting
 - Lazy loading for components
 
-[unreleased]: https://github.com/essedev/plannerinator/compare/v0.3.0...HEAD
+[unreleased]: https://github.com/essedev/plannerinator/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/essedev/plannerinator/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/essedev/plannerinator/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/essedev/plannerinator/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/essedev/plannerinator/releases/tag/v0.1.0

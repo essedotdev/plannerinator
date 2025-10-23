@@ -1,11 +1,12 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Edit, ArrowLeft } from "lucide-react";
+import { Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageHeader } from "@/components/common";
 import { getProjectById, getProjectStats } from "@/features/projects/queries";
 import { getTasks } from "@/features/tasks/queries";
 import { getEvents } from "@/features/events/queries";
@@ -83,63 +84,47 @@ export default async function ProjectDetailPage({ params, searchParams }: Projec
 
   return (
     <div className="space-y-6">
-      {/* Back Button */}
-      <Button variant="ghost" size="sm" asChild>
-        <Link href="/dashboard/projects">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Projects
-        </Link>
-      </Button>
-
       {/* Page Header */}
-      <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            {project.icon && <span className="text-3xl">{project.icon}</span>}
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">{project.name}</h1>
-              {project.description && (
-                <p className="text-muted-foreground mt-1">{project.description}</p>
-              )}
-            </div>
-          </div>
+      <PageHeader
+        title={`${project.icon ? project.icon + " " : ""}${project.name}`}
+        description={project.description || undefined}
+        backButton
+        actions={
+          <>
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`/dashboard/projects/${id}/edit`}>
+                <Edit className="h-4 w-4 mr-2" />
+                Edit
+              </Link>
+            </Button>
+            <DeleteProjectButton projectId={id} projectName={project.name} />
+          </>
+        }
+      />
 
-          {/* Metadata */}
-          <div className="flex items-center gap-2 mt-3">
-            <Badge
-              variant="outline"
-              style={{
-                borderColor: project.color || undefined,
-                color: project.color || undefined,
-              }}
-            >
-              {PROJECT_STATUS_LABELS[project.status]}
-            </Badge>
+      {/* Metadata */}
+      <div className="flex items-center gap-2 -mt-2">
+        <Badge
+          variant="outline"
+          style={{
+            borderColor: project.color || undefined,
+            color: project.color || undefined,
+          }}
+        >
+          {PROJECT_STATUS_LABELS[project.status]}
+        </Badge>
 
-            {project.startDate && (
-              <span className="text-sm text-muted-foreground">
-                Started {formatFullDate(project.startDate)}
-              </span>
-            )}
+        {project.startDate && (
+          <span className="text-sm text-muted-foreground">
+            Started {formatFullDate(project.startDate)}
+          </span>
+        )}
 
-            {project.endDate && (
-              <span className="text-sm text-muted-foreground">
-                • Due {formatFullDate(project.endDate)}
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/dashboard/projects/${id}/edit`}>
-              <Edit className="h-4 w-4 mr-2" />
-              Edit
-            </Link>
-          </Button>
-          <DeleteProjectButton projectId={id} projectName={project.name} />
-        </div>
+        {project.endDate && (
+          <span className="text-sm text-muted-foreground">
+            • Due {formatFullDate(project.endDate)}
+          </span>
+        )}
       </div>
 
       {/* Tabs */}

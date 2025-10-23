@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
-import { TaskList } from "@/components/tasks/TaskList";
+import { TasksView } from "@/components/tasks/TasksView";
 import { TaskFilters } from "@/components/tasks/TaskFilters";
 import type { TaskStatus, TaskPriority, TaskFilterInput } from "@/features/tasks/schema";
 
@@ -14,6 +14,7 @@ import type { TaskStatus, TaskPriority, TaskFilterInput } from "@/features/tasks
  * - Display all user tasks
  * - Filter by status, priority, project, date
  * - Sort tasks
+ * - Toggle between List and Kanban view
  * - Quick actions (complete, delete)
  * - Create new task
  */
@@ -65,8 +66,8 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
       {/* Filters */}
       <TaskFilters />
 
-      {/* Task List */}
-      <TaskList tasks={tasks} />
+      {/* Tasks View (List or Kanban) */}
+      <TasksView tasks={tasks} />
 
       {/* Pagination Info */}
       {pagination.hasMore && (
