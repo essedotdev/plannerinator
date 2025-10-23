@@ -87,6 +87,13 @@ export const updateEventSchema = baseEventSchema.partial().refine(
 );
 
 /**
+ * Tag filter logic enum schema
+ */
+export const tagFilterLogicSchema = z.enum(["AND", "OR"], {
+  message: "Tag filter logic must be AND or OR",
+});
+
+/**
  * Schema for event filters
  */
 export const eventFilterSchema = z.object({
@@ -97,6 +104,10 @@ export const eventFilterSchema = z.object({
   // Date range filters
   startTimeFrom: z.coerce.date().optional(),
   startTimeTo: z.coerce.date().optional(),
+
+  // Tag filters
+  tagIds: z.array(z.string().uuid()).optional(),
+  tagLogic: tagFilterLogicSchema.default("OR").optional(),
 
   // Search
   search: z.string().max(500).optional(),

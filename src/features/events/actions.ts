@@ -30,23 +30,20 @@ export async function createEvent(input: unknown) {
   const data = createEventSchema.parse(input);
 
   try {
-    const newEvent = await db.transaction(async (tx) => {
-      const [createdEvent] = await tx
-        .insert(event)
-        .values({
-          ...data,
-          userId: session.user.id,
-          // allDay and calendarType use database defaults (false and 'personal')
-        })
-        .returning();
+    // Create event
+    const [createdEvent] = await db
+      .insert(event)
+      .values({
+        ...data,
+        userId: session.user.id,
+        // allDay and calendarType use database defaults (false and 'personal')
+      })
+      .returning();
 
-      // Sync assigned_to link if projectId is provided
-      if (data.projectId) {
-        await syncAssignedToLink(session.user.id, "event", createdEvent.id, data.projectId);
-      }
-
-      return createdEvent;
-    });
+    // Sync assigned_to link if projectId is provided
+    if (data.projectId) {
+      await syncAssignedToLink(session.user.id, "event", createdEvent.id, data.projectId);
+    }
 
     // Revalidate events page
     revalidatePath("/dashboard/events");
@@ -54,7 +51,7 @@ export async function createEvent(input: unknown) {
       revalidatePath(`/dashboard/projects/${data.projectId}`);
     }
 
-    return { success: true, event: newEvent };
+    return { success: true, event: createdEvent };
   } catch (error) {
     console.error("Error creating event:", error);
     if (error instanceof Error) {
@@ -98,16 +95,13 @@ export async function updateEvent(id: string, input: unknown) {
 
     const updates: UpdateEventInput = { ...data };
 
-    const updatedEvent = await db.transaction(async (tx) => {
-      const [updated] = await tx.update(event).set(updates).where(eq(event.id, id)).returning();
+    // Update event
+    const [updatedEvent] = await db.update(event).set(updates).where(eq(event.id, id)).returning();
 
-      // Sync assigned_to link if projectId changed
-      if ("projectId" in data) {
-        await syncAssignedToLink(session.user.id, "event", id, data.projectId);
-      }
-
-      return updated;
-    });
+    // Sync assigned_to link if projectId changed
+    if ("projectId" in data) {
+      await syncAssignedToLink(session.user.id, "event", id, data.projectId);
+    }
 
     // Revalidate relevant pages
     revalidatePath("/dashboard/events");

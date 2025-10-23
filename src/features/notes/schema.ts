@@ -63,6 +63,13 @@ export const createNoteSchema = baseNoteSchema
 export const updateNoteSchema = baseNoteSchema.partial();
 
 /**
+ * Tag filter logic enum schema
+ */
+export const tagFilterLogicSchema = z.enum(["AND", "OR"], {
+  message: "Tag filter logic must be AND or OR",
+});
+
+/**
  * Schema for note filters
  */
 export const noteFilterSchema = z.object({
@@ -70,6 +77,10 @@ export const noteFilterSchema = z.object({
   projectId: z.string().uuid().optional(),
   parentNoteId: z.string().uuid().optional().nullable(),
   isFavorite: z.boolean().optional(),
+
+  // Tag filters
+  tagIds: z.array(z.string().uuid()).optional(),
+  tagLogic: tagFilterLogicSchema.default("OR").optional(),
 
   // Search (will search in title and content)
   search: z.string().max(500).optional(),

@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { note, project, link } from "@/db/schema";
+import { note, project, link, entityTag } from "@/db/schema";
 import { eq, and, desc, asc, or, ilike, isNull, sql } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { noteFilterSchema, type NoteFilterInput } from "./schema";
@@ -161,6 +161,44 @@ export async function getNotes(filters: NoteFilterInput = {}) {
 
     if (search) {
       conditions.push(or(ilike(note.title, `%${search}%`), ilike(note.content, `%${search}%`))!);
+    }
+
+    // Tag filtering
+    // If tagIds are provided, filter notes that have the specified tags
+    // - OR logic: note has at least one of the tags
+    // - AND logic: note has all of the tags
+    if (validatedFilters.tagIds && validatedFilters.tagIds.length > 0) {
+      const tagLogic = validatedFilters.tagLogic || "OR";
+
+      if (tagLogic === "OR") {
+        // OR logic: note has at least one of the tags
+        conditions.push(
+          sql`EXISTS (
+            SELECT 1 FROM ${entityTag}
+            WHERE ${entityTag.entityType} = 'note'
+            AND ${entityTag.entityId} = ${note.id}
+            AND ${entityTag.tagId} = ANY(${sql`ARRAY[${sql.join(
+              validatedFilters.tagIds.map((id) => sql`${id}::uuid`),
+              sql`, `
+            )}]`})
+          )`
+        );
+      } else {
+        // AND logic: note has all of the tags
+        conditions.push(
+          sql`EXISTS (
+            SELECT 1 FROM ${entityTag}
+            WHERE ${entityTag.entityType} = 'note'
+            AND ${entityTag.entityId} = ${note.id}
+            AND ${entityTag.tagId} = ANY(${sql`ARRAY[${sql.join(
+              validatedFilters.tagIds.map((id) => sql`${id}::uuid`),
+              sql`, `
+            )}]`})
+            GROUP BY ${entityTag.entityId}
+            HAVING COUNT(DISTINCT ${entityTag.tagId}) = ${validatedFilters.tagIds.length}
+          )`
+        );
+      }
     }
 
     // Build ORDER BY clause

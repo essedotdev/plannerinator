@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { useCallback } from "react";
 import { PROJECT_STATUS_LABELS } from "@/lib/labels";
+import { TagFilter } from "@/components/common/TagFilter";
 
 /**
  * Project filters component
@@ -46,49 +47,55 @@ export function ProjectFilters() {
     router.push("/dashboard/projects");
   }, [router]);
 
-  const hasFilters = searchParams.has("status") || searchParams.has("search");
+  const hasFilters =
+    searchParams.has("status") || searchParams.has("search") || searchParams.has("tags");
 
   return (
-    <div className="flex flex-col sm:flex-row gap-3">
-      {/* Search */}
-      <div className="flex-1">
-        <Input
-          type="search"
-          placeholder="Search projects..."
-          defaultValue={searchParams.get("search") || ""}
-          onChange={(e) => {
-            const value = e.target.value;
-            // Debounce search
-            setTimeout(() => updateFilter("search", value || null), 300);
-          }}
-          className="w-full"
-        />
+    <div className="space-y-3">
+      <div className="flex flex-col sm:flex-row gap-3">
+        {/* Search */}
+        <div className="flex-1">
+          <Input
+            type="search"
+            placeholder="Search projects..."
+            defaultValue={searchParams.get("search") || ""}
+            onChange={(e) => {
+              const value = e.target.value;
+              // Debounce search
+              setTimeout(() => updateFilter("search", value || null), 300);
+            }}
+            className="w-full"
+          />
+        </div>
+
+        {/* Status Filter */}
+        <Select
+          value={searchParams.get("status") || "all"}
+          onValueChange={(value) => updateFilter("status", value === "all" ? null : value)}
+        >
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="All statuses" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All statuses</SelectItem>
+            <SelectItem value="active">{PROJECT_STATUS_LABELS.active}</SelectItem>
+            <SelectItem value="on_hold">{PROJECT_STATUS_LABELS.on_hold}</SelectItem>
+            <SelectItem value="completed">{PROJECT_STATUS_LABELS.completed}</SelectItem>
+            <SelectItem value="archived">{PROJECT_STATUS_LABELS.archived}</SelectItem>
+            <SelectItem value="cancelled">{PROJECT_STATUS_LABELS.cancelled}</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* Clear Filters */}
+        {hasFilters && (
+          <Button variant="outline" size="icon" onClick={clearFilters}>
+            <X className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
-      {/* Status Filter */}
-      <Select
-        value={searchParams.get("status") || "all"}
-        onValueChange={(value) => updateFilter("status", value === "all" ? null : value)}
-      >
-        <SelectTrigger className="w-full sm:w-[180px]">
-          <SelectValue placeholder="All statuses" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All statuses</SelectItem>
-          <SelectItem value="active">{PROJECT_STATUS_LABELS.active}</SelectItem>
-          <SelectItem value="on_hold">{PROJECT_STATUS_LABELS.on_hold}</SelectItem>
-          <SelectItem value="completed">{PROJECT_STATUS_LABELS.completed}</SelectItem>
-          <SelectItem value="archived">{PROJECT_STATUS_LABELS.archived}</SelectItem>
-          <SelectItem value="cancelled">{PROJECT_STATUS_LABELS.cancelled}</SelectItem>
-        </SelectContent>
-      </Select>
-
-      {/* Clear Filters */}
-      {hasFilters && (
-        <Button variant="outline" size="icon" onClick={clearFilters}>
-          <X className="h-4 w-4" />
-        </Button>
-      )}
+      {/* Tag Filter */}
+      <TagFilter basePath="/dashboard/projects" />
     </div>
   );
 }

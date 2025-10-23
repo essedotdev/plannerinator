@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { event, note, project, task } from "@/db/schema";
+import { event, note, project, task, entityTag } from "@/db/schema";
 import { getSession } from "@/lib/auth";
 import { and, asc, count, desc, eq, gte, ilike, isNull, lte, or, sql } from "drizzle-orm";
 import { projectFilterSchema, type ProjectFilterInput, type ProjectStatsInput } from "./schema";
@@ -85,6 +85,44 @@ export async function getProjects(filters: ProjectFilterInput = {}) {
     conditions.push(
       or(ilike(project.name, `%${search}%`), ilike(project.description, `%${search}%`))!
     );
+  }
+
+  // Tag filtering
+  // If tagIds are provided, filter projects that have the specified tags
+  // - OR logic: project has at least one of the tags
+  // - AND logic: project has all of the tags
+  if (validatedFilters.tagIds && validatedFilters.tagIds.length > 0) {
+    const tagLogic = validatedFilters.tagLogic || "OR";
+
+    if (tagLogic === "OR") {
+      // OR logic: project has at least one of the tags
+      conditions.push(
+        sql`EXISTS (
+          SELECT 1 FROM ${entityTag}
+          WHERE ${entityTag.entityType} = 'project'
+          AND ${entityTag.entityId} = ${project.id}
+          AND ${entityTag.tagId} = ANY(${sql`ARRAY[${sql.join(
+            validatedFilters.tagIds.map((id) => sql`${id}::uuid`),
+            sql`, `
+          )}]`})
+        )`
+      );
+    } else {
+      // AND logic: project has all of the tags
+      conditions.push(
+        sql`EXISTS (
+          SELECT 1 FROM ${entityTag}
+          WHERE ${entityTag.entityType} = 'project'
+          AND ${entityTag.entityId} = ${project.id}
+          AND ${entityTag.tagId} = ANY(${sql`ARRAY[${sql.join(
+            validatedFilters.tagIds.map((id) => sql`${id}::uuid`),
+            sql`, `
+          )}]`})
+          GROUP BY ${entityTag.entityId}
+          HAVING COUNT(DISTINCT ${entityTag.tagId}) = ${validatedFilters.tagIds.length}
+        )`
+      );
+    }
   }
 
   // 4. Build ORDER BY

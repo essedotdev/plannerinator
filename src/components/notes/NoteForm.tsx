@@ -11,7 +11,6 @@ import { getProjects } from "@/features/projects/queries";
 import { PROJECT_STATUS_LABELS } from "@/lib/labels";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -21,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MarkdownEditor } from "./MarkdownEditor";
 import type { Project } from "@/db/schema";
 
 type ProjectOption = Pick<Project, "id" | "name" | "icon" | "color" | "status">;
@@ -54,10 +54,15 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
     defaultValues: {
       title: initialData?.title || "",
       content: initialData?.content || "",
-      projectId: initialData?.projectId || "",
-      parentNoteId: initialData?.parentNoteId || "",
+      projectId: initialData?.projectId || undefined,
+      parentNoteId: initialData?.parentNoteId || undefined,
     },
   });
+
+  // Register content field manually since we're using a custom component
+  useEffect(() => {
+    register("content");
+  }, [register]);
 
   // Load all projects (regardless of status)
   useEffect(() => {
@@ -80,11 +85,17 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
 
     try {
       if (mode === "create") {
-        await createNote(data);
+        const result = await createNote(data);
+        if (!result.success) {
+          throw new Error("Failed to create note");
+        }
         toast.success("Note created successfully!");
         router.push("/dashboard/notes");
       } else if (initialData?.id) {
-        await updateNote(initialData.id, data);
+        const result = await updateNote(initialData.id, data);
+        if (!result.success) {
+          throw new Error("Failed to update note");
+        }
         toast.success("Note updated successfully!");
         router.push(`/dashboard/notes/${initialData.id}`);
       }
@@ -122,7 +133,9 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
             <Label htmlFor="project">Project (optional)</Label>
             <Select
               value={watch("projectId") || undefined}
-              onValueChange={(value) => setValue("projectId", value)}
+              onValueChange={(value) =>
+                setValue("projectId", value || undefined, { shouldValidate: true })
+              }
               disabled={isSubmitting || loadingProjects}
             >
               <SelectTrigger id="project">
@@ -153,7 +166,7 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
             {watch("projectId") && (
               <button
                 type="button"
-                onClick={() => setValue("projectId", undefined)}
+                onClick={() => setValue("projectId", undefined, { shouldValidate: true })}
                 className="text-xs text-muted-foreground hover:text-foreground"
               >
                 Clear selection
@@ -161,23 +174,20 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
             )}
           </div>
 
-          {/* Content */}
+          {/* Content - Markdown Editor */}
           <div className="space-y-2">
             <Label htmlFor="content">Content</Label>
-            <Textarea
-              id="content"
-              {...register("content")}
-              placeholder="Write your note content here... (Markdown supported)"
-              rows={15}
-              disabled={isSubmitting}
-              className="font-mono text-sm"
+            <MarkdownEditor
+              value={watch("content") || ""}
+              onChange={(value) =>
+                setValue("content", value, { shouldValidate: true, shouldDirty: true })
+              }
+              placeholder="Write your note in markdown..."
+              minHeight="400px"
             />
             {formState.errors.content && (
               <p className="text-sm text-destructive">{formState.errors.content.message}</p>
             )}
-            <p className="text-xs text-muted-foreground">
-              You can use Markdown formatting for your notes
-            </p>
           </div>
 
           {/* Form Actions */}

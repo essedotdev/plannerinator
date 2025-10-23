@@ -141,20 +141,29 @@ Tutte le entità supportano:
 
 ## Documentazione
 
-### Core Documentation
+### 📋 Planning
 
-- [Database Schema](./DATABASE_SCHEMA.md) - Schema completo con esempi
-- [Architecture](./ARCHITECTURE.md) - Architettura applicazione
-- [Features](./FEATURES.md) - Lista feature dettagliata
-- [UI Patterns](./UI_PATTERNS.md) - Pattern e componenti UI
-- [API Design](./API_DESIGN.md) - Server Actions e validazione
+- [Roadmap](./planning/ROADMAP.md) - Status attuale, priorità e timeline
+- [Backlog](./planning/BACKLOG.md) - Feature ideas e enhancement futuri
 
-### Development
+### 🔧 Technical Reference
 
-- [Roadmap](./ROADMAP.md) - Roadmap completa delle feature e progress tracking
-- [Code Quality & Standards](./CODE_QUALITY.md) - Best practice e standard del codice
+- [Database Schema](./technical/DATABASE_SCHEMA.md) - Schema completo con esempi e query
+- [Architecture](./technical/ARCHITECTURE.md) - Architettura applicazione e data flow
+- [Code Quality & Standards](./technical/CODE_QUALITY.md) - Best practice e convenzioni
 
-### Future Features
+### 💡 Development
 
-- [Sharing System](./SHARING.md) - Sistema di condivisione (futuro)
-- [AI Assistant](./AI_ASSISTANT.md) - Integrazione AI (futuro)
+Per pattern di sviluppo (Server Actions, componenti, validazione), consulta direttamente il codice:
+
+- **Server Actions:** `src/features/*/actions.ts` - Pattern auth, validation, revalidation
+- **Schemas:** `src/features/*/schema.ts` - Zod validation con 143 tests
+- **Components:** `src/components/*/` - Server Components + Client Components patterns
+- **Utilities:** `src/lib/` - Date formatting, labels, auth, permissions
+
+Il codice è auto-documentato con commenti e type safety completo.
+
+### 💭 Future Features
+
+- [AI Assistant](./future/AI_ASSISTANT.md) - Integrazione AI (Phase 5)
+- [Sharing System](./future/SHARING.md) - Sistema di condivisione (Phase 4)

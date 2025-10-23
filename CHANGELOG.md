@@ -7,6 +7,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2025-10-23
+
+### Added
+
+**Tag Filtering System**
+- Universal TagFilter component for filtering entities by tags across all pages
+- Multi-select tag interface with checkboxes in popover
+- AND/OR logic toggle (match all tags vs. match any tag)
+- Active tag badges with clear button
+- URL synchronization for tag filters (tags and tagLogic params)
+- Integrated tag filtering in Tasks, Events, Notes, and Projects pages
+
+**Event Calendar View**
+- EventCalendar component with monthly calendar grid view
+- EventsView component to toggle between list and calendar views
+- Calendar navigation (previous/next month)
+- Event display on calendar dates with color-coded badges
+- Multi-event support per day with visual indicators
+- react-big-calendar integration for calendar functionality
+
+**Rich Markdown Editor for Notes**
+- MarkdownEditor component with live preview
+- Syntax highlighting for code blocks (react-syntax-highlighter)
+- GitHub Flavored Markdown support (GFM) with tables, task lists, strikethrough
+- HTML rendering support with rehype-raw
+- Split view: edit and preview side-by-side
+- Integrated in note creation and editing forms
+
+**Developer Tools & Infrastructure**
+- Custom slash commands for common operations:
+  - `/changelog` - Analyze changes and update CHANGELOG.md
+  - `/release` - Create and publish version releases
+  - `/deploy` - Deploy to Cloudflare Workers
+- .gitignore file for proper version control exclusions
+- Updated documentation structure (future/, planning/, technical/ folders)
+
+### Changed
+- Event pages now support tag filtering with AND/OR logic
+- Event list page includes calendar/list view toggle
+- Note forms now use rich markdown editor instead of plain textarea
+- Task, Note, and Project filters expanded to support tag-based filtering
+- Documentation files reorganized into thematic subdirectories
+- Database connection updated to new Neon PostgreSQL instance
+
+### Added (Dependencies)
+- react-big-calendar (^1.19.4) - Calendar component library
+- react-markdown (^10.1.0) - Markdown rendering
+- react-syntax-highlighter (^16.0.0) - Code syntax highlighting in markdown
+- rehype-raw (^7.0.0) - HTML support in markdown
+- remark-gfm (^4.0.1) - GitHub Flavored Markdown
+- @tailwindcss/typography (^0.5.19) - Beautiful typography styles for markdown
+- @types/react-big-calendar (^1.16.3) - TypeScript types for calendar
+- @types/react-syntax-highlighter (^15.5.13) - TypeScript types for syntax highlighter
+
 ## [0.2.0] - 2025-10-22
 
 ### Added - Phase 1: Core Entities & Universal Features
@@ -381,6 +435,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code splitting
 - Lazy loading for components
 
-[unreleased]: https://github.com/essedev/plannerinator/compare/v0.2.0...HEAD
+[unreleased]: https://github.com/essedev/plannerinator/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/essedev/plannerinator/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/essedev/plannerinator/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/essedev/plannerinator/releases/tag/v0.1.0

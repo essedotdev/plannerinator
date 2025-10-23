@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { event, project, link } from "@/db/schema";
+import { event, project, link, entityTag } from "@/db/schema";
 import { eq, and, gte, lte, desc, asc, or, ilike, sql } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { eventFilterSchema, type EventFilterInput } from "./schema";
@@ -146,6 +146,44 @@ export async function getEvents(filters: EventFilterInput = {}) {
           ilike(event.location, `%${search}%`)
         )!
       );
+    }
+
+    // Tag filtering
+    // If tagIds are provided, filter events that have the specified tags
+    // - OR logic: event has at least one of the tags
+    // - AND logic: event has all of the tags
+    if (validatedFilters.tagIds && validatedFilters.tagIds.length > 0) {
+      const tagLogic = validatedFilters.tagLogic || "OR";
+
+      if (tagLogic === "OR") {
+        // OR logic: event has at least one of the tags
+        conditions.push(
+          sql`EXISTS (
+            SELECT 1 FROM ${entityTag}
+            WHERE ${entityTag.entityType} = 'event'
+            AND ${entityTag.entityId} = ${event.id}
+            AND ${entityTag.tagId} = ANY(${sql`ARRAY[${sql.join(
+              validatedFilters.tagIds.map((id) => sql`${id}::uuid`),
+              sql`, `
+            )}]`})
+          )`
+        );
+      } else {
+        // AND logic: event has all of the tags
+        conditions.push(
+          sql`EXISTS (
+            SELECT 1 FROM ${entityTag}
+            WHERE ${entityTag.entityType} = 'event'
+            AND ${entityTag.entityId} = ${event.id}
+            AND ${entityTag.tagId} = ANY(${sql`ARRAY[${sql.join(
+              validatedFilters.tagIds.map((id) => sql`${id}::uuid`),
+              sql`, `
+            )}]`})
+            GROUP BY ${entityTag.entityId}
+            HAVING COUNT(DISTINCT ${entityTag.tagId}) = ${validatedFilters.tagIds.length}
+          )`
+        );
+      }
     }
 
     // Build ORDER BY clause

@@ -35,25 +35,21 @@ export async function createTask(input: unknown) {
   const data = createTaskSchema.parse(input);
 
   try {
-    // Use transaction to ensure task and link are created atomically
-    const newTask = await db.transaction(async (tx) => {
-      const [createdTask] = await tx
-        .insert(task)
-        .values({
-          ...data,
-          userId: session.user.id,
-          status: "todo",
-          position: 0,
-        })
-        .returning();
+    // Create task
+    const [createdTask] = await db
+      .insert(task)
+      .values({
+        ...data,
+        userId: session.user.id,
+        status: "todo",
+        position: 0,
+      })
+      .returning();
 
-      // Sync assigned_to link if projectId is provided
-      if (data.projectId) {
-        await syncAssignedToLink(session.user.id, "task", createdTask.id, data.projectId);
-      }
-
-      return createdTask;
-    });
+    // Sync assigned_to link if projectId is provided
+    if (data.projectId) {
+      await syncAssignedToLink(session.user.id, "task", createdTask.id, data.projectId);
+    }
 
     // Revalidate tasks page
     revalidatePath("/dashboard/tasks");
@@ -61,7 +57,7 @@ export async function createTask(input: unknown) {
       revalidatePath(`/dashboard/projects/${data.projectId}`);
     }
 
-    return { success: true, task: newTask };
+    return { success: true, task: createdTask };
   } catch (error) {
     console.error("Error creating task:", error);
     if (error instanceof Error) {
@@ -113,17 +109,13 @@ export async function updateTask(id: string, input: unknown) {
       updateData.completedAt = null;
     }
 
-    // Use transaction to ensure task and link are updated atomically
-    const updatedTask = await db.transaction(async (tx) => {
-      const [updated] = await tx.update(task).set(updateData).where(eq(task.id, id)).returning();
+    // Update task
+    const [updatedTask] = await db.update(task).set(updateData).where(eq(task.id, id)).returning();
 
-      // Sync assigned_to link if projectId changed
-      if ("projectId" in data) {
-        await syncAssignedToLink(session.user.id, "task", id, data.projectId);
-      }
-
-      return updated;
-    });
+    // Sync assigned_to link if projectId changed
+    if ("projectId" in data) {
+      await syncAssignedToLink(session.user.id, "task", id, data.projectId);
+    }
 
     // Revalidate relevant pages
     revalidatePath("/dashboard/tasks");

@@ -29,10 +29,10 @@ type ProjectOption = Pick<Project, "id" | "name" | "icon" | "color" | "status">;
 interface EventFormProps {
   mode: "create" | "edit";
   initialData?: {
-    id: string;
-    title: string;
+    id?: string;
+    title?: string;
     description?: string | null;
-    startTime: Date;
+    startTime?: Date;
     endTime?: Date | null;
     location?: string | null;
     locationUrl?: string | null;
@@ -57,12 +57,12 @@ export function EventForm({ mode, initialData }: EventFormProps) {
     resolver: zodResolver(createEventSchema),
     defaultValues: {
       title: initialData?.title || "",
-      description: initialData?.description || "",
+      description: initialData?.description || undefined,
       startTime: initialData?.startTime ? formatForDateTimeInput(initialData.startTime) : "",
-      endTime: initialData?.endTime ? formatForDateTimeInput(initialData.endTime) : "",
-      location: initialData?.location || "",
-      locationUrl: initialData?.locationUrl || "",
-      projectId: initialData?.projectId || "",
+      endTime: initialData?.endTime ? formatForDateTimeInput(initialData.endTime) : undefined,
+      location: initialData?.location || undefined,
+      locationUrl: initialData?.locationUrl || undefined,
+      projectId: initialData?.projectId || undefined,
     },
   });
 
@@ -146,7 +146,9 @@ export function EventForm({ mode, initialData }: EventFormProps) {
             <Label htmlFor="project">Project (optional)</Label>
             <Select
               value={watch("projectId") || undefined}
-              onValueChange={(value) => setValue("projectId", value)}
+              onValueChange={(value) =>
+                setValue("projectId", value || undefined, { shouldValidate: true })
+              }
               disabled={isSubmitting || loadingProjects}
             >
               <SelectTrigger id="project">
@@ -177,7 +179,7 @@ export function EventForm({ mode, initialData }: EventFormProps) {
             {watch("projectId") && (
               <button
                 type="button"
-                onClick={() => setValue("projectId", undefined)}
+                onClick={() => setValue("projectId", undefined, { shouldValidate: true })}
                 className="text-xs text-muted-foreground hover:text-foreground"
               >
                 Clear selection

@@ -26,11 +26,16 @@ interface TasksPageProps {
     search?: string;
     sortBy?: string;
     sortOrder?: string;
+    tags?: string;
+    tagLogic?: string;
   }>;
 }
 
 export default async function TasksPage({ searchParams }: TasksPageProps) {
   const params = await searchParams;
+
+  // Parse tag IDs from comma-separated string
+  const tagIds = params.tags ? params.tags.split(",").filter(Boolean) : undefined;
 
   // Fetch tasks with filters from URL params
   const { tasks, pagination } = await getTasks({
@@ -38,6 +43,8 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
     priority: params.priority as TaskPriority | undefined,
     projectId: params.projectId,
     search: params.search,
+    tagIds,
+    tagLogic: params.tagLogic as "AND" | "OR" | undefined,
     sortBy: params.sortBy as TaskFilterInput["sortBy"],
     sortOrder: params.sortOrder as TaskFilterInput["sortOrder"],
   });

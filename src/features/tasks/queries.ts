@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { task, project, link } from "@/db/schema";
+import { task, project, link, entityTag } from "@/db/schema";
 import { eq, and, gte, lte, desc, asc, or, ilike, isNull, sql } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { taskFilterSchema, type TaskFilterInput } from "./schema";
@@ -165,6 +165,46 @@ export async function getTasks(input: unknown = {}) {
           ilike(task.description, `%${filters.search}%`)
         )!
       );
+    }
+
+    // Tag filtering
+    // If tagIds are provided, filter tasks that have the specified tags
+    // - OR logic: task has at least one of the tags
+    // - AND logic: task has all of the tags
+    if (filters.tagIds && filters.tagIds.length > 0) {
+      const tagLogic = filters.tagLogic || "OR";
+
+      if (tagLogic === "OR") {
+        // OR logic: task has at least one of the tags
+        // Use EXISTS subquery to check if task has any of the specified tags
+        conditions.push(
+          sql`EXISTS (
+            SELECT 1 FROM ${entityTag}
+            WHERE ${entityTag.entityType} = 'task'
+            AND ${entityTag.entityId} = ${task.id}
+            AND ${entityTag.tagId} = ANY(${sql`ARRAY[${sql.join(
+              filters.tagIds.map((id) => sql`${id}::uuid`),
+              sql`, `
+            )}]`})
+          )`
+        );
+      } else {
+        // AND logic: task has all of the tags
+        // Use subquery with HAVING COUNT to ensure task has all tags
+        conditions.push(
+          sql`EXISTS (
+            SELECT 1 FROM ${entityTag}
+            WHERE ${entityTag.entityType} = 'task'
+            AND ${entityTag.entityId} = ${task.id}
+            AND ${entityTag.tagId} = ANY(${sql`ARRAY[${sql.join(
+              filters.tagIds.map((id) => sql`${id}::uuid`),
+              sql`, `
+            )}]`})
+            GROUP BY ${entityTag.entityId}
+            HAVING COUNT(DISTINCT ${entityTag.tagId}) = ${filters.tagIds.length}
+          )`
+        );
+      }
     }
 
     // Build order by clause

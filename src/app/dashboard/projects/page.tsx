@@ -26,17 +26,24 @@ interface ProjectsPageProps {
     offset?: string;
     sortBy?: string;
     sortOrder?: string;
+    tags?: string;
+    tagLogic?: string;
   }>;
 }
 
 export default async function ProjectsPage({ searchParams }: ProjectsPageProps) {
   const params = await searchParams;
 
+  // Parse tag IDs from comma-separated string
+  const tagIds = params.tags ? params.tags.split(",").filter(Boolean) : undefined;
+
   // Build filters from URL params
   const filters: ProjectFilterInput = {
     status: params.status as ProjectFilterInput["status"],
     parentProjectId: params.parentProjectId || undefined,
     search: params.search,
+    tagIds,
+    tagLogic: params.tagLogic as "AND" | "OR" | undefined,
     limit: params.limit ? parseInt(params.limit) : 50,
     offset: params.offset ? parseInt(params.offset) : 0,
     sortBy: params.sortBy as ProjectFilterInput["sortBy"],

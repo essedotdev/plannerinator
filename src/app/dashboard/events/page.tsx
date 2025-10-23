@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
-import { EventList } from "@/components/events/EventList";
+import { EventsView } from "@/components/events/EventsView";
 import { EventFilters } from "@/components/events/EventFilters";
 import type { EventCalendarType, EventFilterInput } from "@/features/events/schema";
 
@@ -26,11 +26,16 @@ interface EventsPageProps {
     sortBy?: string;
     sortOrder?: string;
     allDay?: string;
+    tags?: string;
+    tagLogic?: string;
   }>;
 }
 
 export default async function EventsPage({ searchParams }: EventsPageProps) {
   const params = await searchParams;
+
+  // Parse tag IDs from comma-separated string
+  const tagIds = params.tags ? params.tags.split(",").filter(Boolean) : undefined;
 
   // Fetch events with filters from URL params
   const { events, pagination } = await getEvents({
@@ -38,6 +43,8 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
     projectId: params.projectId,
     search: params.search,
     allDay: params.allDay === "true" ? true : params.allDay === "false" ? false : undefined,
+    tagIds,
+    tagLogic: params.tagLogic as "AND" | "OR" | undefined,
     sortBy: params.sortBy as EventFilterInput["sortBy"],
     sortOrder: params.sortOrder as EventFilterInput["sortOrder"],
   });
@@ -58,8 +65,8 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
       {/* Filters */}
       <EventFilters />
 
-      {/* Event List */}
-      <EventList events={events} />
+      {/* Events View (List or Calendar) */}
+      <EventsView events={events} />
 
       {/* Pagination Info */}
       {pagination.hasMore && (

@@ -36,10 +36,10 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
     resolver: zodResolver(createProjectSchema),
     defaultValues: {
       name: initialData?.name || "",
-      description: initialData?.description || "",
-      icon: initialData?.icon || "",
-      startDate: initialData?.startDate ? formatForDateInput(initialData.startDate) : "",
-      endDate: initialData?.endDate ? formatForDateInput(initialData.endDate) : "",
+      description: initialData?.description || undefined,
+      icon: initialData?.icon || undefined,
+      startDate: initialData?.startDate ? formatForDateInput(initialData.startDate) : undefined,
+      endDate: initialData?.endDate ? formatForDateInput(initialData.endDate) : undefined,
     },
   });
 

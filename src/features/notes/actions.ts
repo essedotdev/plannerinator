@@ -35,23 +35,20 @@ export async function createNote(input: unknown) {
   const data = createNoteSchema.parse(input);
 
   try {
-    const newNote = await db.transaction(async (tx) => {
-      const [createdNote] = await tx
-        .insert(note)
-        .values({
-          ...data,
-          userId: session.user.id,
-          // type and isFavorite use database defaults
-        })
-        .returning();
+    // Create note
+    const [createdNote] = await db
+      .insert(note)
+      .values({
+        ...data,
+        userId: session.user.id,
+        // type and isFavorite use database defaults
+      })
+      .returning();
 
-      // Sync assigned_to link if projectId is provided
-      if (data.projectId) {
-        await syncAssignedToLink(session.user.id, "note", createdNote.id, data.projectId);
-      }
-
-      return createdNote;
-    });
+    // Sync assigned_to link if projectId is provided
+    if (data.projectId) {
+      await syncAssignedToLink(session.user.id, "note", createdNote.id, data.projectId);
+    }
 
     // Revalidate notes page
     revalidatePath("/dashboard/notes");
@@ -59,7 +56,7 @@ export async function createNote(input: unknown) {
       revalidatePath(`/dashboard/projects/${data.projectId}`);
     }
 
-    return { success: true, note: newNote };
+    return { success: true, note: createdNote };
   } catch (error) {
     console.error("Error creating note:", error);
     if (error instanceof Error) {
@@ -103,16 +100,13 @@ export async function updateNote(id: string, input: unknown) {
 
     const updates: UpdateNoteInput = { ...data };
 
-    const updatedNote = await db.transaction(async (tx) => {
-      const [updated] = await tx.update(note).set(updates).where(eq(note.id, id)).returning();
+    // Update note
+    const [updatedNote] = await db.update(note).set(updates).where(eq(note.id, id)).returning();
 
-      // Sync assigned_to link if projectId changed
-      if ("projectId" in data) {
-        await syncAssignedToLink(session.user.id, "note", id, data.projectId);
-      }
-
-      return updated;
-    });
+    // Sync assigned_to link if projectId changed
+    if ("projectId" in data) {
+      await syncAssignedToLink(session.user.id, "note", id, data.projectId);
+    }
 
     // Revalidate relevant pages
     revalidatePath("/dashboard/notes");

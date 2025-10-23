@@ -78,6 +78,13 @@ export const createTaskSchema = baseTaskSchema.omit({
 export const updateTaskSchema = baseTaskSchema.partial();
 
 /**
+ * Tag filter logic enum schema
+ */
+export const tagFilterLogicSchema = z.enum(["AND", "OR"], {
+  message: "Tag filter logic must be AND or OR",
+});
+
+/**
  * Schema for task filters/search
  */
 export const taskFilterSchema = z.object({
@@ -89,6 +96,10 @@ export const taskFilterSchema = z.object({
   // Date filters
   dueDateFrom: z.coerce.date().optional(),
   dueDateTo: z.coerce.date().optional(),
+
+  // Tag filters
+  tagIds: z.array(z.string().uuid()).optional(),
+  tagLogic: tagFilterLogicSchema.default("OR").optional(),
 
   // Search
   search: z.string().max(500).optional(),

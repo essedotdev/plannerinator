@@ -97,6 +97,13 @@ export const updateProjectSchema = baseProjectSchema.partial().refine(
 );
 
 /**
+ * Tag filter logic enum schema
+ */
+export const tagFilterLogicSchema = z.enum(["AND", "OR"], {
+  message: "Tag filter logic must be AND or OR",
+});
+
+/**
  * Schema for project filters
  */
 export const projectFilterSchema = z.object({
@@ -108,6 +115,10 @@ export const projectFilterSchema = z.object({
   startDateTo: z.coerce.date().optional(),
   endDateFrom: z.coerce.date().optional(),
   endDateTo: z.coerce.date().optional(),
+
+  // Tag filters
+  tagIds: z.array(z.string().uuid()).optional(),
+  tagLogic: tagFilterLogicSchema.default("OR").optional(),
 
   // Search
   search: z.string().max(500).optional(),

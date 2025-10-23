@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { useCallback } from "react";
+import { TagFilter } from "@/components/common/TagFilter";
 
 /**
  * Task filters component
@@ -47,65 +48,73 @@ export function TaskFilters() {
   }, [router]);
 
   const hasFilters =
-    searchParams.has("status") || searchParams.has("priority") || searchParams.has("search");
+    searchParams.has("status") ||
+    searchParams.has("priority") ||
+    searchParams.has("search") ||
+    searchParams.has("tags");
 
   return (
-    <div className="flex flex-col sm:flex-row gap-3">
-      {/* Search */}
-      <div className="flex-1">
-        <Input
-          type="search"
-          placeholder="Search tasks..."
-          defaultValue={searchParams.get("search") || ""}
-          onChange={(e) => {
-            const value = e.target.value;
-            // Debounce search
-            setTimeout(() => updateFilter("search", value || null), 300);
-          }}
-          className="w-full"
-        />
+    <div className="space-y-3">
+      <div className="flex flex-col sm:flex-row gap-3">
+        {/* Search */}
+        <div className="flex-1">
+          <Input
+            type="search"
+            placeholder="Search tasks..."
+            defaultValue={searchParams.get("search") || ""}
+            onChange={(e) => {
+              const value = e.target.value;
+              // Debounce search
+              setTimeout(() => updateFilter("search", value || null), 300);
+            }}
+            className="w-full"
+          />
+        </div>
+
+        {/* Status Filter */}
+        <Select
+          value={searchParams.get("status") || "all"}
+          onValueChange={(value) => updateFilter("status", value === "all" ? null : value)}
+        >
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="All statuses" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All statuses</SelectItem>
+            <SelectItem value="todo">To Do</SelectItem>
+            <SelectItem value="in_progress">In Progress</SelectItem>
+            <SelectItem value="done">Done</SelectItem>
+            <SelectItem value="cancelled">Cancelled</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* Priority Filter */}
+        <Select
+          value={searchParams.get("priority") || "all"}
+          onValueChange={(value) => updateFilter("priority", value === "all" ? null : value)}
+        >
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="All priorities" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All priorities</SelectItem>
+            <SelectItem value="low">Low</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="high">High</SelectItem>
+            <SelectItem value="urgent">Urgent</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* Clear Filters */}
+        {hasFilters && (
+          <Button variant="outline" size="icon" onClick={clearFilters}>
+            <X className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
-      {/* Status Filter */}
-      <Select
-        value={searchParams.get("status") || "all"}
-        onValueChange={(value) => updateFilter("status", value === "all" ? null : value)}
-      >
-        <SelectTrigger className="w-full sm:w-[180px]">
-          <SelectValue placeholder="All statuses" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All statuses</SelectItem>
-          <SelectItem value="todo">To Do</SelectItem>
-          <SelectItem value="in_progress">In Progress</SelectItem>
-          <SelectItem value="done">Done</SelectItem>
-          <SelectItem value="cancelled">Cancelled</SelectItem>
-        </SelectContent>
-      </Select>
-
-      {/* Priority Filter */}
-      <Select
-        value={searchParams.get("priority") || "all"}
-        onValueChange={(value) => updateFilter("priority", value === "all" ? null : value)}
-      >
-        <SelectTrigger className="w-full sm:w-[180px]">
-          <SelectValue placeholder="All priorities" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All priorities</SelectItem>
-          <SelectItem value="low">Low</SelectItem>
-          <SelectItem value="medium">Medium</SelectItem>
-          <SelectItem value="high">High</SelectItem>
-          <SelectItem value="urgent">Urgent</SelectItem>
-        </SelectContent>
-      </Select>
-
-      {/* Clear Filters */}
-      {hasFilters && (
-        <Button variant="outline" size="icon" onClick={clearFilters}>
-          <X className="h-4 w-4" />
-        </Button>
-      )}
+      {/* Tag Filter */}
+      <TagFilter basePath="/dashboard/tasks" />
     </div>
   );
 }

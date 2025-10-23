@@ -146,7 +146,9 @@ export function TaskForm({ mode, initialData }: TaskFormProps) {
             <Label htmlFor="project">Project (optional)</Label>
             <Select
               value={watch("projectId") || undefined}
-              onValueChange={(value) => setValue("projectId", value)}
+              onValueChange={(value) =>
+                setValue("projectId", value || undefined, { shouldValidate: true })
+              }
               disabled={isSubmitting || loadingProjects}
             >
               <SelectTrigger id="project">
@@ -177,7 +179,7 @@ export function TaskForm({ mode, initialData }: TaskFormProps) {
             {watch("projectId") && (
               <button
                 type="button"
-                onClick={() => setValue("projectId", undefined)}
+                onClick={() => setValue("projectId", undefined, { shouldValidate: true })}
                 className="text-xs text-muted-foreground hover:text-foreground"
               >
                 Clear selection

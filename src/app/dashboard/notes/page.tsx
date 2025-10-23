@@ -25,17 +25,24 @@ interface NotesPageProps {
     search?: string;
     sortBy?: string;
     sortOrder?: string;
+    tags?: string;
+    tagLogic?: string;
   }>;
 }
 
 export default async function NotesPage({ searchParams }: NotesPageProps) {
   const params = await searchParams;
 
+  // Parse tag IDs from comma-separated string
+  const tagIds = params.tags ? params.tags.split(",").filter(Boolean) : undefined;
+
   // Fetch notes with filters from URL params
   const { notes, pagination } = await getNotes({
     type: params.type as NoteType | undefined,
     isFavorite: params.isFavorite === "true" ? true : undefined,
     search: params.search,
+    tagIds,
+    tagLogic: params.tagLogic as "AND" | "OR" | undefined,
     sortBy: params.sortBy as NoteFilterInput["sortBy"],
     sortOrder: params.sortOrder as NoteFilterInput["sortOrder"],
   });

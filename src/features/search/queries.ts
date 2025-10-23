@@ -1,12 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import {
-  event,
-  note,
-  project,
-  task,
-} from "@/db/schema";
+import { event, note, project, task } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { and, eq, ilike, or, sql } from "drizzle-orm";
 import { headers } from "next/headers";
