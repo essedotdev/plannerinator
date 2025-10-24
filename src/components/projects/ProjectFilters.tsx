@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, FolderKanban } from "lucide-react";
 import { useCallback } from "react";
 import { PROJECT_STATUS_LABELS } from "@/lib/labels";
 import { TagFilter } from "@/components/common/TagFilter";
@@ -73,7 +73,10 @@ export function ProjectFilters() {
         onValueChange={(value) => updateFilter("status", value === "all" ? null : value)}
       >
         <SelectTrigger className="w-full sm:w-[180px]">
-          <SelectValue placeholder="All statuses" />
+          <span className="flex items-center gap-2">
+            <FolderKanban className="h-4 w-4" />
+            <SelectValue placeholder="All statuses" />
+          </span>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All statuses</SelectItem>

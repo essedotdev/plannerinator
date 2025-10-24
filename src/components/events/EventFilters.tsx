@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, Calendar, Clock } from "lucide-react";
 import { useCallback } from "react";
 import { TagFilter } from "@/components/common/TagFilter";
 
@@ -76,7 +76,10 @@ export function EventFilters() {
         onValueChange={(value) => updateFilter("calendarType", value === "all" ? null : value)}
       >
         <SelectTrigger className="w-full sm:w-[180px]">
-          <SelectValue placeholder="All calendars" />
+          <span className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            <SelectValue placeholder="All calendars" />
+          </span>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All calendars</SelectItem>
@@ -93,7 +96,10 @@ export function EventFilters() {
         onValueChange={(value) => updateFilter("allDay", value === "all" ? null : value)}
       >
         <SelectTrigger className="w-full sm:w-[180px]">
-          <SelectValue placeholder="All events" />
+          <span className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            <SelectValue placeholder="All events" />
+          </span>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All events</SelectItem>

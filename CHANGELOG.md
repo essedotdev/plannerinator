@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.2] - 2025-10-24
+
+### Changed
+
+- Improved filter components UI with icon indicators for better visual hierarchy (Calendar, Clock, FileText, Star, FolderKanban, ListChecks, Flag icons)
+- Enhanced TagFilter button with responsive width and better spacing
+- Updated breadcrumbs to show on all dashboard pages (previously hidden on dashboard root)
+- Improved kanban board drag-and-drop to support dropping tasks on other tasks (not just columns)
+- Code formatting improvements across multiple components
+
+### Fixed
+
+- Fixed VSCode settings.json formatting (removed trailing comma)
+- Improved code consistency in sidebar, sheet, and tooltip components with proper formatting
+
 ## [0.5.1] - 2025-10-23
 
 ### Added
@@ -563,7 +578,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code splitting
 - Lazy loading for components
 
-[unreleased]: https://github.com/essedev/plannerinator/compare/v0.5.1...HEAD
+[unreleased]: https://github.com/essedev/plannerinator/compare/v0.5.2...HEAD
+[0.5.2]: https://github.com/essedev/plannerinator/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/essedev/plannerinator/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/essedev/plannerinator/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/essedev/plannerinator/compare/v0.3.0...v0.4.0

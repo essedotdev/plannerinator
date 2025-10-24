@@ -121,7 +121,8 @@ export function AppSidebar() {
         <SidebarMenu className="gap-1 p-2">
           {visibleItems.map((item) => {
             const isActive =
-              pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+              pathname === item.href ||
+              (item.href !== "/dashboard" && pathname.startsWith(item.href));
             const Icon = item.icon;
 
             return (
@@ -162,9 +163,7 @@ export function AppSidebar() {
 
             {/* Actions */}
             <div className="flex items-center gap-2">
-              <span className="mr-auto text-xs text-muted-foreground">
-                Actions
-              </span>
+              <span className="mr-auto text-xs text-muted-foreground">Actions</span>
               <ThemeToggle />
               <Button
                 variant="ghost"

@@ -129,15 +129,17 @@ export function TagFilter({ basePath }: TagFilterProps) {
       {/* Popover Trigger */}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-2">
-            <Tag className="h-4 w-4" />
-            Tags
-            {selectedTagIds.length > 0 && (
-              <Badge variant="secondary" className="ml-1 h-5 px-1.5">
-                {selectedTagIds.length}
-              </Badge>
-            )}
-            <ChevronDown className="h-3 w-3 opacity-50" />
+          <Button variant="outline" className="w-full sm:w-[180px] justify-between">
+            <span className="flex items-center gap-2">
+              <Tag className="h-4 w-4" />
+              Tags
+              {selectedTagIds.length > 0 && (
+                <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                  {selectedTagIds.length}
+                </Badge>
+              )}
+            </span>
+            <ChevronDown className="h-4 w-4 opacity-50" />
           </Button>
         </PopoverTrigger>
 

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, FileText, Star } from "lucide-react";
 import { useCallback } from "react";
 import { TagFilter } from "@/components/common/TagFilter";
 
@@ -76,7 +76,10 @@ export function NoteFilters() {
         onValueChange={(value) => updateFilter("type", value === "all" ? null : value)}
       >
         <SelectTrigger className="w-full sm:w-[180px]">
-          <SelectValue placeholder="All types" />
+          <span className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            <SelectValue placeholder="All types" />
+          </span>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All types</SelectItem>
@@ -94,7 +97,10 @@ export function NoteFilters() {
         onValueChange={(value) => updateFilter("isFavorite", value === "all" ? null : value)}
       >
         <SelectTrigger className="w-full sm:w-[180px]">
-          <SelectValue placeholder="All notes" />
+          <span className="flex items-center gap-2">
+            <Star className="h-4 w-4" />
+            <SelectValue placeholder="All notes" />
+          </span>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All notes</SelectItem>

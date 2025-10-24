@@ -51,8 +51,7 @@ function generateBreadcrumbs(pathname: string) {
     }
 
     // Usa label custom o fallback al segmento capitalizzato
-    const label =
-      pathLabels[segment] || segment.charAt(0).toUpperCase() + segment.slice(1);
+    const label = pathLabels[segment] || segment.charAt(0).toUpperCase() + segment.slice(1);
 
     breadcrumbs.push({
       label,
@@ -67,17 +66,12 @@ function generateBreadcrumbs(pathname: string) {
 export function DashboardBreadcrumbs() {
   const pathname = usePathname();
 
-  // Non mostrare breadcrumbs sulla dashboard root
-  if (pathname === "/dashboard") {
-    return null;
-  }
-
   const breadcrumbs = generateBreadcrumbs(pathname);
 
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        {breadcrumbs.map((crumb, index) => (
+        {breadcrumbs.map((crumb) => (
           <Fragment key={crumb.href}>
             <BreadcrumbItem>
               {crumb.isLast ? (

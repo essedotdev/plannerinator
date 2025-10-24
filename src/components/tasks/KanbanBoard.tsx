@@ -52,7 +52,19 @@ export function KanbanBoard({ tasks: initialTasks }: KanbanBoardProps) {
     if (!over) return;
 
     const taskId = active.id as string;
-    const newStatus = over.id as "todo" | "in_progress" | "done";
+
+    // Check if we're dropping over a column (status) or over a task
+    let newStatus: "todo" | "in_progress" | "done" | "cancelled";
+
+    // If over.id is a valid status, use it directly
+    if (over.id === "todo" || over.id === "in_progress" || over.id === "done") {
+      newStatus = over.id;
+    } else {
+      // Otherwise, we're dropping over a task, find its status
+      const overTask = tasks.find((t) => t.id === over.id);
+      if (!overTask) return;
+      newStatus = overTask.status;
+    }
 
     // Find the task
     const task = tasks.find((t) => t.id === taskId);
