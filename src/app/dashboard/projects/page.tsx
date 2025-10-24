@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PageHeader } from "@/components/common";
+import { PageHeader, Pagination } from "@/components/common";
 import { getProjects } from "@/features/projects/queries";
 import { ProjectList } from "@/components/projects/ProjectList";
 import { ProjectFilters } from "@/components/projects/ProjectFilters";
@@ -74,8 +74,11 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
 
       {/* Projects List */}
       <Suspense fallback={<div>Loading projects...</div>}>
-        <ProjectList projects={projects} pagination={pagination} />
+        <ProjectList projects={projects} />
       </Suspense>
+
+      {/* Pagination */}
+      <Pagination total={pagination.total} limit={pagination.limit} offset={pagination.offset} />
     </div>
   );
 }

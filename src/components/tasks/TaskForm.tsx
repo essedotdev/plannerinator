@@ -6,9 +6,14 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { createTask, updateTask } from "@/features/tasks/actions";
-import { createTaskSchema, type TaskPriority } from "@/features/tasks/schema";
+import {
+  createTaskSchema,
+  updateTaskSchema,
+  type TaskPriority,
+  type TaskStatus,
+} from "@/features/tasks/schema";
 import { getProjects } from "@/features/projects/queries";
-import { PROJECT_STATUS_LABELS } from "@/lib/labels";
+import { PROJECT_STATUS_LABELS, TASK_STATUS_LABELS } from "@/lib/labels";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -54,13 +59,14 @@ export function TaskForm({ mode, initialData }: TaskFormProps) {
   const [loadingProjects, setLoadingProjects] = useState(true);
 
   const { register, handleSubmit, formState, watch, setValue } = useForm({
-    resolver: zodResolver(createTaskSchema),
+    resolver: zodResolver(mode === "edit" ? updateTaskSchema : createTaskSchema),
     defaultValues: {
       title: initialData?.title || "",
       description: initialData?.description || "",
       dueDate: initialData?.dueDate || undefined,
       startDate: initialData?.startDate || undefined,
       duration: initialData?.duration || undefined,
+      ...(mode === "edit" && { status: initialData?.status || "todo" }),
       priority: initialData?.priority || "medium",
       projectId: initialData?.projectId || undefined,
     },
@@ -141,54 +147,78 @@ export function TaskForm({ mode, initialData }: TaskFormProps) {
             )}
           </div>
 
-          {/* Project Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="project">Project (optional)</Label>
-            <Select
-              value={watch("projectId") || undefined}
-              onValueChange={(value) =>
-                setValue("projectId", value || undefined, { shouldValidate: true })
-              }
-              disabled={isSubmitting || loadingProjects}
-            >
-              <SelectTrigger id="project">
-                <SelectValue placeholder={loadingProjects ? "Loading..." : "No project selected"} />
-              </SelectTrigger>
-              <SelectContent>
-                {projects.map((project) => (
-                  <SelectItem key={project.id} value={project.id}>
-                    <span className="flex items-center gap-2 w-full">
-                      {project.icon && <span>{project.icon}</span>}
-                      <span className="flex-1">{project.name}</span>
-                      {project.status && project.status !== "active" && (
-                        <span className="text-xs text-muted-foreground">
-                          (
-                          {
-                            PROJECT_STATUS_LABELS[
-                              project.status as keyof typeof PROJECT_STATUS_LABELS
-                            ]
-                          }
-                          )
-                        </span>
-                      )}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {watch("projectId") && (
-              <button
-                type="button"
-                onClick={() => setValue("projectId", undefined, { shouldValidate: true })}
-                className="text-xs text-muted-foreground hover:text-foreground"
+          {/* Grid: Project, Status, Priority, Duration, Start Date, Due Date */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Project Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="project">Project</Label>
+              <Select
+                value={watch("projectId") || undefined}
+                onValueChange={(value) =>
+                  setValue("projectId", value || undefined, { shouldValidate: true })
+                }
+                disabled={isSubmitting || loadingProjects}
               >
-                Clear selection
-              </button>
-            )}
-          </div>
+                <SelectTrigger id="project" className="w-full">
+                  <SelectValue placeholder={loadingProjects ? "Loading..." : "No project"} />
+                </SelectTrigger>
+                <SelectContent className="w-[var(--radix-select-trigger-width)]">
+                  {projects.map((project) => (
+                    <SelectItem key={project.id} value={project.id}>
+                      <span className="flex items-center gap-2">
+                        {project.icon && <span>{project.icon}</span>}
+                        <span className="flex-1 truncate">{project.name}</span>
+                        {project.status && project.status !== "active" && (
+                          <span className="text-xs text-muted-foreground">
+                            (
+                            {
+                              PROJECT_STATUS_LABELS[
+                                project.status as keyof typeof PROJECT_STATUS_LABELS
+                              ]
+                            }
+                            )
+                          </span>
+                        )}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {watch("projectId") && (
+                <button
+                  type="button"
+                  onClick={() => setValue("projectId", undefined, { shouldValidate: true })}
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
 
-          {/* Grid for smaller fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Status - Only in Edit Mode */}
+            {mode === "edit" ? (
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={watch("status") || "todo"}
+                  onValueChange={(value) => setValue("status", value as TaskStatus)}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger id="status" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todo">{TASK_STATUS_LABELS.todo}</SelectItem>
+                    <SelectItem value="in_progress">{TASK_STATUS_LABELS.in_progress}</SelectItem>
+                    <SelectItem value="done">{TASK_STATUS_LABELS.done}</SelectItem>
+                    <SelectItem value="cancelled">{TASK_STATUS_LABELS.cancelled}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              <div></div>
+            )}
+
             {/* Priority */}
             <div className="space-y-2">
               <Label htmlFor="priority">Priority</Label>
@@ -197,7 +227,7 @@ export function TaskForm({ mode, initialData }: TaskFormProps) {
                 onValueChange={(value) => setValue("priority", value as TaskPriority)}
                 disabled={isSubmitting}
               >
-                <SelectTrigger id="priority">
+                <SelectTrigger id="priority" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

@@ -41,21 +41,16 @@ const baseNoteSchema = z.object({
 /**
  * Schema for creating a new note
  */
-export const createNoteSchema = baseNoteSchema
-  .omit({
-    type: true,
-    isFavorite: true,
-  })
-  .refine(
-    (data) => {
-      // At least title or content must be provided
-      return (data.title && data.title.length > 0) || (data.content && data.content.length > 0);
-    },
-    {
-      message: "Either title or content must be provided",
-      path: ["title"],
-    }
-  );
+export const createNoteSchema = baseNoteSchema.refine(
+  (data) => {
+    // At least title or content must be provided
+    return (data.title && data.title.length > 0) || (data.content && data.content.length > 0);
+  },
+  {
+    message: "Either title or content must be provided",
+    path: ["title"],
+  }
+);
 
 /**
  * Schema for updating an existing note

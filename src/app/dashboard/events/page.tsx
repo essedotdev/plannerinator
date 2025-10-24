@@ -1,5 +1,5 @@
 import { getEvents } from "@/features/events/queries";
-import { PageHeader } from "@/components/common";
+import { PageHeader, Pagination } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
@@ -28,6 +28,7 @@ interface EventsPageProps {
     allDay?: string;
     tags?: string;
     tagLogic?: string;
+    offset?: string;
   }>;
 }
 
@@ -47,6 +48,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
     tagLogic: params.tagLogic as "AND" | "OR" | undefined,
     sortBy: params.sortBy as EventFilterInput["sortBy"],
     sortOrder: params.sortOrder as EventFilterInput["sortOrder"],
+    offset: params.offset ? parseInt(params.offset) : 0,
   });
 
   return (
@@ -68,12 +70,8 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
       {/* Events View (List or Calendar) */}
       <EventsView events={events} />
 
-      {/* Pagination Info */}
-      {pagination.hasMore && (
-        <div className="text-center text-sm text-muted-foreground">
-          Showing {events.length} of {pagination.total} events
-        </div>
-      )}
+      {/* Pagination */}
+      <Pagination total={pagination.total} limit={pagination.limit} offset={pagination.offset} />
     </div>
   );
 }

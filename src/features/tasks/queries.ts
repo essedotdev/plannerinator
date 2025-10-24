@@ -137,7 +137,7 @@ export async function getTasks(input: unknown = {}) {
     }
 
     if (filters.projectId) {
-      conditions.push(eq(link.toId, filters.projectId));
+      conditions.push(eq(task.projectId, filters.projectId));
     }
 
     // Handle parentTaskId filter (null = root tasks, uuid = specific parent)

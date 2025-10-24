@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { TASK_STATUS_LABELS, TASK_PRIORITY_LABELS } from "@/lib/labels";
 import { formatShortDate, isOverdue } from "@/lib/dates";
+import { ConfirmDialog } from "@/components/common";
 
 /**
  * Task priority colors
@@ -60,6 +61,7 @@ export function TaskCard({ task }: TaskCardProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isCompleted, setIsCompleted] = useState(task.status === "done");
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const handleToggleComplete = async () => {
     const newStatus = !isCompleted;
@@ -82,10 +84,8 @@ export function TaskCard({ task }: TaskCardProps) {
     });
   };
 
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this task?")) {
-      return;
-    }
+  const handleDeleteConfirm = async () => {
+    setShowDeleteDialog(false);
 
     startTransition(async () => {
       try {
@@ -185,7 +185,7 @@ export function TaskCard({ task }: TaskCardProps) {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                onClick={handleDelete}
+                onClick={() => setShowDeleteDialog(true)}
                 disabled={isPending}
                 className="text-red-600 dark:text-red-400"
               >
@@ -196,6 +196,18 @@ export function TaskCard({ task }: TaskCardProps) {
           </DropdownMenu>
         </div>
       </CardContent>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Task"
+        description={`Are you sure you want to delete "${task.title}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </Card>
   );
 }

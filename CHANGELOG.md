@@ -7,6 +7,75 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2025-10-24
+
+### Added
+
+**File Attachments with Cloudflare R2 Storage**
+
+- Complete file attachment system for tasks, events, notes, and projects
+- Cloudflare R2 integration for secure cloud storage
+- File upload with drag-and-drop support and progress tracking
+- Image preview with lightbox for uploaded images
+- File type detection and validation (documents, images, videos, archives)
+- Per-user storage quota tracking and enforcement
+- Presigned URL generation for secure downloads
+- AttachmentsSection component with file upload, preview, and management
+- Progress bar component for visual upload feedback
+- ConfirmDialog component for delete confirmations
+- Pagination component for large attachment lists
+- Database migration for attachments table with foreign keys to all entity types
+- R2 client utility with upload, download, delete, and quota management
+- Attachment server actions (upload, delete, get) with validation
+- Attachment database queries with user quota tracking
+- Environment variables for R2 configuration (account ID, access keys, bucket name, file size limits)
+
+**Documentation**
+
+- R2_SETUP.md guide for Cloudflare R2 bucket setup and configuration
+- ATTACHMENTS_IMPLEMENTATION.md technical documentation for the attachment system
+
+### Changed
+
+**Detail Page Improvements**
+
+- Simplified detail pages by removing redundant metadata cards
+- Moved tags sections to consistent position with icon indicators
+- Added clickable links to parent/child relationships (tasks, notes)
+- Improved layout consistency across all entity detail pages (tasks, events, notes, projects)
+- Moved attachments section to unified position across all entities
+- Detail pages now focus on essential information with cleaner layout
+
+**Environment Configuration**
+
+- Updated .env.example with R2 storage configuration and detailed setup comments
+- Updated .prettierignore to exclude wrangler.jsonc from formatting
+- Added R2 configuration variables to environment files
+
+**Line Ending Normalization**
+
+- Normalized line endings to LF across configuration files (.env.example, .env.local, .prettierignore, .gitignore)
+
+**Dependencies**
+
+- Added @aws-sdk/client-s3 (^3.916.0) for R2 storage operations
+- Added @aws-sdk/s3-request-presigner (^3.916.0) for secure download URLs
+- Added @radix-ui/react-progress (^1.1.7) for upload progress UI
+
+**Database Schema**
+
+- New migration (0003_numerous_psynapse) adding attachments table
+- Attachments table with polymorphic entity relationships (task_id, event_id, note_id, project_id)
+- File metadata tracking (filename, file size, content type, storage path)
+- User ownership and timestamps for all attachments
+
+### Fixed
+
+- Event detail page now properly fetches and displays attachments
+- Task detail page now includes attachments section with upload functionality
+- Note detail page layout improved with proper parent/child note navigation
+- Project detail page now supports file attachments for project documents
+
 ## [0.5.4] - 2025-10-24
 
 ### Changed
@@ -605,7 +674,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code splitting
 - Lazy loading for components
 
-[unreleased]: https://github.com/essedev/plannerinator/compare/v0.5.4...HEAD
+[unreleased]: https://github.com/essedev/plannerinator/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/essedev/plannerinator/compare/v0.5.4...v0.6.0
 [0.5.4]: https://github.com/essedev/plannerinator/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/essedev/plannerinator/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/essedev/plannerinator/compare/v0.5.1...v0.5.2

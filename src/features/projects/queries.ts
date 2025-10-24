@@ -181,9 +181,10 @@ export async function getProjectById(id: string) {
   // 2. Get project with parent
   const foundProject = await db.query.project.findFirst({
     where: and(eq(project.id, id), eq(project.userId, session.user.id)),
-    with: {
-      parentProject: true,
-    },
+    // TODO: Re-enable when relations are defined in schema
+    // with: {
+    //   parentProject: true,
+    // },
   });
 
   if (!foundProject) {
@@ -261,7 +262,15 @@ export async function getProjectStats(input: ProjectStatsInput) {
       count: count(),
     })
     .from(task)
-    .where(and(sql`${task.projectId} = ANY(${projectIds})`, eq(task.userId, session.user.id)))
+    .where(
+      and(
+        sql`${task.projectId} = ANY(${sql`ARRAY[${sql.join(
+          projectIds.map((id) => sql`${id}::uuid`),
+          sql`, `
+        )}]`})`,
+        eq(task.userId, session.user.id)
+      )
+    )
     .groupBy(task.status);
 
   const tasksByStatus = {
@@ -286,7 +295,10 @@ export async function getProjectStats(input: ProjectStatsInput) {
     .from(event)
     .where(
       and(
-        sql`${event.projectId} = ANY(${projectIds})`,
+        sql`${event.projectId} = ANY(${sql`ARRAY[${sql.join(
+          projectIds.map((id) => sql`${id}::uuid`),
+          sql`, `
+        )}]`})`,
         eq(event.userId, session.user.id),
         gte(event.startTime, new Date())
       )
@@ -296,7 +308,15 @@ export async function getProjectStats(input: ProjectStatsInput) {
   const [notesResult] = await db
     .select({ count: count() })
     .from(note)
-    .where(and(sql`${note.projectId} = ANY(${projectIds})`, eq(note.userId, session.user.id)));
+    .where(
+      and(
+        sql`${note.projectId} = ANY(${sql`ARRAY[${sql.join(
+          projectIds.map((id) => sql`${id}::uuid`),
+          sql`, `
+        )}]`})`,
+        eq(note.userId, session.user.id)
+      )
+    );
 
   return {
     projectId,

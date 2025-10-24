@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Tag, X, ChevronDown } from "lucide-react";
+import { Tag, ChevronDown } from "lucide-react";
 import { getTags } from "@/features/tags/queries";
 import { Separator } from "@/components/ui/separator";
 
@@ -71,9 +71,6 @@ export function TagFilter({ basePath }: TagFilterProps) {
     loadTags();
   }, []);
 
-  // Get selected tag objects
-  const selectedTags = tags.filter((tag) => selectedTagIds.includes(tag.id));
-
   // Update URL with tag filter
   const updateTagFilter = useCallback(
     (tagIds: string[], logic: "AND" | "OR") => {
@@ -114,15 +111,6 @@ export function TagFilter({ basePath }: TagFilterProps) {
   const clearTags = useCallback(() => {
     updateTagFilter([], "OR");
   }, [updateTagFilter]);
-
-  // Remove single tag
-  const removeTag = useCallback(
-    (tagId: string) => {
-      const newSelection = selectedTagIds.filter((id) => id !== tagId);
-      updateTagFilter(newSelection, tagLogic);
-    },
-    [selectedTagIds, tagLogic, updateTagFilter]
-  );
 
   return (
     <div className="flex items-center gap-2 flex-wrap">

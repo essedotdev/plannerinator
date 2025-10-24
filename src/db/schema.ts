@@ -61,6 +61,11 @@ export const user = pgTable("user", {
     .$onUpdate(() => new Date())
     .notNull(),
   role: userRoleEnum("role").default("user").notNull(),
+  // Storage quota for attachments
+  storageQuotaBytes: bigint("storage_quota_bytes", { mode: "number" })
+    .default(1073741824) // 1GB default
+    .notNull(),
+  storageUsedBytes: bigint("storage_used_bytes", { mode: "number" }).default(0).notNull(),
 });
 
 /**
@@ -755,6 +760,58 @@ export const comment = pgTable(
 );
 
 /**
+ * Attachments table
+ *
+ * File attachments for any entity (tasks, events, notes, projects, collection items, comments).
+ * Files are stored in Cloudflare R2 with metadata tracked in PostgreSQL.
+ *
+ * Supported entities:
+ * - task, event, note, project, collection_item, comment
+ *
+ * Storage strategy:
+ * - Files stored in R2 bucket with unique keys
+ * - Per-user storage quota enforced (default 1GB)
+ * - Signed URLs for secure access
+ *
+ * Relations:
+ * - user: Owner of the attachment
+ * - entity: Polymorphic reference to any entity
+ */
+export const attachment = pgTable(
+  "attachment",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+
+    // Entity reference (polymorphic)
+    entityType: entityTypeEnum("entity_type").notNull(),
+    entityId: uuid("entity_id").notNull(),
+
+    // File metadata
+    fileName: text("file_name").notNull(),
+    fileSize: integer("file_size").notNull(), // bytes
+    mimeType: text("mime_type").notNull(),
+
+    // R2 Storage
+    storageKey: text("storage_key").notNull().unique(), // R2 object key
+    storageUrl: text("storage_url"), // Public URL (if using public bucket)
+
+    // Custom metadata (e.g., dimensions for images, duration for videos)
+    metadata: jsonb("metadata").default({}).notNull(),
+
+    // Timestamps
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_attachments_entity").on(table.entityType, table.entityId),
+    index("idx_attachments_user").on(table.userId),
+    index("idx_attachments_storage_key").on(table.storageKey),
+  ]
+);
+
+/**
  * Activity Log table
  *
  * Tracks all changes for timeline and audit trail.
@@ -803,19 +860,6 @@ export const activityLog = pgTable(
 // ============================================
 // FUTURE TABLES
 // ============================================
-
-/**
- * Attachments table (Future - requires R2 setup)
- *
- * File attachments for any entity.
- * Will be implemented when Cloudflare R2 storage is configured.
- *
- * Planned features:
- * - Upload files to R2 bucket
- * - Generate public URLs
- * - Track file metadata (size, type, name)
- * - Attach to tasks, events, notes, projects, collection items, comments
- */
 
 /**
  * Shares table (Future - Phase 4: Collaboration)
@@ -895,6 +939,12 @@ export type NewEntityTag = typeof entityTag.$inferInsert;
  */
 export type Comment = typeof comment.$inferSelect;
 export type NewComment = typeof comment.$inferInsert;
+
+/**
+ * Attachment types
+ */
+export type Attachment = typeof attachment.$inferSelect;
+export type NewAttachment = typeof attachment.$inferInsert;
 
 /**
  * Activity Log types

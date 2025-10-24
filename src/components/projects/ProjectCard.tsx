@@ -12,12 +12,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical, Edit, Trash2, Archive, CheckCircle } from "lucide-react";
 import Link from "next/link";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { deleteProject, archiveProject, completeProject } from "@/features/projects/actions";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { PROJECT_STATUS_LABELS } from "@/lib/labels";
 import { formatShortDate, formatDueDate, getDueDateColorClass } from "@/lib/dates";
+import { ConfirmDialog } from "@/components/common";
 
 /**
  * Project status colors for badges
@@ -48,15 +49,10 @@ interface ProjectCardProps {
 export function ProjectCard({ project }: ProjectCardProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const handleDelete = async () => {
-    if (
-      !confirm(
-        `Are you sure you want to delete "${project.name}"? This will also delete all related tasks, events, and notes.`
-      )
-    ) {
-      return;
-    }
+  const handleDeleteConfirm = async () => {
+    setShowDeleteDialog(false);
 
     startTransition(async () => {
       try {
@@ -150,7 +146,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
               )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                onClick={handleDelete}
+                onClick={() => setShowDeleteDialog(true)}
                 disabled={isPending}
                 className="text-destructive focus:text-destructive cursor-pointer"
               >
@@ -191,6 +187,18 @@ export function ProjectCard({ project }: ProjectCardProps) {
           )}
         </div>
       </CardContent>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Project"
+        description={`Are you sure you want to delete "${project.name}"? This will also delete all related tasks, events, and notes. This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </Card>
   );
 }

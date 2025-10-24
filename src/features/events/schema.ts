@@ -50,24 +50,19 @@ const baseEventSchema = z.object({
 /**
  * Schema for creating a new event
  */
-export const createEventSchema = baseEventSchema
-  .omit({
-    allDay: true,
-    calendarType: true,
-  })
-  .refine(
-    (data) => {
-      // If endTime is provided, it must be after startTime
-      if (data.endTime && data.startTime) {
-        return data.endTime > data.startTime;
-      }
-      return true;
-    },
-    {
-      message: "End time must be after start time",
-      path: ["endTime"],
+export const createEventSchema = baseEventSchema.refine(
+  (data) => {
+    // If endTime is provided, it must be after startTime
+    if (data.endTime && data.startTime) {
+      return data.endTime > data.startTime;
     }
-  );
+    return true;
+  },
+  {
+    message: "End time must be after start time",
+    path: ["endTime"],
+  }
+);
 
 /**
  * Schema for updating an existing event

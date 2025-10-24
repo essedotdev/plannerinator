@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EditProfileForm } from "@/features/profile/EditProfileForm";
 import { PageHeader } from "@/components/common";
+import { StorageQuota } from "@/components/attachments/StorageQuota";
+import { getUserStorageQuota } from "@/features/attachments/queries";
 import { Shield, Mail, Calendar, Clock } from "lucide-react";
 import { formatFullDate, getDaysSince } from "@/lib/dates";
 
@@ -18,8 +20,11 @@ export default async function ProfilePage() {
   // Session è già verificata dal layout, garantito che session esiste
   const session = (await getSession())!;
 
-  // Fetch dati utente completi
-  const [userData] = await db.select().from(user).where(eq(user.id, session.user.id)).limit(1);
+  // Fetch dati utente completi e storage quota in parallelo
+  const [[userData], storageQuota] = await Promise.all([
+    db.select().from(user).where(eq(user.id, session.user.id)).limit(1),
+    getUserStorageQuota(),
+  ]);
 
   if (!userData) {
     throw new Error("User data not found");
@@ -126,6 +131,9 @@ export default async function ProfilePage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Storage Quota */}
+      <StorageQuota quota={storageQuota} />
     </div>
   );
 }

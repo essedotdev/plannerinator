@@ -1,5 +1,5 @@
 import { getTasks } from "@/features/tasks/queries";
-import { PageHeader } from "@/components/common";
+import { PageHeader, Pagination } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
@@ -29,6 +29,7 @@ interface TasksPageProps {
     sortOrder?: string;
     tags?: string;
     tagLogic?: string;
+    offset?: string;
   }>;
 }
 
@@ -48,6 +49,7 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
     tagLogic: params.tagLogic as "AND" | "OR" | undefined,
     sortBy: params.sortBy as TaskFilterInput["sortBy"],
     sortOrder: params.sortOrder as TaskFilterInput["sortOrder"],
+    offset: params.offset ? parseInt(params.offset) : 0,
   });
 
   return (
@@ -69,12 +71,8 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
       {/* Tasks View (List or Kanban) */}
       <TasksView tasks={tasks} />
 
-      {/* Pagination Info */}
-      {pagination.hasMore && (
-        <div className="text-center text-sm text-muted-foreground">
-          Showing {tasks.length} of {pagination.total} tasks
-        </div>
-      )}
+      {/* Pagination */}
+      <Pagination total={pagination.total} limit={pagination.limit} offset={pagination.offset} />
     </div>
   );
 }

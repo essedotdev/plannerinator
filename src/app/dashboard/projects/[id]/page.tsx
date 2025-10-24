@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Edit } from "lucide-react";
+import { Edit, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ import { getNotes } from "@/features/notes/queries";
 import { getEntityTags } from "@/features/tags/queries";
 import { getEntityComments } from "@/features/comments/queries";
 import { getEntityLinks } from "@/features/links/queries";
+import { getAttachmentsByEntity } from "@/features/attachments/queries";
 import { getSession } from "@/lib/auth";
 import { TaskList } from "@/components/tasks/TaskList";
 import { EventList } from "@/components/events/EventList";
@@ -21,6 +22,7 @@ import { NoteList } from "@/components/notes/NoteList";
 import { TagInput } from "@/components/tags/TagInput";
 import { CommentThread } from "@/components/comments/CommentThread";
 import { EntityLinksSection } from "@/components/links/EntityLinksSection";
+import { AttachmentsSection } from "@/components/attachments/AttachmentsSection";
 import { PROJECT_STATUS_LABELS } from "@/lib/labels";
 import { DeleteProjectButton } from "@/components/projects/DeleteProjectButton";
 import { formatFullDate } from "@/lib/dates";
@@ -32,6 +34,7 @@ import { formatFullDate } from "@/lib/dates";
  * - Project overview with stats
  * - Edit/delete actions
  * - Tabs for: Overview, Tasks, Events, Notes
+ * - Tags, attachments, links, and comments sections
  * - Related entities filtered by project
  */
 
@@ -65,22 +68,25 @@ export default async function ProjectDetailPage({ params, searchParams }: Projec
   // Fetch project stats
   const stats = await getProjectStats({ projectId: id });
 
-  // Fetch related entities, tags, comments, and links in parallel
+  // Fetch related entities, tags, comments, links, and attachments in parallel
   const tasksPromise = getTasks({ projectId: id, limit: 100 });
   const eventsPromise = getEvents({ projectId: id, limit: 100 });
   const notesPromise = getNotes({ projectId: id, limit: 100 });
   const tagsPromise = getEntityTags({ entityType: "project", entityId: id });
   const commentsPromise = getEntityComments({ entityType: "project", entityId: id });
   const linksPromise = getEntityLinks({ entityType: "project", entityId: id });
+  const attachmentsPromise = getAttachmentsByEntity("project", id);
 
-  const [tasksData, eventsData, notesData, tags, commentsData, links] = await Promise.all([
-    tasksPromise,
-    eventsPromise,
-    notesPromise,
-    tagsPromise,
-    commentsPromise,
-    linksPromise,
-  ]);
+  const [tasksData, eventsData, notesData, tags, commentsData, links, attachments] =
+    await Promise.all([
+      tasksPromise,
+      eventsPromise,
+      notesPromise,
+      tagsPromise,
+      commentsPromise,
+      linksPromise,
+      attachmentsPromise,
+    ]);
 
   return (
     <div className="space-y-6">
@@ -233,17 +239,6 @@ export default async function ProjectDetailPage({ params, searchParams }: Projec
               </div>
             </CardContent>
           </Card>
-
-          {/* Tags Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Tags</CardTitle>
-              <CardDescription>Organize and categorize this project</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <TagInput entityType="project" entityId={id} initialTags={tags} />
-            </CardContent>
-          </Card>
         </TabsContent>
 
         {/* Tasks Tab */}
@@ -267,6 +262,22 @@ export default async function ProjectDetailPage({ params, searchParams }: Projec
           </Suspense>
         </TabsContent>
       </Tabs>
+
+      {/* Tags Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Tag className="h-4 w-4" />
+            Tags
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <TagInput entityType="project" entityId={id} initialTags={tags} />
+        </CardContent>
+      </Card>
+
+      {/* Attachments Section */}
+      <AttachmentsSection entityType="project" entityId={id} initialAttachments={attachments} />
 
       {/* Links Section */}
       <EntityLinksSection entityType="project" entityId={id} initialLinks={links} />

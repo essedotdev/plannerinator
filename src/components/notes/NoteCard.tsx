@@ -12,12 +12,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { FileText, Star, MoreVertical, Trash2, Edit } from "lucide-react";
 import Link from "next/link";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { deleteNote, toggleNoteFavorite } from "@/features/notes/actions";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { NOTE_TYPE_LABELS } from "@/lib/labels";
 import { formatShortDate } from "@/lib/dates";
+import { ConfirmDialog } from "@/components/common";
 
 /**
  * Note type colors
@@ -50,11 +51,10 @@ interface NoteCardProps {
 export function NoteCard({ note }: NoteCardProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this note?")) {
-      return;
-    }
+  const handleDeleteConfirm = async () => {
+    setShowDeleteDialog(false);
 
     startTransition(async () => {
       try {
@@ -157,7 +157,7 @@ export function NoteCard({ note }: NoteCardProps) {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                onClick={handleDelete}
+                onClick={() => setShowDeleteDialog(true)}
                 disabled={isPending}
                 className="text-destructive focus:text-destructive cursor-pointer"
               >
@@ -168,6 +168,18 @@ export function NoteCard({ note }: NoteCardProps) {
           </DropdownMenu>
         </div>
       </CardContent>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Note"
+        description={`Are you sure you want to delete "${note.title || "this note"}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </Card>
   );
 }

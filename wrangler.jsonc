@@ -7,7 +7,7 @@
   "keep_names": false,
   "assets": {
     "directory": ".open-next/assets",
-    "binding": "ASSETS",
+    "binding": "ASSETS"
   },
   "vars": {
     "BETTER_AUTH_URL": "https://planner.essedev.it",
@@ -16,5 +16,9 @@
     "EMAIL_FROM": "noreply@planner.essedev.it",
     "EMAIL_REPLY_TO": "support@planner.essedev.it",
     "ADMIN_EMAIL": "admin@planner.essedev.it",
-  },
+    "R2_ACCOUNT_ID": "your-account-id",
+    "R2_BUCKET_NAME": "plannerinator-attachments",
+    "MAX_FILE_SIZE_MB": "10",
+    "DEFAULT_STORAGE_QUOTA_GB": "1"
+  }
 }

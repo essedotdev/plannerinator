@@ -6,12 +6,13 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { createNote, updateNote } from "@/features/notes/actions";
-import { createNoteSchema } from "@/features/notes/schema";
+import { createNoteSchema, updateNoteSchema, type NoteType } from "@/features/notes/schema";
 import { getProjects } from "@/features/projects/queries";
-import { PROJECT_STATUS_LABELS } from "@/lib/labels";
+import { PROJECT_STATUS_LABELS, NOTE_TYPE_LABELS } from "@/lib/labels";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -31,6 +32,8 @@ interface NoteFormProps {
     id: string;
     title?: string | null;
     content?: string | null;
+    type?: "note" | "document" | "research" | "idea" | "snippet";
+    isFavorite?: boolean;
     projectId?: string | null;
     parentNoteId?: string | null;
     project?: {
@@ -50,10 +53,12 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
   const [loadingProjects, setLoadingProjects] = useState(true);
 
   const { register, handleSubmit, formState, watch, setValue } = useForm({
-    resolver: zodResolver(createNoteSchema),
+    resolver: zodResolver(mode === "edit" ? updateNoteSchema : createNoteSchema),
     defaultValues: {
       title: initialData?.title || "",
       content: initialData?.content || "",
+      type: initialData?.type || "note",
+      isFavorite: initialData?.isFavorite || false,
       projectId: initialData?.projectId || undefined,
       parentNoteId: initialData?.parentNoteId || undefined,
     },
@@ -128,51 +133,99 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
             )}
           </div>
 
-          {/* Project Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="project">Project (optional)</Label>
-            <Select
-              value={watch("projectId") || undefined}
-              onValueChange={(value) =>
-                setValue("projectId", value || undefined, { shouldValidate: true })
-              }
-              disabled={isSubmitting || loadingProjects}
-            >
-              <SelectTrigger id="project">
-                <SelectValue placeholder={loadingProjects ? "Loading..." : "No project selected"} />
-              </SelectTrigger>
-              <SelectContent>
-                {projects.map((project) => (
-                  <SelectItem key={project.id} value={project.id}>
-                    <span className="flex items-center gap-2 w-full">
-                      {project.icon && <span>{project.icon}</span>}
-                      <span className="flex-1">{project.name}</span>
-                      {project.status && project.status !== "active" && (
-                        <span className="text-xs text-muted-foreground">
-                          (
-                          {
-                            PROJECT_STATUS_LABELS[
-                              project.status as keyof typeof PROJECT_STATUS_LABELS
-                            ]
-                          }
-                          )
-                        </span>
-                      )}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {watch("projectId") && (
-              <button
-                type="button"
-                onClick={() => setValue("projectId", undefined, { shouldValidate: true })}
-                className="text-xs text-muted-foreground hover:text-foreground"
+          {/* Row 2: Project | Type */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Project Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="project">Project</Label>
+              <Select
+                value={watch("projectId") || undefined}
+                onValueChange={(value) =>
+                  setValue("projectId", value || undefined, { shouldValidate: true })
+                }
+                disabled={isSubmitting || loadingProjects}
               >
-                Clear selection
-              </button>
+                <SelectTrigger id="project" className="w-full">
+                  <SelectValue placeholder={loadingProjects ? "Loading..." : "No project"} />
+                </SelectTrigger>
+                <SelectContent className="w-[var(--radix-select-trigger-width)]">
+                  {projects.map((project) => (
+                    <SelectItem key={project.id} value={project.id}>
+                      <span className="flex items-center gap-2">
+                        {project.icon && <span>{project.icon}</span>}
+                        <span className="flex-1 truncate">{project.name}</span>
+                        {project.status && project.status !== "active" && (
+                          <span className="text-xs text-muted-foreground">
+                            (
+                            {
+                              PROJECT_STATUS_LABELS[
+                                project.status as keyof typeof PROJECT_STATUS_LABELS
+                              ]
+                            }
+                            )
+                          </span>
+                        )}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {watch("projectId") && (
+                <button
+                  type="button"
+                  onClick={() => setValue("projectId", undefined, { shouldValidate: true })}
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+
+            {/* Type - Only in Edit Mode */}
+            {mode === "edit" ? (
+              <div className="space-y-2">
+                <Label htmlFor="type">Type</Label>
+                <Select
+                  value={watch("type") || "note"}
+                  onValueChange={(value) => setValue("type", value as NoteType)}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger id="type" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="note">{NOTE_TYPE_LABELS.note}</SelectItem>
+                    <SelectItem value="document">{NOTE_TYPE_LABELS.document}</SelectItem>
+                    <SelectItem value="research">{NOTE_TYPE_LABELS.research}</SelectItem>
+                    <SelectItem value="idea">{NOTE_TYPE_LABELS.idea}</SelectItem>
+                    <SelectItem value="snippet">{NOTE_TYPE_LABELS.snippet}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              <div></div>
             )}
           </div>
+
+          {/* Favorite - Only in Edit Mode */}
+          {mode === "edit" && (
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="isFavorite"
+                checked={watch("isFavorite") || false}
+                onCheckedChange={(checked) =>
+                  setValue("isFavorite", checked as boolean, { shouldValidate: true })
+                }
+                disabled={isSubmitting}
+              />
+              <label
+                htmlFor="isFavorite"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+              >
+                Mark as favorite
+              </label>
+            </div>
+          )}
 
           {/* Content - Markdown Editor */}
           <div className="space-y-2">

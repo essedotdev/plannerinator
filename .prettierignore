@@ -19,6 +19,7 @@ drizzle
 
 # Wrangler
 .wrangler
+wrangler.jsonc
 
 # Git
 .git

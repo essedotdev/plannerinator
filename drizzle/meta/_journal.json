@@ -22,6 +22,13 @@
       "when": 1761047954533,
       "tag": "0002_majestic_captain_universe",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1761311036109,
+      "tag": "0003_numerous_psynapse",
+      "breakpoints": true
     }
   ]
 }

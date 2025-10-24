@@ -2,6 +2,7 @@ import { getNoteById } from "@/features/notes/queries";
 import { getEntityTags } from "@/features/tags/queries";
 import { getEntityComments } from "@/features/comments/queries";
 import { getEntityLinks } from "@/features/links/queries";
+import { getAttachmentsByEntity } from "@/features/attachments/queries";
 import { getSession } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/common";
@@ -9,10 +10,10 @@ import { NoteForm } from "@/components/notes/NoteForm";
 import { TagInput } from "@/components/tags/TagInput";
 import { CommentThread } from "@/components/comments/CommentThread";
 import { EntityLinksSection } from "@/components/links/EntityLinksSection";
+import { AttachmentsSection } from "@/components/attachments/AttachmentsSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { FolderOpen, FileText, Star } from "lucide-react";
-import { NOTE_TYPE_LABELS } from "@/lib/labels";
+import { Tag } from "lucide-react";
+import Link from "next/link";
 
 /**
  * Note detail page
@@ -45,11 +46,12 @@ export default async function NoteDetailPage({ params }: NoteDetailPageProps) {
     notFound();
   }
 
-  // Fetch tags, comments, and links in parallel
-  const [tags, commentsData, links] = await Promise.all([
+  // Fetch tags, comments, links, and attachments in parallel
+  const [tags, commentsData, links, attachments] = await Promise.all([
     getEntityTags({ entityType: "note", entityId: id }),
     getEntityComments({ entityType: "note", entityId: id }),
     getEntityLinks({ entityType: "note", entityId: id }),
+    getAttachmentsByEntity("note", id),
   ]);
 
   return (
@@ -64,75 +66,61 @@ export default async function NoteDetailPage({ params }: NoteDetailPageProps) {
       {/* Edit Form */}
       <NoteForm mode="edit" initialData={noteData} />
 
-      {/* Additional Info Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Note Metadata</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Project */}
-          {noteData.project && (
-            <div className="flex items-center gap-2">
-              <FolderOpen className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-sm text-muted-foreground">Project</p>
-                <p className="font-medium">{noteData.project.name}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Type */}
-          <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-muted-foreground" />
-            <div>
-              <p className="text-sm text-muted-foreground">Type</p>
-              <Badge variant="outline">{NOTE_TYPE_LABELS[noteData.type]}</Badge>
-            </div>
-          </div>
-
-          {/* Favorite */}
-          {noteData.isFavorite && (
-            <div className="flex items-center gap-2">
-              <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-              <p className="font-medium">Favorite</p>
-            </div>
-          )}
-
-          {/* Parent Note */}
-          {noteData.parentNote && (
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">Parent Note</p>
-              <p className="font-medium">{noteData.parentNote.title || "Untitled Note"}</p>
-            </div>
-          )}
-
-          {/* Child Notes */}
-          {noteData.childNotes && noteData.childNotes.length > 0 && (
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">
-                Child Notes ({noteData.childNotes.length})
-              </p>
-              <ul className="space-y-1">
-                {noteData.childNotes.map((child) => (
-                  <li key={child.id} className="text-sm">
-                    {child.title || "Untitled Note"}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
       {/* Tags Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Tags</CardTitle>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Tag className="h-4 w-4" />
+            Tags
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <TagInput entityType="note" entityId={id} initialTags={tags} />
         </CardContent>
       </Card>
+
+      {/* Parent Note Card */}
+      {noteData.parentNote && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Parent Note</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href={`/dashboard/notes/${noteData.parentNote.id}`}
+              className="block hover:text-primary transition-colors"
+            >
+              <p className="font-medium">{noteData.parentNote.title || "Untitled Note"}</p>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Child Notes Card */}
+      {noteData.childNotes && noteData.childNotes.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Child Notes ({noteData.childNotes.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {noteData.childNotes.map((child) => (
+                <li key={child.id}>
+                  <Link
+                    href={`/dashboard/notes/${child.id}`}
+                    className="text-sm hover:text-primary transition-colors"
+                  >
+                    {child.title || "Untitled Note"}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Attachments Section */}
+      <AttachmentsSection entityType="note" entityId={id} initialAttachments={attachments} />
 
       {/* Links Section */}
       <EntityLinksSection entityType="note" entityId={id} initialLinks={links} />
