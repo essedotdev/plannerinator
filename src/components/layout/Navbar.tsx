@@ -97,10 +97,10 @@ export function Navbar() {
             // Not logged in: Sign in / Register
             <>
               <Button variant="ghost" asChild className="hidden sm:flex">
-                <Link href="/login">Sign in</Link>
+                <Link href="/auth?tab=login">Sign in</Link>
               </Button>
               <Button asChild>
-                <Link href="/register">Get Started</Link>
+                <Link href="/auth?tab=signup">Get Started</Link>
               </Button>
             </>
           )}

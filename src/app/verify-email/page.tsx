@@ -92,7 +92,7 @@ function VerifyEmailContent() {
               <Link href="/dashboard/profile" className="block">
                 <Button className="w-full">Request New Verification Email</Button>
               </Link>
-              <Link href="/login" className="block">
+              <Link href="/auth" className="block">
                 <Button variant="outline" className="w-full">
                   Back to Login
                 </Button>

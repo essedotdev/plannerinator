@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.3] - 2025-10-24
+
+### Added
+
+- Unified authentication page at `/auth` with tabbed interface for login and signup
+- Tab persistence in URL (supports `?tab=login` and `?tab=signup` query parameters)
+
+### Changed
+
+- Consolidated login and signup pages into a single `/auth` page with tabs for better UX
+- Improved authentication flow with cleaner navigation between login and signup modes
+- Normalized line endings across all configuration files (CRLF to LF)
+
+### Removed
+
+- Separate `/login` page (consolidated into `/auth`)
+- Separate `/register` page (consolidated into `/auth`)
+
 ## [0.5.2] - 2025-10-24
 
 ### Changed
@@ -578,7 +596,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code splitting
 - Lazy loading for components
 
-[unreleased]: https://github.com/essedev/plannerinator/compare/v0.5.2...HEAD
+[unreleased]: https://github.com/essedev/plannerinator/compare/v0.5.3...HEAD
+[0.5.3]: https://github.com/essedev/plannerinator/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/essedev/plannerinator/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/essedev/plannerinator/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/essedev/plannerinator/compare/v0.4.0...v0.5.0

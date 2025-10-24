@@ -29,7 +29,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/login"
+                  href="/auth?tab=login"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Sign In
@@ -37,7 +37,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/register"
+                  href="/auth?tab=signup"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Get Started

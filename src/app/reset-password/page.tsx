@@ -78,7 +78,7 @@ function ResetPasswordContent() {
 
       // Redirect to login after 3 seconds
       setTimeout(() => {
-        router.push("/login");
+        router.push("/auth");
       }, 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to reset password");
@@ -107,7 +107,7 @@ function ResetPasswordContent() {
               <Link href="/forgot-password" className="block">
                 <Button className="w-full">Request New Reset Link</Button>
               </Link>
-              <Link href="/login" className="block">
+              <Link href="/auth" className="block">
                 <Button variant="outline" className="w-full">
                   Back to Login
                 </Button>
@@ -138,7 +138,7 @@ function ResetPasswordContent() {
             </p>
 
             <div className="pt-4">
-              <Link href="/login" className="block">
+              <Link href="/auth" className="block">
                 <Button className="w-full">Go to Login</Button>
               </Link>
             </div>
@@ -200,7 +200,7 @@ function ResetPasswordContent() {
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
                 Remember your password?{" "}
-                <Link href="/login" className="font-medium text-primary hover:underline">
+                <Link href="/auth" className="font-medium text-primary hover:underline">
                   Sign in
                 </Link>
               </p>

@@ -75,7 +75,7 @@ export default function ForgotPasswordPage() {
             </p>
 
             <div className="pt-4">
-              <Link href="/login" className="block">
+              <Link href="/auth" className="block">
                 <Button variant="outline" className="w-full">
                   Back to Login
                 </Button>
@@ -122,7 +122,7 @@ export default function ForgotPasswordPage() {
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
                 Remember your password?{" "}
-                <Link href="/login" className="font-medium text-primary hover:underline">
+                <Link href="/auth" className="font-medium text-primary hover:underline">
                   Sign in
                 </Link>
               </p>

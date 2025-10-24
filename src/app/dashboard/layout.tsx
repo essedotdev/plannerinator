@@ -15,7 +15,7 @@ import { redirect } from "next/navigation";
  * Sicurezza:
  * - Chiama getSession() che valida completamente la sessione Better Auth
  * - Verifica firma del cookie, scadenza, e integrità del token
- * - Redirect a /login se la sessione non è valida
+ * - Redirect a /auth se la sessione non è valida
  * - RBAC (controllo ruoli) gestito nei singoli componenti tramite RoleGate
  *
  * Layout:
@@ -27,7 +27,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const session = await getSession();
 
   if (!session?.user) {
-    redirect("/login");
+    redirect("/auth");
   }
 
   return (

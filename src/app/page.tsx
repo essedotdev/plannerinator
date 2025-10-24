@@ -10,5 +10,5 @@ export default async function HomePage() {
   }
 
   // Altrimenti redirect al login
-  redirect("/login");
+  redirect("/auth");
 }
