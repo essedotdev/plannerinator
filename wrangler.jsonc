@@ -16,7 +16,7 @@
     "EMAIL_FROM": "noreply@planner.essedev.it",
     "EMAIL_REPLY_TO": "support@planner.essedev.it",
     "ADMIN_EMAIL": "admin@planner.essedev.it",
-    "R2_ACCOUNT_ID": "your-account-id",
+    "R2_ACCOUNT_ID": "8ae40b811b690b766707e9cc398ba578",
     "R2_BUCKET_NAME": "plannerinator-attachments",
     "MAX_FILE_SIZE_MB": "10",
     "DEFAULT_STORAGE_QUOTA_GB": "1"
