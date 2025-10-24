@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.4] - 2025-10-24
+
+### Changed
+
+- Tag filter dropdown now matches the width of its trigger button for consistent UI alignment with other select components
+- Tag filter popover simplified with internal "Clear" button instead of external clear button and header
+- Removed external selected tag badges from TagFilter component - selection now managed entirely within the dropdown
+- TagInput popover width now matches its trigger button for consistent UI
+
 ## [0.5.3] - 2025-10-24
 
 ### Added
@@ -596,7 +605,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code splitting
 - Lazy loading for components
 
-[unreleased]: https://github.com/essedev/plannerinator/compare/v0.5.3...HEAD
+[unreleased]: https://github.com/essedev/plannerinator/compare/v0.5.4...HEAD
+[0.5.4]: https://github.com/essedev/plannerinator/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/essedev/plannerinator/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/essedev/plannerinator/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/essedev/plannerinator/compare/v0.5.0...v0.5.1

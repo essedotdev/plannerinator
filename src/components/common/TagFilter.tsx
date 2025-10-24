@@ -143,18 +143,8 @@ export function TagFilter({ basePath }: TagFilterProps) {
           </Button>
         </PopoverTrigger>
 
-        <PopoverContent className="w-80" align="start">
+        <PopoverContent className="w-[var(--radix-popover-trigger-width)]" align="start">
           <div className="space-y-4">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <h4 className="font-semibold text-sm">Filter by Tags</h4>
-              {selectedTagIds.length > 0 && (
-                <Button variant="ghost" size="sm" onClick={clearTags} className="h-7 text-xs">
-                  Clear all
-                </Button>
-              )}
-            </div>
-
             {/* AND/OR Toggle */}
             {selectedTagIds.length > 1 && (
               <>
@@ -206,27 +196,16 @@ export function TagFilter({ basePath }: TagFilterProps) {
                 ))
               )}
             </div>
+
+            {/* Clear Button */}
+            {selectedTagIds.length > 0 && (
+              <Button variant="ghost" size="sm" onClick={clearTags} className="h-7 text-xs w-full">
+                Clear
+              </Button>
+            )}
           </div>
         </PopoverContent>
       </Popover>
-
-      {/* Selected Tags Badges */}
-      {selectedTags.length > 0 && (
-        <>
-          {selectedTags.map((tag) => (
-            <Badge key={tag.id} variant="secondary" className="gap-1.5 pr-1">
-              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: tag.color }} />
-              {tag.name}
-              <button
-                onClick={() => removeTag(tag.id)}
-                className="ml-1 rounded-full hover:bg-muted p-0.5"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
-        </>
-      )}
     </div>
   );
 }

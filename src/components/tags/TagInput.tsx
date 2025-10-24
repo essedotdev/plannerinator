@@ -148,7 +148,7 @@ export function TagInput({ entityType, entityId, initialTags }: TagInputProps) {
               Add Tag
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-80" align="start">
+          <PopoverContent className="w-[var(--radix-popover-trigger-width)]" align="start">
             <div className="space-y-4">
               <div className="space-y-2">
                 <h4 className="font-medium leading-none">Add Tag</h4>

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X, ListChecks, Flag } from "lucide-react";
+import { ListChecks, Flag } from "lucide-react";
 import { useCallback } from "react";
 import { TagFilter } from "@/components/common/TagFilter";
 
@@ -42,16 +42,6 @@ export function TaskFilters() {
     },
     [router, searchParams]
   );
-
-  const clearFilters = useCallback(() => {
-    router.push("/dashboard/tasks");
-  }, [router]);
-
-  const hasFilters =
-    searchParams.has("status") ||
-    searchParams.has("priority") ||
-    searchParams.has("search") ||
-    searchParams.has("tags");
 
   return (
     <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center flex-wrap">
@@ -112,13 +102,6 @@ export function TaskFilters() {
 
       {/* Tag Filter */}
       <TagFilter basePath="/dashboard/tasks" />
-
-      {/* Clear Filters */}
-      {hasFilters && (
-        <Button variant="outline" size="icon" onClick={clearFilters}>
-          <X className="h-4 w-4" />
-        </Button>
-      )}
     </div>
   );
 }
