@@ -89,7 +89,11 @@ export function EventForm({ mode, initialData }: EventFormProps) {
 
       if (checked) {
         // Switching to All Day mode: save full datetime and show only date
-        if (currentStartTime && typeof currentStartTime === "string" && currentStartTime.length > 10) {
+        if (
+          currentStartTime &&
+          typeof currentStartTime === "string" &&
+          currentStartTime.length > 10
+        ) {
           savedStartTimeRef.current = currentStartTime;
           setValue("startTime", currentStartTime.substring(0, 10), { shouldValidate: false });
         }
@@ -99,7 +103,11 @@ export function EventForm({ mode, initialData }: EventFormProps) {
         }
       } else {
         // Switching to timed mode: restore saved datetime or add default time
-        if (currentStartTime && typeof currentStartTime === "string" && currentStartTime.length === 10) {
+        if (
+          currentStartTime &&
+          typeof currentStartTime === "string" &&
+          currentStartTime.length === 10
+        ) {
           if (savedStartTimeRef.current && savedStartTimeRef.current.startsWith(currentStartTime)) {
             setValue("startTime", savedStartTimeRef.current, { shouldValidate: false });
           } else {
@@ -243,29 +251,25 @@ export function EventForm({ mode, initialData }: EventFormProps) {
               )}
             </div>
 
-            {/* Calendar Type - Only in Edit Mode */}
-            {mode === "edit" ? (
-              <div className="space-y-2">
-                <Label htmlFor="calendarType">Calendar Type</Label>
-                <Select
-                  value={watch("calendarType") || "personal"}
-                  onValueChange={(value) => setValue("calendarType", value as EventCalendarType)}
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger id="calendarType" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="personal">{EVENT_CALENDAR_TYPE_LABELS.personal}</SelectItem>
-                    <SelectItem value="work">{EVENT_CALENDAR_TYPE_LABELS.work}</SelectItem>
-                    <SelectItem value="family">{EVENT_CALENDAR_TYPE_LABELS.family}</SelectItem>
-                    <SelectItem value="other">{EVENT_CALENDAR_TYPE_LABELS.other}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            ) : (
-              <div></div>
-            )}
+            {/* Calendar Type */}
+            <div className="space-y-2">
+              <Label htmlFor="calendarType">Calendar Type</Label>
+              <Select
+                value={watch("calendarType") || "personal"}
+                onValueChange={(value) => setValue("calendarType", value as EventCalendarType)}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger id="calendarType" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="personal">{EVENT_CALENDAR_TYPE_LABELS.personal}</SelectItem>
+                  <SelectItem value="work">{EVENT_CALENDAR_TYPE_LABELS.work}</SelectItem>
+                  <SelectItem value="family">{EVENT_CALENDAR_TYPE_LABELS.family}</SelectItem>
+                  <SelectItem value="other">{EVENT_CALENDAR_TYPE_LABELS.other}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Row 4: Start Time | (End Time + All Day) */}

@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2025-10-26
+
+### Added
+
+- Project edit page route at `/dashboard/projects/[id]/edit` for dedicated editing interface
+- Calendar type selector in event creation form (previously only available in edit mode)
+- Status selector in project creation form for setting initial project status
+- Note type and favorite toggle in note creation form (previously only in edit mode)
+
+### Changed
+
+**Comment System Improvements**
+
+- Comments now use optimistic UI updates for instant feedback when posting
+- Comment form clears immediately on submit for better perceived performance
+- New comments appear instantly with "Posting..." status while saving
+- Reply button and action menu hidden for pending comments during save
+
+**UI/UX Enhancements**
+
+- Project detail page reorganized with tags, attachments, links, and comments moved inside the Overview tab for cleaner layout
+- Projects list grid changed from 3-column to 2-column layout for better card sizing on larger screens
+- ProjectCard now uses flexbox layout with improved text wrapping and spacing
+- ProjectCard descriptions now properly break long words and use line-clamping
+- PageHeader component improved with better gap spacing and flex-shrink handling for action buttons
+- PageHeader title and description area now uses min-w-0 to prevent overflow issues
+- All form field labels now consistently aligned across create and edit modes
+
+**Form Consistency**
+
+- Event forms now show calendar type selector in both create and edit modes
+- Note forms now show type selector and favorite toggle in both create and edit modes
+- Project forms now include status selector and color picker in create mode
+- Removed conditional rendering that hid form fields in create mode
+
+### Fixed
+
+- Fixed text overflow issues in PageHeader when title or description is too long
+- Fixed ProjectCard layout issues with long project names and descriptions
+- Fixed comment deletion state variable naming conflict (isPending vs isDeleting)
+- Fixed default user display when user data is missing in comments (shows "?" instead of crashing)
+
 ## [0.6.0] - 2025-10-24
 
 ### Added
@@ -674,7 +716,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code splitting
 - Lazy loading for components
 
-[unreleased]: https://github.com/essedev/plannerinator/compare/v0.6.0...HEAD
+[unreleased]: https://github.com/essedev/plannerinator/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/essedev/plannerinator/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/essedev/plannerinator/compare/v0.5.4...v0.6.0
 [0.5.4]: https://github.com/essedev/plannerinator/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/essedev/plannerinator/compare/v0.5.2...v0.5.3

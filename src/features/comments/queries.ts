@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { comment, user } from "@/db/schema";
-import { eq, and, isNull, desc, count } from "drizzle-orm";
+import { eq, and, desc, count } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { getEntityCommentsSchema, type GetEntityCommentsInput } from "./schema";
 
@@ -20,7 +20,7 @@ import { getEntityCommentsSchema, type GetEntityCommentsInput } from "./schema";
 // ============================================================================
 
 /**
- * Get all comments for a specific entity (excluding replies)
+ * Get all comments for a specific entity (including replies)
  *
  * @param input - Entity type and entity ID
  * @returns Array of comments with user info, pagination info
@@ -35,7 +35,7 @@ export async function getEntityComments(input: GetEntityCommentsInput) {
   // 2. Validate input
   const { entityType, entityId, limit = 50, offset = 0 } = getEntityCommentsSchema.parse(input);
 
-  // 3. Get top-level comments (no parent) for this entity
+  // 3. Get ALL comments (including replies) for this entity
   // Only show comments from the current user for now (user isolation)
   // In a real app, you might want to show comments from collaborators too
   const comments = await db
@@ -54,15 +54,14 @@ export async function getEntityComments(input: GetEntityCommentsInput) {
       and(
         eq(comment.entityType, entityType),
         eq(comment.entityId, entityId),
-        eq(comment.userId, session.user.id), // User isolation
-        isNull(comment.parentCommentId) // Only top-level comments
+        eq(comment.userId, session.user.id) // User isolation
       )
     )
     .orderBy(desc(comment.createdAt))
     .limit(limit)
     .offset(offset);
 
-  // 4. Get total count
+  // 4. Get total count (including replies)
   const [{ total }] = await db
     .select({ total: count() })
     .from(comment)
@@ -70,8 +69,7 @@ export async function getEntityComments(input: GetEntityCommentsInput) {
       and(
         eq(comment.entityType, entityType),
         eq(comment.entityId, entityId),
-        eq(comment.userId, session.user.id),
-        isNull(comment.parentCommentId)
+        eq(comment.userId, session.user.id)
       )
     );
 

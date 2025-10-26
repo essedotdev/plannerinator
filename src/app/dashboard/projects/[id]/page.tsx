@@ -239,6 +239,33 @@ export default async function ProjectDetailPage({ params, searchParams }: Projec
               </div>
             </CardContent>
           </Card>
+
+          {/* Tags Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Tag className="h-4 w-4" />
+                Tags
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TagInput entityType="project" entityId={id} initialTags={tags} />
+            </CardContent>
+          </Card>
+
+          {/* Attachments Section */}
+          <AttachmentsSection entityType="project" entityId={id} initialAttachments={attachments} />
+
+          {/* Links Section */}
+          <EntityLinksSection entityType="project" entityId={id} initialLinks={links} />
+
+          {/* Comments Section */}
+          <CommentThread
+            entityType="project"
+            entityId={id}
+            currentUserId={session.user.id}
+            initialComments={commentsData.comments}
+          />
         </TabsContent>
 
         {/* Tasks Tab */}
@@ -262,33 +289,6 @@ export default async function ProjectDetailPage({ params, searchParams }: Projec
           </Suspense>
         </TabsContent>
       </Tabs>
-
-      {/* Tags Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Tag className="h-4 w-4" />
-            Tags
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <TagInput entityType="project" entityId={id} initialTags={tags} />
-        </CardContent>
-      </Card>
-
-      {/* Attachments Section */}
-      <AttachmentsSection entityType="project" entityId={id} initialAttachments={attachments} />
-
-      {/* Links Section */}
-      <EntityLinksSection entityType="project" entityId={id} initialLinks={links} />
-
-      {/* Comments Section */}
-      <CommentThread
-        entityType="project"
-        entityId={id}
-        currentUserId={session.user.id}
-        initialComments={commentsData.comments}
-      />
     </div>
   );
 }

@@ -24,6 +24,7 @@ interface CommentFormProps {
   commentId?: string;
   onSuccess?: () => void;
   onCancel?: () => void;
+  onOptimisticAdd?: (content: string, parentCommentId?: string) => void;
 }
 
 export function CommentForm({
@@ -35,6 +36,7 @@ export function CommentForm({
   commentId,
   onSuccess,
   onCancel,
+  onOptimisticAdd,
 }: CommentFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -48,18 +50,40 @@ export function CommentForm({
       return;
     }
 
-    startTransition(async () => {
-      try {
-        if (mode === "create") {
+    if (mode === "create") {
+      // Save content before clearing
+      const trimmedContent = content.trim();
+
+      // Execute synchronous UI updates BEFORE starting transition
+      // This makes the form disappear instantly
+      setContent("");
+      onSuccess?.();
+
+      // Execute optimistic update and server call in transition
+      // (useOptimistic requires updates to be inside a transition)
+      startTransition(async () => {
+        try {
+          // Add optimistic comment (must be inside transition)
+          if (onOptimisticAdd) {
+            onOptimisticAdd(trimmedContent, parentCommentId);
+          }
+
           await createComment({
-            content: content.trim(),
+            content: trimmedContent,
             entityType,
             entityId,
             parentCommentId,
           });
           toast.success(parentCommentId ? "Reply added" : "Comment added");
-          setContent("");
-        } else {
+          router.refresh();
+        } catch (error) {
+          toast.error(error instanceof Error ? error.message : "Failed to save comment");
+        }
+      });
+    } else {
+      // Edit mode - keep everything in transition
+      startTransition(async () => {
+        try {
           if (!commentId) {
             throw new Error("Comment ID is required for edit mode");
           }
@@ -67,14 +91,13 @@ export function CommentForm({
             content: content.trim(),
           });
           toast.success("Comment updated");
+          onSuccess?.();
+          router.refresh();
+        } catch (error) {
+          toast.error(error instanceof Error ? error.message : "Failed to save comment");
         }
-
-        router.refresh();
-        onSuccess?.();
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Failed to save comment");
-      }
-    });
+      });
+    }
   };
 
   return (

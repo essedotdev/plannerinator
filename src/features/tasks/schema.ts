@@ -65,7 +65,6 @@ const baseTaskSchema = z.object({
  * userId and timestamps are automatically added server-side
  */
 export const createTaskSchema = baseTaskSchema.omit({
-  status: true,
   position: true,
 });
 

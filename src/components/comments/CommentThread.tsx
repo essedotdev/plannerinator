@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { CommentForm } from "./CommentForm";
-import { CommentCard } from "./CommentCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { MessageSquare } from "lucide-react";
 import type { EntityType } from "@/features/comments/schema";
+import { MessageSquare } from "lucide-react";
+import { useOptimistic, useState } from "react";
+import { CommentCard } from "./CommentCard";
+import { CommentForm } from "./CommentForm";
 
 /**
  * Comment Thread Component
@@ -32,6 +32,7 @@ interface CommentData {
     email: string;
     image: string | null;
   };
+  isPending?: boolean; // Flag for optimistic updates
 }
 
 interface CommentThreadProps {
@@ -49,11 +50,44 @@ export function CommentThread({
 }: CommentThreadProps) {
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
 
+  // Optimistic updates for immediate UI feedback
+  const [optimisticComments, addOptimisticComment] = useOptimistic<CommentData[], CommentData>(
+    initialComments,
+    (state, newComment) => [newComment, ...state]
+  );
+
   // Organize comments into a tree structure
-  const topLevelComments = initialComments.filter((c) => !c.comment.parentCommentId);
+  const topLevelComments = optimisticComments.filter((c) => !c.comment.parentCommentId);
 
   const getReplies = (parentId: string) => {
-    return initialComments.filter((c) => c.comment.parentCommentId === parentId);
+    return optimisticComments.filter((c) => c.comment.parentCommentId === parentId);
+  };
+
+  // Function to create an optimistic comment
+  const createOptimisticComment = (content: string, parentCommentId?: string) => {
+    // Try to get current user info from existing comments
+    const currentUserComment = initialComments.find((c) => c.user.id === currentUserId);
+    const currentUserInfo = currentUserComment?.user || {
+      id: currentUserId,
+      name: null,
+      email: "",
+      image: null,
+    };
+
+    const optimisticComment: CommentData = {
+      comment: {
+        id: `temp-${Date.now()}`, // Temporary ID
+        content,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        userId: currentUserId,
+        parentCommentId: parentCommentId || null,
+      },
+      user: currentUserInfo,
+      isPending: true, // Mark as pending
+    };
+
+    addOptimisticComment(optimisticComment);
   };
 
   const renderComment = (commentData: CommentData) => {
@@ -69,6 +103,7 @@ export function CommentThread({
           entityType={entityType}
           entityId={entityId}
           onReply={setReplyingTo}
+          isPending={commentData.isPending}
           replies={
             <>
               {/* Reply Form */}
@@ -81,6 +116,7 @@ export function CommentThread({
                     parentCommentId={commentData.comment.id}
                     onSuccess={() => setReplyingTo(null)}
                     onCancel={() => setReplyingTo(null)}
+                    onOptimisticAdd={createOptimisticComment}
                   />
                 </div>
               )}
@@ -94,6 +130,7 @@ export function CommentThread({
                   currentUserId={currentUserId}
                   entityType={entityType}
                   entityId={entityId}
+                  isPending={reply.isPending}
                 />
               ))}
             </>
@@ -108,13 +145,18 @@ export function CommentThread({
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2">
           <MessageSquare className="h-4 w-4" />
-          Comments ({initialComments.length})
+          Comments ({optimisticComments.length})
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* New Comment Form */}
         <div>
-          <CommentForm mode="create" entityType={entityType} entityId={entityId} />
+          <CommentForm
+            mode="create"
+            entityType={entityType}
+            entityId={entityId}
+            onOptimisticAdd={createOptimisticComment}
+          />
         </div>
 
         {/* Comments List */}

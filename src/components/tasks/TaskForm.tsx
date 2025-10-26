@@ -66,7 +66,7 @@ export function TaskForm({ mode, initialData }: TaskFormProps) {
       dueDate: initialData?.dueDate || undefined,
       startDate: initialData?.startDate || undefined,
       duration: initialData?.duration || undefined,
-      ...(mode === "edit" && { status: initialData?.status || "todo" }),
+      status: initialData?.status || "todo",
       priority: initialData?.priority || "medium",
       projectId: initialData?.projectId || undefined,
     },
@@ -195,29 +195,25 @@ export function TaskForm({ mode, initialData }: TaskFormProps) {
               )}
             </div>
 
-            {/* Status - Only in Edit Mode */}
-            {mode === "edit" ? (
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select
-                  value={watch("status") || "todo"}
-                  onValueChange={(value) => setValue("status", value as TaskStatus)}
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger id="status" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="todo">{TASK_STATUS_LABELS.todo}</SelectItem>
-                    <SelectItem value="in_progress">{TASK_STATUS_LABELS.in_progress}</SelectItem>
-                    <SelectItem value="done">{TASK_STATUS_LABELS.done}</SelectItem>
-                    <SelectItem value="cancelled">{TASK_STATUS_LABELS.cancelled}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            ) : (
-              <div></div>
-            )}
+            {/* Status */}
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Select
+                value={watch("status") || "todo"}
+                onValueChange={(value) => setValue("status", value as TaskStatus)}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger id="status" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todo">{TASK_STATUS_LABELS.todo}</SelectItem>
+                  <SelectItem value="in_progress">{TASK_STATUS_LABELS.in_progress}</SelectItem>
+                  <SelectItem value="done">{TASK_STATUS_LABELS.done}</SelectItem>
+                  <SelectItem value="cancelled">{TASK_STATUS_LABELS.cancelled}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             {/* Priority */}
             <div className="space-y-2">

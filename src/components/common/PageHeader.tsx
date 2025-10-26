@@ -56,13 +56,13 @@ export function PageHeader({ title, description, children, backButton, actions }
           Back
         </Button>
       )}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
+      <div className="flex items-center justify-between gap-10">
+        <div className="space-y-1 min-w-0">
           <h1 className="text-4xl font-bold tracking-tight">{title}</h1>
           {description && <p className="text-muted-foreground text-lg">{description}</p>}
         </div>
         {(children || actions) && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             {children}
             {actions}
           </div>

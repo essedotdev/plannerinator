@@ -181,51 +181,45 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
               )}
             </div>
 
-            {/* Type - Only in Edit Mode */}
-            {mode === "edit" ? (
-              <div className="space-y-2">
-                <Label htmlFor="type">Type</Label>
-                <Select
-                  value={watch("type") || "note"}
-                  onValueChange={(value) => setValue("type", value as NoteType)}
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger id="type" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="note">{NOTE_TYPE_LABELS.note}</SelectItem>
-                    <SelectItem value="document">{NOTE_TYPE_LABELS.document}</SelectItem>
-                    <SelectItem value="research">{NOTE_TYPE_LABELS.research}</SelectItem>
-                    <SelectItem value="idea">{NOTE_TYPE_LABELS.idea}</SelectItem>
-                    <SelectItem value="snippet">{NOTE_TYPE_LABELS.snippet}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            ) : (
-              <div></div>
-            )}
+            {/* Type */}
+            <div className="space-y-2">
+              <Label htmlFor="type">Type</Label>
+              <Select
+                value={watch("type") || "note"}
+                onValueChange={(value) => setValue("type", value as NoteType)}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger id="type" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="note">{NOTE_TYPE_LABELS.note}</SelectItem>
+                  <SelectItem value="document">{NOTE_TYPE_LABELS.document}</SelectItem>
+                  <SelectItem value="research">{NOTE_TYPE_LABELS.research}</SelectItem>
+                  <SelectItem value="idea">{NOTE_TYPE_LABELS.idea}</SelectItem>
+                  <SelectItem value="snippet">{NOTE_TYPE_LABELS.snippet}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          {/* Favorite - Only in Edit Mode */}
-          {mode === "edit" && (
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="isFavorite"
-                checked={watch("isFavorite") || false}
-                onCheckedChange={(checked) =>
-                  setValue("isFavorite", checked as boolean, { shouldValidate: true })
-                }
-                disabled={isSubmitting}
-              />
-              <label
-                htmlFor="isFavorite"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-              >
-                Mark as favorite
-              </label>
-            </div>
-          )}
+          {/* Favorite */}
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="isFavorite"
+              checked={watch("isFavorite") || false}
+              onCheckedChange={(checked) =>
+                setValue("isFavorite", checked as boolean, { shouldValidate: true })
+              }
+              disabled={isSubmitting}
+            />
+            <label
+              htmlFor="isFavorite"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+            >
+              Mark as favorite
+            </label>
+          </div>
 
           {/* Content - Markdown Editor */}
           <div className="space-y-2">

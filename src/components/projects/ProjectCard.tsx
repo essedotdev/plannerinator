@@ -90,11 +90,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md transition-shadow flex flex-col">
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between gap-2">
           {/* Project Icon & Title */}
-          <Link href={`/dashboard/projects/${project.id}`} className="flex-1 group">
+          <Link href={`/dashboard/projects/${project.id}`} className="flex-1 min-w-0 group">
             <div className="flex items-start gap-3">
               {project.icon && <span className="text-2xl flex-shrink-0">{project.icon}</span>}
               <div className="flex-1 min-w-0">
@@ -102,7 +102,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
                   {project.name}
                 </h3>
                 {project.description && (
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2 break-words">
                     {project.description}
                   </p>
                 )}
@@ -113,7 +113,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           {/* Actions Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -160,11 +160,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
       <CardContent className="pt-0">
         {/* Status & Dates */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 min-w-0">
           {/* Status Badge */}
           <Badge
             variant="outline"
-            className={PROJECT_STATUS_COLORS[project.status]}
+            className={`${PROJECT_STATUS_COLORS[project.status]} flex-shrink-0`}
             style={{
               borderColor: project.color || undefined,
             }}
@@ -174,14 +174,14 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
           {/* Due Date */}
           {project.endDate && (
-            <Badge variant="outline" className={getDueDateColorClass(project.endDate)}>
+            <Badge variant="outline" className={`${getDueDateColorClass(project.endDate)} flex-shrink-0`}>
               {formatDueDate(project.endDate)}
             </Badge>
           )}
 
           {/* Start Date */}
           {project.startDate && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
               Started {formatShortDate(project.startDate)}
             </span>
           )}

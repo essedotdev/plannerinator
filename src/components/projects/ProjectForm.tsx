@@ -6,13 +6,21 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { createProject, updateProject } from "@/features/projects/actions";
-import { createProjectSchema } from "@/features/projects/schema";
+import { createProjectSchema, updateProjectSchema } from "@/features/projects/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatForDateInput } from "@/lib/dates";
+import { PROJECT_STATUS_LABELS } from "@/lib/labels";
 
 interface ProjectFormProps {
   mode: "create" | "edit";
@@ -32,12 +40,14 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { register, handleSubmit, formState } = useForm({
-    resolver: zodResolver(createProjectSchema),
+  const { register, handleSubmit, formState, watch, setValue } = useForm({
+    resolver: zodResolver(mode === "edit" ? updateProjectSchema : createProjectSchema),
     defaultValues: {
       name: initialData?.name || "",
       description: initialData?.description || undefined,
       icon: initialData?.icon || undefined,
+      color: initialData?.color || undefined,
+      ...(mode === "edit" && { status: initialData?.status || "active" }),
       startDate: initialData?.startDate ? formatForDateInput(initialData.startDate) : undefined,
       endDate: initialData?.endDate ? formatForDateInput(initialData.endDate) : undefined,
     },
@@ -102,6 +112,31 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
             )}
           </div>
 
+          {/* Status - Only in Edit Mode */}
+          {mode === "edit" && (
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Select
+                value={watch("status") || "active"}
+                onValueChange={(value) =>
+                  setValue("status", value as "active" | "on_hold" | "completed" | "archived" | "cancelled")
+                }
+                disabled={isSubmitting}
+              >
+                <SelectTrigger id="status" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">{PROJECT_STATUS_LABELS.active}</SelectItem>
+                  <SelectItem value="on_hold">{PROJECT_STATUS_LABELS.on_hold}</SelectItem>
+                  <SelectItem value="completed">{PROJECT_STATUS_LABELS.completed}</SelectItem>
+                  <SelectItem value="archived">{PROJECT_STATUS_LABELS.archived}</SelectItem>
+                  <SelectItem value="cancelled">{PROJECT_STATUS_LABELS.cancelled}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           {/* Icon & Color */}
           <div className="grid gap-4 md:grid-cols-2">
             {/* Icon */}
@@ -121,9 +156,16 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
 
             {/* Color Picker */}
             <div className="space-y-2">
-              <Label>Color (optional)</Label>
-              <p className="text-xs text-muted-foreground mb-2">
-                Project color badge (defaults to blue)
+              <Label htmlFor="color">Color</Label>
+              <Input
+                id="color"
+                type="color"
+                {...register("color")}
+                disabled={isSubmitting}
+                className="h-10 w-full"
+              />
+              <p className="text-xs text-muted-foreground">
+                Project color for badges and UI elements
               </p>
             </div>
           </div>

@@ -55,6 +55,7 @@ interface CommentCardProps {
   entityId: string;
   onReply?: (commentId: string) => void;
   replies?: React.ReactNode;
+  isPending?: boolean;
 }
 
 export function CommentCard({
@@ -65,9 +66,10 @@ export function CommentCard({
   entityId,
   onReply,
   replies,
+  isPending = false,
 }: CommentCardProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [isDeleting, startTransition] = useTransition();
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -104,7 +106,7 @@ export function CommentCard({
 
   return (
     <div className="space-y-3">
-      <div className="bg-muted/50 p-4 rounded-lg">
+      <div className={`bg-muted/50 p-4 rounded-lg ${isPending ? "opacity-60" : ""}`}>
         {/* Header */}
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-2">
@@ -120,23 +122,23 @@ export function CommentCard({
             ) : (
               <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                 <span className="text-sm font-medium">
-                  {user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase()}
+                  {user.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || "?"}
                 </span>
               </div>
             )}
 
             {/* User Name and Timestamp */}
             <div>
-              <p className="text-sm font-medium">{user.name || user.email}</p>
+              <p className="text-sm font-medium">{user.name || user.email || "User"}</p>
               <p className="text-xs text-muted-foreground">
-                {formatRelative(comment.createdAt)}
-                {isEdited && " (edited)"}
+                {isPending ? "Posting..." : formatRelative(comment.createdAt)}
+                {!isPending && isEdited && " (edited)"}
               </p>
             </div>
           </div>
 
-          {/* Actions Menu (only for owner) */}
-          {isOwner && (
+          {/* Actions Menu (only for owner and not pending) */}
+          {isOwner && !isPending && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -163,8 +165,8 @@ export function CommentCard({
         {/* Content */}
         <p className="text-sm whitespace-pre-wrap break-words">{comment.content}</p>
 
-        {/* Reply Button */}
-        {onReply && (
+        {/* Reply Button (not shown for pending comments) */}
+        {onReply && !isPending && (
           <Button
             variant="ghost"
             size="sm"
@@ -192,8 +194,8 @@ export function CommentCard({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} disabled={isPending}>
-              {isPending ? "Deleting..." : "Delete"}
+            <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+              {isDeleting ? "Deleting..." : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
