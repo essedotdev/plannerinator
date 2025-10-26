@@ -174,7 +174,10 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
           {/* Due Date */}
           {project.endDate && (
-            <Badge variant="outline" className={`${getDueDateColorClass(project.endDate)} flex-shrink-0`}>
+            <Badge
+              variant="outline"
+              className={`${getDueDateColorClass(project.endDate)} flex-shrink-0`}
+            >
               {formatDueDate(project.endDate)}
             </Badge>
           )}

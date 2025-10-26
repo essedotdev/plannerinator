@@ -119,7 +119,10 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
               <Select
                 value={watch("status") || "active"}
                 onValueChange={(value) =>
-                  setValue("status", value as "active" | "on_hold" | "completed" | "archived" | "cancelled")
+                  setValue(
+                    "status",
+                    value as "active" | "on_hold" | "completed" | "archived" | "cancelled"
+                  )
                 }
                 disabled={isSubmitting}
               >
