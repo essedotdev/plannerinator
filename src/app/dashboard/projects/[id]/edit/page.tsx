@@ -70,8 +70,8 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
           status: project.status,
           color: project.color,
           icon: project.icon,
-          startDate: project.startDate,
-          endDate: project.endDate,
+          startDate: project.startDate ? new Date(project.startDate) : null,
+          endDate: project.endDate ? new Date(project.endDate) : null,
         }}
       />
 
