@@ -38,11 +38,11 @@ export function TasksView({ tasks, defaultView = "list" }: TasksViewProps) {
   const [view, setView] = useState<"list" | "kanban">(defaultView);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* View Toggle */}
-      <div className="flex items-center gap-2">
+      <div className="inline-flex items-center gap-1 bg-muted/50 p-1 rounded-lg border border-border">
         <Button
-          variant={view === "list" ? "default" : "outline"}
+          variant={view === "list" ? "default" : "ghost"}
           size="sm"
           onClick={() => setView("list")}
         >
@@ -50,7 +50,7 @@ export function TasksView({ tasks, defaultView = "list" }: TasksViewProps) {
           List
         </Button>
         <Button
-          variant={view === "kanban" ? "default" : "outline"}
+          variant={view === "kanban" ? "default" : "ghost"}
           size="sm"
           onClick={() => setView("kanban")}
         >

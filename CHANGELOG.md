@@ -7,6 +7,82 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2025-10-27
+
+### Added
+
+**Enhanced Detail Pages with Action Buttons**
+
+- Archive buttons for all entities (tasks, events, notes, projects)
+- Delete buttons for all entities with confirmation dialogs
+- Edit buttons in page headers linking to dedicated edit pages
+- Dedicated edit routes for events, notes, and tasks
+- Archive and delete button components for each entity type
+
+**Parent Relationship Management**
+
+- Parent event selection functionality in EventForm
+- Parent note selection in NoteForm
+- Parent project selection in ProjectForm
+- Parent task selection in TaskForm
+- Server actions for fetching parent selection options
+- Parent relationship display on all detail pages
+
+**Improved Detail Page Layouts**
+
+- Events detail page redesigned with metadata badges and improved layout
+- Notes detail page with content preview and metadata display
+- Tasks detail page with status, priority, and due date badges
+- Projects detail page with new ProjectDetailView component
+- Side-by-side layout for tags and parent relationship cards
+- Better visual hierarchy with location, description, and metadata sections
+
+**Project Detail View Component**
+
+- New ProjectDetailView component with tabbed interface for project details
+- Overview tab with stats, tags, attachments, links, and comments
+- Separate tabs for tasks, events, and notes related to the project
+- Statistics cards showing task counts, completion rate, upcoming events, and notes
+- Task breakdown card showing status distribution
+- Consistent layout across project detail pages
+
+**Database Schema Updates**
+
+- New migration adding parent relationship support
+- Updated schema for parent relationships across all entities
+
+### Changed
+
+**Detail Pages Refactored to View-Only**
+
+- Event detail pages now display information instead of inline editing
+- Note detail pages show content with edit button to navigate to edit page
+- Task detail pages display task information with edit button
+- Project detail pages separated from edit functionality
+- Edit functionality moved to dedicated `/edit` routes
+
+**Form Improvements**
+
+- All forms now support parent relationship selection
+- Parent selection dropdowns with proper filtering
+- Forms show parent relationship information in edit mode
+- Improved form layout and field organization
+
+**UI/UX Enhancements**
+
+- Detail pages now have consistent action button placement in page headers
+- Archive and delete actions separated from edit actions
+- Better visual feedback for archive and delete operations
+- Improved metadata display with badges and formatted dates
+- Parent relationships shown in dedicated cards with clickable links
+
+### Fixed
+
+- Event detail page no longer shows edit form inline
+- Note detail page properly displays content and metadata
+- Task detail page layout improved with proper badge display
+- Project detail page statistics and tabs working correctly
+
 ## [0.8.0] - 2025-10-27
 
 ### Added
@@ -786,7 +862,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code splitting
 - Lazy loading for components
 
-[unreleased]: https://github.com/essedev/plannerinator/compare/v0.8.0...HEAD
+[unreleased]: https://github.com/essedev/plannerinator/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/essedev/plannerinator/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/essedev/plannerinator/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/essedev/plannerinator/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/essedev/plannerinator/compare/v0.5.4...v0.6.0

@@ -338,6 +338,7 @@ export const task = pgTable(
  * Relations:
  * - user: Owner of the event
  * - project: Optional project assignment
+ * - parent_event: For sub-events hierarchy (e.g., conference → session)
  * - links: Universal linking to other entities
  * - tags: Via entity_tags join table
  * - comments: Discussion threads
@@ -365,6 +366,8 @@ export const event = pgTable(
 
     // Organization
     projectId: uuid("project_id").references(() => project.id, { onDelete: "set null" }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    parentEventId: uuid("parent_event_id").references((): any => event.id, { onDelete: "cascade" }),
 
     // Calendar
     calendarType: eventCalendarTypeEnum("calendar_type").default("personal").notNull(),
@@ -387,6 +390,7 @@ export const event = pgTable(
     index("idx_events_user_id").on(table.userId),
     index("idx_events_start_time").on(table.startTime),
     index("idx_events_project_id").on(table.projectId),
+    index("idx_events_parent").on(table.parentEventId),
     index("idx_events_calendar_type").on(table.calendarType),
     index("idx_events_archived").on(table.archivedAt),
     index("idx_events_deleted").on(table.deletedAt),

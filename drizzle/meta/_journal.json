@@ -36,6 +36,13 @@
       "when": 1761560111090,
       "tag": "0004_same_kate_bishop",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1761572944978,
+      "tag": "0005_jazzy_cardiac",
+      "breakpoints": true
     }
   ]
 }

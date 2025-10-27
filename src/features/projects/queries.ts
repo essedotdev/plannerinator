@@ -17,6 +17,7 @@ import {
   or,
   sql,
 } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { projectFilterSchema, type ProjectFilterInput, type ProjectStatsInput } from "./schema";
 
 /**
@@ -208,18 +209,24 @@ export async function getProjectById(id: string) {
     throw new Error("Unauthorized: You must be logged in to view projects");
   }
 
-  // 2. Get project with parent
-  const foundProject = await db.query.project.findFirst({
-    where: and(eq(project.id, id), eq(project.userId, session.user.id)),
-    // TODO: Re-enable when relations are defined in schema
-    // with: {
-    //   parentProject: true,
-    // },
-  });
+  // 2. Get project with parent (using alias for self-join)
+  const parentProject = alias(project, "parent_project");
 
-  if (!foundProject) {
+  const [projectData] = await db
+    .select({
+      project: project,
+      parentProject: parentProject,
+    })
+    .from(project)
+    .leftJoin(parentProject, eq(project.parentProjectId, parentProject.id))
+    .where(and(eq(project.id, id), eq(project.userId, session.user.id)))
+    .limit(1);
+
+  if (!projectData) {
     throw new Error("Project not found");
   }
+
+  const foundProject = projectData.project;
 
   // 3. Get counts for related entities
   const [taskCount] = await db
@@ -239,6 +246,7 @@ export async function getProjectById(id: string) {
 
   return {
     ...foundProject,
+    parentProject: projectData.parentProject || null,
     counts: {
       tasks: taskCount.count,
       events: eventCount.count,

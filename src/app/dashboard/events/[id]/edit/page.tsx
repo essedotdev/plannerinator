@@ -1,40 +1,36 @@
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { Tag } from "lucide-react";
+import { PageHeader } from "@/components/common";
+import { EventForm } from "@/components/events/EventForm";
+import { TagInput } from "@/components/tags/TagInput";
+import { CommentThread } from "@/components/comments/CommentThread";
+import { EntityLinksSection } from "@/components/links/EntityLinksSection";
+import { AttachmentsSection } from "@/components/attachments/AttachmentsSection";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getEventById } from "@/features/events/queries";
 import { getEntityTags } from "@/features/tags/queries";
 import { getEntityComments } from "@/features/comments/queries";
 import { getEntityLinks } from "@/features/links/queries";
 import { getAttachmentsByEntity } from "@/features/attachments/queries";
 import { getSession } from "@/lib/auth";
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import { Edit, Tag } from "lucide-react";
-import { PageHeader } from "@/components/common";
-import { TagInput } from "@/components/tags/TagInput";
-import { CommentThread } from "@/components/comments/CommentThread";
-import { EntityLinksSection } from "@/components/links/EntityLinksSection";
-import { AttachmentsSection } from "@/components/attachments/AttachmentsSection";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { formatFullDate } from "@/lib/dates";
-import { DeleteEventButton } from "@/components/events/DeleteEventButton";
-import { ArchiveEventButton } from "@/components/events/ArchiveEventButton";
 
 /**
- * Event detail page
+ * Event Edit Page
  *
  * Features:
- * - View event details
- * - Edit, archive, and delete actions
- * - View related project
+ * - Edit event details
+ * - Manage tags, comments, links, and attachments
  */
 
-interface EventDetailPageProps {
+interface EditEventPageProps {
   params: Promise<{
     id: string;
   }>;
 }
 
-export default async function EventDetailPage({ params }: EventDetailPageProps) {
+export default async function EditEventPage({ params }: EditEventPageProps) {
   const { id } = await params;
 
   const eventData = await getEventById(id);
@@ -60,59 +56,16 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <PageHeader
-        title={eventData.title}
-        description={eventData.description || undefined}
-        backButton
-        actions={
-          <>
-            <Button variant="outline" size="sm" asChild>
-              <Link href={`/dashboard/events/${id}/edit`}>
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Link>
-            </Button>
-            <ArchiveEventButton eventId={id} eventTitle={eventData.title} />
-            <DeleteEventButton eventId={id} eventTitle={eventData.title} />
-          </>
-        }
+      <PageHeader title="Edit Event" description={`Editing event: ${eventData.title}`} backButton />
+
+      {/* Event Form */}
+      <EventForm
+        mode="edit"
+        initialData={{
+          ...eventData,
+          parentEventId: eventData.parentEventId,
+        }}
       />
-
-      {/* Metadata */}
-      <div className="flex items-center gap-2 -mt-2">
-        <Badge variant="outline">{formatFullDate(eventData.startTime)}</Badge>
-
-        {eventData.endTime && (
-          <>
-            <span className="text-muted-foreground">→</span>
-            <Badge variant="outline">{formatFullDate(eventData.endTime)}</Badge>
-          </>
-        )}
-
-        {eventData.project && (
-          <>
-            <span className="text-muted-foreground">•</span>
-            <Link
-              href={`/dashboard/projects/${eventData.project.id}`}
-              className="text-sm text-primary hover:underline"
-            >
-              {eventData.project.icon} {eventData.project.name}
-            </Link>
-          </>
-        )}
-      </div>
-
-      {/* Location */}
-      {eventData.location && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Location</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm">{eventData.location}</p>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Tags and Parent Event - Side by side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -368,7 +368,7 @@ export function MarkdownEditor({
         )}
 
         {/* View mode toggles */}
-        <div className="flex items-center gap-1 border border-border rounded-md p-1">
+        <div className="inline-flex items-center gap-1 bg-muted/50 p-1 rounded-lg border border-border">
           <Button
             type="button"
             variant={viewMode === "edit" ? "default" : "ghost"}

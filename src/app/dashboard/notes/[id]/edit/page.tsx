@@ -1,38 +1,35 @@
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { Tag } from "lucide-react";
+import { PageHeader } from "@/components/common";
+import { NoteForm } from "@/components/notes/NoteForm";
+import { TagInput } from "@/components/tags/TagInput";
+import { CommentThread } from "@/components/comments/CommentThread";
+import { EntityLinksSection } from "@/components/links/EntityLinksSection";
+import { AttachmentsSection } from "@/components/attachments/AttachmentsSection";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getNoteById } from "@/features/notes/queries";
 import { getEntityTags } from "@/features/tags/queries";
 import { getEntityComments } from "@/features/comments/queries";
 import { getEntityLinks } from "@/features/links/queries";
 import { getAttachmentsByEntity } from "@/features/attachments/queries";
 import { getSession } from "@/lib/auth";
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import { Edit, Tag } from "lucide-react";
-import { PageHeader } from "@/components/common";
-import { TagInput } from "@/components/tags/TagInput";
-import { CommentThread } from "@/components/comments/CommentThread";
-import { EntityLinksSection } from "@/components/links/EntityLinksSection";
-import { AttachmentsSection } from "@/components/attachments/AttachmentsSection";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { DeleteNoteButton } from "@/components/notes/DeleteNoteButton";
-import { ArchiveNoteButton } from "@/components/notes/ArchiveNoteButton";
 
 /**
- * Note detail page
+ * Note Edit Page
  *
  * Features:
- * - View note details
- * - Edit, archive, and delete actions
- * - View related project and child notes
+ * - Edit note details
+ * - Manage tags, comments, links, and attachments
  */
 
-interface NoteDetailPageProps {
+interface EditNotePageProps {
   params: Promise<{
     id: string;
   }>;
 }
 
-export default async function NoteDetailPage({ params }: NoteDetailPageProps) {
+export default async function EditNotePage({ params }: EditNotePageProps) {
   const { id } = await params;
 
   const noteData = await getNoteById(id);
@@ -59,47 +56,13 @@ export default async function NoteDetailPage({ params }: NoteDetailPageProps) {
     <div className="space-y-6">
       {/* Page Header */}
       <PageHeader
-        title={noteData.title || "Untitled Note"}
+        title="Edit Note"
+        description={noteData.title ? `Editing note: ${noteData.title}` : "Editing note"}
         backButton
-        actions={
-          <>
-            <Button variant="outline" size="sm" asChild>
-              <Link href={`/dashboard/notes/${id}/edit`}>
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Link>
-            </Button>
-            <ArchiveNoteButton noteId={id} noteTitle={noteData.title || "Untitled Note"} />
-            <DeleteNoteButton noteId={id} noteTitle={noteData.title || "Untitled Note"} />
-          </>
-        }
       />
 
-      {/* Metadata */}
-      {noteData.project && (
-        <div className="flex items-center gap-2 -mt-2">
-          <Link
-            href={`/dashboard/projects/${noteData.project.id}`}
-            className="text-sm text-primary hover:underline"
-          >
-            {noteData.project.icon} {noteData.project.name}
-          </Link>
-        </div>
-      )}
-
-      {/* Content */}
-      {noteData.content && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Content</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="prose prose-sm dark:prose-invert max-w-none">
-              <p className="whitespace-pre-wrap">{noteData.content}</p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Note Form */}
+      <NoteForm mode="edit" initialData={noteData} />
 
       {/* Tags and Parent Note - Side by side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

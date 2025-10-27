@@ -1,41 +1,37 @@
-import { getTaskById } from "@/features/tasks/queries";
-import { getEntityTags } from "@/features/tags/queries";
-import { getEntityComments } from "@/features/comments/queries";
-import { getEntityLinks } from "@/features/links/queries";
-import { getAttachmentsByEntity } from "@/features/attachments/queries";
-import { getSession } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Edit, Tag } from "lucide-react";
+import { Tag } from "lucide-react";
 import { PageHeader } from "@/components/common";
+import { TaskForm } from "@/components/tasks/TaskForm";
 import { TagInput } from "@/components/tags/TagInput";
 import { CommentThread } from "@/components/comments/CommentThread";
 import { EntityLinksSection } from "@/components/links/EntityLinksSection";
 import { AttachmentsSection } from "@/components/attachments/AttachmentsSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { TASK_STATUS_LABELS, TASK_PRIORITY_LABELS } from "@/lib/labels";
-import { formatFullDate } from "@/lib/dates";
-import { DeleteTaskButton } from "@/components/tasks/DeleteTaskButton";
-import { ArchiveTaskButton } from "@/components/tasks/ArchiveTaskButton";
+import { TASK_STATUS_LABELS } from "@/lib/labels";
+import { getTaskById } from "@/features/tasks/queries";
+import { getEntityTags } from "@/features/tags/queries";
+import { getEntityComments } from "@/features/comments/queries";
+import { getEntityLinks } from "@/features/links/queries";
+import { getAttachmentsByEntity } from "@/features/attachments/queries";
+import { getSession } from "@/lib/auth";
 
 /**
- * Task detail page
+ * Task Edit Page
  *
  * Features:
- * - View task details
- * - Edit, archive, and delete actions
- * - View related project and subtasks
+ * - Edit task details
+ * - Manage tags, comments, links, and attachments
  */
 
-interface TaskDetailPageProps {
+interface EditTaskPageProps {
   params: Promise<{
     id: string;
   }>;
 }
 
-export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
+export default async function EditTaskPage({ params }: EditTaskPageProps) {
   const { id } = await params;
 
   const taskData = await getTaskById(id);
@@ -61,49 +57,10 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <PageHeader
-        title={taskData.title}
-        description={taskData.description || undefined}
-        backButton
-        actions={
-          <>
-            <Button variant="outline" size="sm" asChild>
-              <Link href={`/dashboard/tasks/${id}/edit`}>
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Link>
-            </Button>
-            <ArchiveTaskButton taskId={id} taskTitle={taskData.title} />
-            <DeleteTaskButton taskId={id} taskTitle={taskData.title} />
-          </>
-        }
-      />
+      <PageHeader title="Edit Task" description={`Editing task: ${taskData.title}`} backButton />
 
-      {/* Metadata */}
-      <div className="flex items-center gap-2 -mt-2">
-        <Badge variant="outline">{TASK_STATUS_LABELS[taskData.status]}</Badge>
-        {taskData.priority && (
-          <Badge variant="outline">{TASK_PRIORITY_LABELS[taskData.priority]}</Badge>
-        )}
-
-        {taskData.dueDate && (
-          <span className="text-sm text-muted-foreground">
-            Due {formatFullDate(taskData.dueDate)}
-          </span>
-        )}
-
-        {taskData.project && (
-          <>
-            <span className="text-muted-foreground">•</span>
-            <Link
-              href={`/dashboard/projects/${taskData.project.id}`}
-              className="text-sm text-primary hover:underline"
-            >
-              {taskData.project.icon} {taskData.project.name}
-            </Link>
-          </>
-        )}
-      </div>
+      {/* Task Form */}
+      <TaskForm mode="edit" initialData={taskData} />
 
       {/* Tags and Parent Task - Side by side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

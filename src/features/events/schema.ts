@@ -39,6 +39,7 @@ const baseEventSchema = z.object({
 
   // Organization
   projectId: z.string().uuid("Invalid project ID").optional().nullable(),
+  parentEventId: z.string().uuid("Invalid parent event ID").optional().nullable(),
 
   // Calendar type
   calendarType: eventCalendarTypeSchema.default("personal"),
@@ -104,6 +105,7 @@ export const eventFilterSchema = z.object({
 
   calendarType: eventCalendarTypeSchema.optional(),
   projectId: z.string().uuid().optional(),
+  parentEventId: z.string().uuid().optional().nullable(),
   allDay: z.boolean().optional(),
 
   // Date range filters

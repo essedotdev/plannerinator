@@ -13,6 +13,7 @@ import {
   type TaskStatus,
 } from "@/features/tasks/schema";
 import { getProjects } from "@/features/projects/queries";
+import { getTasksForParentSelection } from "@/features/tasks/parent-actions";
 import { PROJECT_STATUS_LABELS, TASK_STATUS_LABELS } from "@/lib/labels";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,9 +27,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Project } from "@/db/schema";
+import type { Project, Task } from "@/db/schema";
 
 type ProjectOption = Pick<Project, "id" | "name" | "icon" | "color" | "status">;
+type TaskOption = Pick<Task, "id" | "title" | "status">;
 
 interface TaskFormProps {
   mode: "create" | "edit";
@@ -42,6 +44,7 @@ interface TaskFormProps {
     status: "todo" | "in_progress" | "done" | "cancelled";
     priority?: "low" | "medium" | "high" | "urgent" | null;
     projectId?: string | null;
+    parentTaskId?: string | null;
     project?: {
       id: string;
       name: string;
@@ -57,6 +60,8 @@ export function TaskForm({ mode, initialData }: TaskFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [projects, setProjects] = useState<ProjectOption[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
+  const [tasks, setTasks] = useState<TaskOption[]>([]);
+  const [loadingTasks, setLoadingTasks] = useState(true);
 
   const { register, handleSubmit, formState, watch, setValue } = useForm({
     resolver: zodResolver(mode === "edit" ? updateTaskSchema : createTaskSchema),
@@ -69,6 +74,7 @@ export function TaskForm({ mode, initialData }: TaskFormProps) {
       status: initialData?.status || "todo",
       priority: initialData?.priority || "medium",
       projectId: initialData?.projectId || undefined,
+      parentTaskId: initialData?.parentTaskId || undefined,
     },
   });
 
@@ -87,6 +93,28 @@ export function TaskForm({ mode, initialData }: TaskFormProps) {
     }
     loadProjects();
   }, []);
+
+  // Load all tasks (exclude current task in edit mode)
+  useEffect(() => {
+    async function loadTasks() {
+      try {
+        const result = await getTasksForParentSelection(
+          mode === "edit" ? initialData?.id : undefined
+        );
+        if (result.success) {
+          setTasks(result.tasks);
+        } else {
+          toast.error("Failed to load tasks");
+        }
+      } catch (error) {
+        console.error("Failed to load tasks:", error);
+        toast.error("Failed to load tasks");
+      } finally {
+        setLoadingTasks(false);
+      }
+    }
+    loadTasks();
+  }, [mode, initialData?.id]);
 
   const onSubmit = handleSubmit(async (data) => {
     setIsSubmitting(true);
@@ -147,8 +175,8 @@ export function TaskForm({ mode, initialData }: TaskFormProps) {
             )}
           </div>
 
-          {/* Grid: Project, Status, Priority, Duration, Start Date, Due Date */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Grid: Project, Parent Task, Status, Priority, Duration, Start Date, Due Date */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Project Selection */}
             <div className="space-y-2">
               <Label htmlFor="project">Project</Label>
@@ -188,6 +216,43 @@ export function TaskForm({ mode, initialData }: TaskFormProps) {
                 <button
                   type="button"
                   onClick={() => setValue("projectId", undefined, { shouldValidate: true })}
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+
+            {/* Parent Task Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="parentTask">Parent Task</Label>
+              <Select
+                value={watch("parentTaskId") || undefined}
+                onValueChange={(value) =>
+                  setValue("parentTaskId", value || undefined, { shouldValidate: true })
+                }
+                disabled={isSubmitting || loadingTasks}
+              >
+                <SelectTrigger id="parentTask" className="w-full">
+                  <SelectValue placeholder={loadingTasks ? "Loading..." : "No parent task"} />
+                </SelectTrigger>
+                <SelectContent className="w-[var(--radix-select-trigger-width)]">
+                  {tasks.map((task) => (
+                    <SelectItem key={task.id} value={task.id}>
+                      <span className="flex items-center gap-2">
+                        <span className="flex-1 truncate">{task.title}</span>
+                        <span className="text-xs text-muted-foreground">
+                          ({TASK_STATUS_LABELS[task.status]})
+                        </span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {watch("parentTaskId") && (
+                <button
+                  type="button"
+                  onClick={() => setValue("parentTaskId", undefined, { shouldValidate: true })}
                   className="text-xs text-muted-foreground hover:text-foreground"
                 >
                   Clear

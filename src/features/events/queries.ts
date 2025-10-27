@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { event, project, link, entityTag } from "@/db/schema";
 import { eq, and, gte, lte, desc, asc, or, ilike, isNull, isNotNull, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { getSession } from "@/lib/auth";
 import { eventFilterSchema, type EventFilterInput } from "./schema";
 
@@ -13,6 +14,7 @@ import { eventFilterSchema, type EventFilterInput } from "./schema";
  *
  * Relations included:
  * - Project (if assigned)
+ * - Parent event (if exists)
  *
  * Future relations (not yet implemented):
  * - Tags
@@ -31,11 +33,15 @@ export async function getEventById(id: string) {
   }
 
   try {
-    // Get event with project relation
+    // Create alias for parent event (for self-join)
+    const parentEvent = alias(event, "parent_event");
+
+    // Get event with project and parent event relations
     const [eventData] = await db
       .select({
         event: event,
         project: project,
+        parentEvent: parentEvent,
       })
       .from(event)
       .leftJoin(
@@ -48,6 +54,7 @@ export async function getEventById(id: string) {
         )
       )
       .leftJoin(project, eq(link.toId, project.id))
+      .leftJoin(parentEvent, eq(event.parentEventId, parentEvent.id))
       .where(and(eq(event.id, id), eq(event.userId, session.user.id)))
       .limit(1);
 
@@ -58,6 +65,7 @@ export async function getEventById(id: string) {
     return {
       ...eventData.event,
       project: eventData.project || null,
+      parentEvent: eventData.parentEvent || null,
     };
   } catch (error) {
     console.error("Error fetching event:", error);
@@ -105,6 +113,7 @@ export async function getEvents(filters: EventFilterInput = {}) {
     const {
       calendarType,
       projectId,
+      parentEventId,
       allDay,
       startTimeFrom,
       startTimeTo,
@@ -141,6 +150,14 @@ export async function getEvents(filters: EventFilterInput = {}) {
 
     if (projectId) {
       conditions.push(eq(event.projectId, projectId));
+    }
+
+    if (parentEventId !== undefined) {
+      if (parentEventId === null) {
+        conditions.push(isNull(event.parentEventId));
+      } else {
+        conditions.push(eq(event.parentEventId, parentEventId));
+      }
     }
 
     if (allDay !== undefined) {
