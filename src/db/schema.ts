@@ -311,6 +311,10 @@ export const task = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
+
+    // Soft delete & Archive
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (table) => [
     index("idx_tasks_user_id").on(table.userId),
@@ -318,6 +322,8 @@ export const task = pgTable(
     index("idx_tasks_status").on(table.status),
     index("idx_tasks_due_date").on(table.dueDate),
     index("idx_tasks_parent").on(table.parentTaskId),
+    index("idx_tasks_archived").on(table.archivedAt),
+    index("idx_tasks_deleted").on(table.deletedAt),
   ]
 );
 
@@ -372,12 +378,18 @@ export const event = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
+
+    // Soft delete & Archive
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (table) => [
     index("idx_events_user_id").on(table.userId),
     index("idx_events_start_time").on(table.startTime),
     index("idx_events_project_id").on(table.projectId),
     index("idx_events_calendar_type").on(table.calendarType),
+    index("idx_events_archived").on(table.archivedAt),
+    index("idx_events_deleted").on(table.deletedAt),
   ]
 );
 
@@ -429,12 +441,18 @@ export const note = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
+
+    // Soft delete & Archive
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (table) => [
     index("idx_notes_user_id").on(table.userId),
     index("idx_notes_type").on(table.type),
     index("idx_notes_project_id").on(table.projectId),
     index("idx_notes_parent").on(table.parentNoteId),
+    index("idx_notes_archived").on(table.archivedAt),
+    index("idx_notes_deleted").on(table.deletedAt),
   ]
 );
 
@@ -493,11 +511,17 @@ export const project = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
+
+    // Soft delete & Archive
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (table) => [
     index("idx_projects_user_id").on(table.userId),
     index("idx_projects_status").on(table.status),
     index("idx_projects_parent").on(table.parentProjectId),
+    index("idx_projects_archived").on(table.archivedAt),
+    index("idx_projects_deleted").on(table.deletedAt),
   ]
 );
 

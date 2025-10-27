@@ -220,15 +220,6 @@ Features per preparare collaborazione multi-user:
 - IFTTT triggers
 - Webhook support
 
-### File System & Attachments
-
-- Upload files to Cloudflare R2
-- Attach to any entity (tasks, notes, projects)
-- Supported: images, PDFs, documents, videos
-- Storage usage dashboard
-- Image preview in notes
-- PDF viewer integrato
-
 ### Advanced Organization
 
 - **Tag Hierarchies:** Parent/child tags (#work > #work/clients)

@@ -10,10 +10,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Calendar, Clock, MapPin, MoreVertical, Trash2, Edit } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  MoreVertical,
+  Trash2,
+  Edit,
+  Copy,
+  Archive,
+  RotateCcw,
+} from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { deleteEvent } from "@/features/events/actions";
+import { deleteEvent, duplicateEvent, archiveEvent, restoreEvent } from "@/features/events/actions";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { EVENT_CALENDAR_TYPE_LABELS } from "@/lib/labels";
@@ -40,6 +50,7 @@ interface EventCardProps {
     allDay: boolean;
     location: string | null;
     calendarType: "personal" | "work" | "family" | "other";
+    archivedAt?: Date | null;
     project?: {
       id: string;
       name: string;
@@ -63,6 +74,45 @@ export function EventCard({ event }: EventCardProps) {
         router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to delete event");
+      }
+    });
+  };
+
+  const handleDuplicate = async () => {
+    startTransition(async () => {
+      try {
+        const result = await duplicateEvent(event.id);
+        toast.success("Event duplicated");
+        router.refresh();
+        if (result.event) {
+          router.push(`/dashboard/events/${result.event.id}`);
+        }
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Failed to duplicate event");
+      }
+    });
+  };
+
+  const handleArchive = async () => {
+    startTransition(async () => {
+      try {
+        await archiveEvent(event.id);
+        toast.success("Event archived");
+        router.refresh();
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Failed to archive event");
+      }
+    });
+  };
+
+  const handleRestore = async () => {
+    startTransition(async () => {
+      try {
+        await restoreEvent(event.id);
+        toast.success("Event restored");
+        router.refresh();
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Failed to restore event");
       }
     });
   };
@@ -98,6 +148,16 @@ export function EventCard({ event }: EventCardProps) {
                   className="bg-indigo-500/10 text-indigo-700 dark:text-indigo-300"
                 >
                   All Day
+                </Badge>
+              )}
+
+              {/* Archived Badge */}
+              {event.archivedAt && (
+                <Badge
+                  variant="outline"
+                  className="bg-gray-500/10 text-gray-700 dark:text-gray-300"
+                >
+                  Archived
                 </Badge>
               )}
 
@@ -150,6 +210,21 @@ export function EventCard({ event }: EventCardProps) {
                   Edit
                 </Link>
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDuplicate} disabled={isPending}>
+                <Copy className="h-4 w-4 mr-2" />
+                Duplicate
+              </DropdownMenuItem>
+              {event.archivedAt ? (
+                <DropdownMenuItem onClick={handleRestore} disabled={isPending}>
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Restore
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={handleArchive} disabled={isPending}>
+                  <Archive className="h-4 w-4 mr-2" />
+                  Archive
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => setShowDeleteDialog(true)}

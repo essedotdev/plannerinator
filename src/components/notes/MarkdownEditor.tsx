@@ -44,6 +44,8 @@ import {
   Image as ImageIcon,
   Minus,
   CheckSquare,
+  Maximize,
+  Minimize,
 } from "lucide-react";
 
 // Type definitions
@@ -81,6 +83,8 @@ interface MarkdownEditorProps {
   onChange: (value: string) => void;
   placeholder?: string;
   minHeight?: string;
+  isFocusMode?: boolean;
+  onFocusModeChange?: (isFocusMode: boolean) => void;
 }
 
 /**
@@ -100,6 +104,8 @@ export function MarkdownEditor({
   onChange,
   placeholder = "Write your note in markdown...",
   minHeight = "300px",
+  isFocusMode = false,
+  onFocusModeChange,
 }: MarkdownEditorProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("split");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -154,6 +160,13 @@ export function MarkdownEditor({
   // Keyboard shortcuts handler
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
+      // ESC to exit focus mode
+      if (e.key === "Escape" && isFocusMode && onFocusModeChange) {
+        e.preventDefault();
+        onFocusModeChange(false);
+        return;
+      }
+
       if (e.ctrlKey || e.metaKey) {
         switch (e.key) {
           case "b":
@@ -175,8 +188,11 @@ export function MarkdownEditor({
         }
       }
     },
-    [insertMarkdown]
+    [insertMarkdown, isFocusMode, onFocusModeChange]
   );
+
+  // Calculate editor height based on focus mode
+  const editorHeight = isFocusMode ? "calc(100vh - 250px)" : minHeight;
 
   return (
     <div className="space-y-2">
@@ -335,6 +351,22 @@ export function MarkdownEditor({
 
         <div className="flex-1" />
 
+        {/* Focus mode toggle */}
+        {onFocusModeChange && (
+          <>
+            <Button
+              type="button"
+              variant={isFocusMode ? "default" : "ghost"}
+              size="sm"
+              onClick={() => onFocusModeChange(!isFocusMode)}
+              title={isFocusMode ? "Exit Focus Mode (ESC)" : "Enter Focus Mode"}
+            >
+              {isFocusMode ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+            </Button>
+            <Separator orientation="vertical" className="h-6" />
+          </>
+        )}
+
         {/* View mode toggles */}
         <div className="flex items-center gap-1 border border-border rounded-md p-1">
           <Button
@@ -384,7 +416,7 @@ export function MarkdownEditor({
               onKeyDown={handleKeyDown}
               placeholder={placeholder}
               className="w-full p-4 border border-border rounded-md bg-background text-foreground font-mono text-sm resize-y focus:outline-none focus:ring-2 focus:ring-ring"
-              style={{ minHeight }}
+              style={{ minHeight: editorHeight }}
             />
           </div>
         )}
@@ -393,7 +425,7 @@ export function MarkdownEditor({
         {(viewMode === "preview" || viewMode === "split") && (
           <div
             className="p-4 border border-border rounded-md bg-muted/20 overflow-auto prose prose-sm dark:prose-invert max-w-none"
-            style={{ minHeight }}
+            style={{ minHeight: editorHeight }}
           >
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}

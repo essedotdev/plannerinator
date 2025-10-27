@@ -17,12 +17,15 @@ Roadmap delle feature di Plannerinator, focalizzata sul presente e futuro prossi
 
 ## 📊 Progress Overview
 
-**Overall Progress: ~70%**
+**Overall Progress: ~75%**
 
 - ✅ **Phase 0 (Foundation):** 100% Complete - [v0.1.0](../../../CHANGELOG.md#010)
 - ✅ **Phase 1 (Core Entities):** 100% Complete - [v0.2.0](../../../CHANGELOG.md#020)
 - ✅ **Phase 2 (Critical UX):** 100% Complete - [v0.3.0](../../../CHANGELOG.md#030)
 - ✅ **Phase 2.5 (Dashboard & Kanban):** 100% Complete - [v0.4.0](../../../CHANGELOG.md#040)
+- ✅ **Phase 2.6 (Modern Dashboard):** 100% Complete - [v0.5.0](../../../CHANGELOG.md#050)
+- ✅ **Phase 2.7 (File Attachments):** 100% Complete - [v0.6.0](../../../CHANGELOG.md#060)
+- ✅ **Phase 2.8 (Optimistic UI):** 100% Complete - [v0.7.0](../../../CHANGELOG.md#070)
 - ⏳ **Phase 3 (Collections & Advanced):** 5% Complete - **CURRENT FOCUS**
 - 💭 **Phase 4+ (Collaboration/AI):** Pianificate - vedi [BACKLOG.md](./BACKLOG.md)
 
@@ -81,6 +84,47 @@ Miglioramenti alla dashboard e gestione task:
 - ✅ **Dashboard Enhancements:** QuickStats, QuickActions, TodayView, UpcomingDeadlines
 - ✅ **Kanban Board:** Drag & drop task management, status-based columns
 - ✅ **UI/UX Consistency:** PageHeader standardization (100% coverage), EmptyState component, form button patterns
+
+### Phase 2.6: Modern Dashboard Layout (100% - v0.5.0-v0.5.4)
+
+Redesign completo del layout dashboard per ottimizzare spazio e UX:
+
+- ✅ **Collapsible Sidebar:** AppSidebar component con shadcn/ui (Cmd+B shortcut)
+- ✅ **Dynamic Breadcrumbs:** Navigazione contestuale con generazione automatica
+- ✅ **Layout Separation:** ConditionalLayout per pagine pubbliche vs dashboard
+- ✅ **Full-width Dashboard:** Rimossa constraint max-width per migliore utilizzo spazio
+- ✅ **Mobile Responsive:** Sidebar come Sheet su mobile con gesture support
+- ✅ **Logout Button:** Sidebar footer con user info e azioni
+- ✅ **Calendar Styling:** Dedicated calendar.css con CSS custom properties
+- ✅ **Filter Improvements:** Better responsive behavior per componenti filtro
+- ✅ **Tag Filter UI:** Unified auth page con tabbed interface, tag width matching
+
+### Phase 2.7: File Attachments System (100% - v0.6.0)
+
+Sistema completo di file attachments con Cloudflare R2 storage:
+
+- ✅ **R2 Integration:** Cloudflare R2 per storage cloud sicuro
+- ✅ **File Upload:** Drag-and-drop con progress tracking
+- ✅ **Image Preview:** Lightbox per immagini caricate
+- ✅ **File Management:** AttachmentsSection component per upload, preview, management
+- ✅ **Storage Quota:** Per-user quota tracking ed enforcement
+- ✅ **Secure Downloads:** Presigned URL generation per download sicuri
+- ✅ **Universal Support:** Attachments per tasks, events, notes, projects
+- ✅ **Database Migration:** Attachments table con foreign keys a tutte le entità
+- ✅ **Components:** ProgressBar, ConfirmDialog, Pagination components
+- ✅ **Documentation:** R2_SETUP.md e ATTACHMENTS_IMPLEMENTATION.md
+
+### Phase 2.8: Optimistic UI & Form Improvements (100% - v0.7.0)
+
+Miglioramenti UX con optimistic updates e consistency forms:
+
+- ✅ **Optimistic Comments:** Instant feedback quando si postano commenti con "Posting..." status
+- ✅ **Form Consistency:** Calendar type, status, note type visibili in create mode
+- ✅ **Project Edit Page:** Dedicated route `/dashboard/projects/[id]/edit`
+- ✅ **Layout Improvements:** ProjectCard con flexbox, PageHeader con better gap spacing
+- ✅ **Projects Grid:** 2-column layout per better card sizing
+- ✅ **Text Overflow Fixes:** Proper word breaking e line-clamping in ProjectCard
+- ✅ **Date Handling:** Convert date strings to Date objects in project edit page
 
 ---
 
@@ -324,6 +368,7 @@ export const FEATURES = {
   COMMENTS: true,
   LINKS: true,
   SEARCH: true,
+  FILE_UPLOADS: true, // ✅ Enabled in v0.6.0
 
   // Phase 3+ (Gradual rollout)
   COLLECTIONS: false,
@@ -333,7 +378,6 @@ export const FEATURES = {
   // Phase 4+
   SHARING: false,
   AI_ASSISTANT: false,
-  FILE_UPLOADS: false,
   API_WEBHOOKS: false,
 } as const;
 ```
@@ -342,17 +386,42 @@ export const FEATURES = {
 
 ## 📝 Recent Milestones
 
-### Post v0.4.0 - Modern Dashboard Layout (In Progress)
+### v0.7.0 - Optimistic UI & Form Improvements (2025-10-26)
 
-Redesign completo del layout dashboard per ottimizzare lo spazio e migliorare UX:
+Miglioramenti UX con optimistic updates e form consistency:
 
-- Sidebar collassabile con shadcn/ui (Cmd+B)
-- Full-width content area (rimossa constraint max-width)
-- Breadcrumbs dinamici per navigazione contestuale
-- Layout separato per pagine pubbliche vs dashboard
-- Mobile-responsive con Sheet sidebar
+- Optimistic UI per commenti con instant feedback
+- Form consistency improvements (calendar type, status, note type in create mode)
+- Project edit page dedicata
+- Layout improvements (ProjectCard, PageHeader, 2-column grid)
 
-### v0.4.0 - Dashboard & Kanban
+Dettagli completi: [CHANGELOG.md](../../../CHANGELOG.md#070)
+
+### v0.6.0 - File Attachments System (2025-10-24)
+
+Sistema completo di file attachments con Cloudflare R2:
+
+- Cloudflare R2 integration per storage sicuro
+- Drag-and-drop upload con progress tracking
+- Image preview con lightbox
+- Storage quota tracking per user
+- AttachmentsSection component completo
+
+Dettagli completi: [CHANGELOG.md](../../../CHANGELOG.md#060)
+
+### v0.5.0-v0.5.4 - Modern Dashboard Layout (2025-10-23/24)
+
+Redesign completo del layout dashboard:
+
+- Collapsible sidebar con shadcn/ui (Cmd+B)
+- Full-width content area
+- Breadcrumbs dinamici
+- Unified auth page con tabs
+- Filter UI improvements
+
+Dettagli completi: [CHANGELOG.md](../../../CHANGELOG.md#050)
+
+### v0.4.0 - Dashboard & Kanban (2025-10-23)
 
 Dashboard enhancements e kanban board:
 
@@ -385,7 +454,7 @@ Dettagli completi: [CHANGELOG.md](../../../CHANGELOG.md#010)
 ---
 
 **Milestone attuale:** Phase 3 - Collections System & Advanced Features (5%)
-**Prossima release:** v0.5.0 (Collections MVP)
+**Prossima release:** v0.8.0 (Collections MVP o Data Management)
 
 > **📋 Per lista completa di enhancement e feature ideas, vedi [BACKLOG.md](./BACKLOG.md)**
 > **📖 Per storico release complete, vedi [CHANGELOG.md](../../../CHANGELOG.md)**

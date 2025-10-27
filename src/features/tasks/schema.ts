@@ -84,9 +84,19 @@ export const tagFilterLogicSchema = z.enum(["AND", "OR"], {
 });
 
 /**
+ * View filter enum schema
+ */
+export const viewFilterSchema = z.enum(["active", "archived", "all"], {
+  message: "View must be active, archived, or all",
+});
+
+/**
  * Schema for task filters/search
  */
 export const taskFilterSchema = z.object({
+  // View filter (active/archived/all)
+  view: viewFilterSchema.default("active").optional(),
+
   status: taskStatusSchema.optional(),
   priority: taskPrioritySchema.optional(),
   projectId: z.string().uuid().optional(),
@@ -135,3 +145,4 @@ export type TaskFilterInput = z.infer<typeof taskFilterSchema>;
 export type BulkTaskOperationInput = z.infer<typeof bulkTaskOperationSchema>;
 export type TaskStatus = z.infer<typeof taskStatusSchema>;
 export type TaskPriority = z.infer<typeof taskPrioritySchema>;
+export type ViewFilter = z.infer<typeof viewFilterSchema>;

@@ -21,6 +21,7 @@ import type { TaskStatus, TaskPriority, TaskFilterInput } from "@/features/tasks
 
 interface TasksPageProps {
   searchParams: Promise<{
+    view?: string;
     status?: string;
     priority?: string;
     projectId?: string;
@@ -41,6 +42,7 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
 
   // Fetch tasks with filters from URL params
   const { tasks, pagination } = await getTasks({
+    view: params.view as TaskFilterInput["view"],
     status: params.status as TaskStatus | undefined,
     priority: params.priority as TaskPriority | undefined,
     projectId: params.projectId,

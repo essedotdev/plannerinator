@@ -15,9 +15,11 @@ import { getAttachmentsByEntity } from "@/features/attachments/queries";
 import { getSession } from "@/lib/auth";
 
 /**
- * Edit Project Page
+ * Project Detail Page
  *
- * Form to edit an existing project
+ * Features:
+ * - View project details
+ * - Edit project
  */
 
 interface EditProjectPageProps {
@@ -55,8 +57,8 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
     <div className="space-y-6">
       {/* Page Header */}
       <PageHeader
-        title="Edit Project"
-        description={`Update details for ${project.name}`}
+        title="Project Details"
+        description={`Viewing project: ${project.name}`}
         backButton
       />
 

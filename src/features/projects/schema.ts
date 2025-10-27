@@ -104,9 +104,19 @@ export const tagFilterLogicSchema = z.enum(["AND", "OR"], {
 });
 
 /**
+ * View filter enum schema
+ */
+export const viewFilterSchema = z.enum(["active", "archived", "all"], {
+  message: "View must be active, archived, or all",
+});
+
+/**
  * Schema for project filters
  */
 export const projectFilterSchema = z.object({
+  // View filter (active/archived/all)
+  view: viewFilterSchema.default("active").optional(),
+
   status: projectStatusSchema.optional(),
   parentProjectId: z.string().uuid().optional().nullable(),
 
@@ -148,3 +158,4 @@ export type UpdateProjectInput = z.infer<typeof updateProjectSchema>;
 export type ProjectFilterInput = z.infer<typeof projectFilterSchema>;
 export type ProjectStatsInput = z.infer<typeof projectStatsSchema>;
 export type ProjectStatus = z.infer<typeof projectStatusSchema>;
+export type ViewFilter = z.infer<typeof viewFilterSchema>;

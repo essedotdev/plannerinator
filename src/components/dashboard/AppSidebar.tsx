@@ -24,6 +24,7 @@ import {
   FolderKanban,
   LayoutDashboard,
   LogOut,
+  Trash2,
   UserCircle,
   Users,
   type LucideIcon,
@@ -63,6 +64,11 @@ const navItems: NavItem[] = [
     label: "Projects",
     href: "/dashboard/projects",
     icon: FolderKanban,
+  },
+  {
+    label: "Trash",
+    href: "/dashboard/trash",
+    icon: Trash2,
   },
   {
     label: "Profile",

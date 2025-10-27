@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { ListChecks, Flag } from "lucide-react";
+import { ListChecks, Flag, Eye } from "lucide-react";
 import { useCallback } from "react";
 import { TagFilter } from "@/components/common/TagFilter";
 
@@ -58,6 +58,24 @@ export function TaskFilters() {
           className="w-full"
         />
       </div>
+
+      {/* View Filter */}
+      <Select
+        value={searchParams.get("view") || "active"}
+        onValueChange={(value) => updateFilter("view", value === "active" ? null : value)}
+      >
+        <SelectTrigger className="w-full sm:w-[160px]">
+          <span className="flex items-center gap-2">
+            <Eye className="h-4 w-4" />
+            <SelectValue placeholder="Active" />
+          </span>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="active">Active</SelectItem>
+          <SelectItem value="archived">Archived</SelectItem>
+          <SelectItem value="all">All Items</SelectItem>
+        </SelectContent>
+      </Select>
 
       {/* Status Filter */}
       <Select

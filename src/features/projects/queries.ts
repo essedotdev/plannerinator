@@ -3,7 +3,20 @@
 import { db } from "@/db";
 import { event, note, project, task, entityTag } from "@/db/schema";
 import { getSession } from "@/lib/auth";
-import { and, asc, count, desc, eq, gte, ilike, isNull, lte, or, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gte,
+  ilike,
+  isNull,
+  isNotNull,
+  lte,
+  or,
+  sql,
+} from "drizzle-orm";
 import { projectFilterSchema, type ProjectFilterInput, type ProjectStatsInput } from "./schema";
 
 /**
@@ -50,6 +63,23 @@ export async function getProjects(filters: ProjectFilterInput = {}) {
 
   // 3. Build WHERE conditions
   const conditions = [eq(project.userId, session.user.id)];
+
+  // Handle view filter (active/archived/all)
+  const view = validatedFilters.view ?? "active";
+  switch (view) {
+    case "active":
+      conditions.push(isNull(project.deletedAt));
+      conditions.push(isNull(project.archivedAt));
+      break;
+    case "archived":
+      conditions.push(isNull(project.deletedAt));
+      conditions.push(isNotNull(project.archivedAt));
+      break;
+    case "all":
+      conditions.push(isNull(project.deletedAt)); // Always exclude deleted
+      // No filter on archivedAt - show both active and archived
+      break;
+  }
 
   // Status filter
   if (status) {
@@ -353,7 +383,14 @@ export async function getSubprojects(parentId: string) {
   const subprojects = await db
     .select()
     .from(project)
-    .where(and(eq(project.parentProjectId, parentId), eq(project.userId, session.user.id)))
+    .where(
+      and(
+        eq(project.parentProjectId, parentId),
+        eq(project.userId, session.user.id),
+        isNull(project.deletedAt),
+        isNull(project.archivedAt)
+      )
+    )
     .orderBy(desc(project.createdAt));
 
   return subprojects;
@@ -384,6 +421,8 @@ export async function searchProjects(query: string, limit = 20) {
     .where(
       and(
         eq(project.userId, session.user.id),
+        isNull(project.deletedAt),
+        isNull(project.archivedAt),
         or(ilike(project.name, `%${query}%`), ilike(project.description, `%${query}%`))!
       )
     )
@@ -413,7 +452,14 @@ export async function getRootProjects() {
   const rootProjects = await db
     .select()
     .from(project)
-    .where(and(eq(project.userId, session.user.id), isNull(project.parentProjectId)))
+    .where(
+      and(
+        eq(project.userId, session.user.id),
+        isNull(project.parentProjectId),
+        isNull(project.deletedAt),
+        isNull(project.archivedAt)
+      )
+    )
     .orderBy(desc(project.updatedAt));
 
   return rootProjects;

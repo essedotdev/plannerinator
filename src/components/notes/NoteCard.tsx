@@ -10,10 +10,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { FileText, Star, MoreVertical, Trash2, Edit } from "lucide-react";
+import { FileText, Star, MoreVertical, Trash2, Edit, Copy, Archive, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { deleteNote, toggleNoteFavorite } from "@/features/notes/actions";
+import {
+  deleteNote,
+  toggleNoteFavorite,
+  duplicateNote,
+  archiveNote,
+  restoreNote,
+} from "@/features/notes/actions";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { NOTE_TYPE_LABELS } from "@/lib/labels";
@@ -40,6 +46,7 @@ interface NoteCardProps {
     isFavorite: boolean;
     createdAt: Date;
     updatedAt: Date;
+    archivedAt?: Date | null;
     project?: {
       id: string;
       name: string;
@@ -63,6 +70,45 @@ export function NoteCard({ note }: NoteCardProps) {
         router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to delete note");
+      }
+    });
+  };
+
+  const handleDuplicate = async () => {
+    startTransition(async () => {
+      try {
+        const result = await duplicateNote(note.id);
+        toast.success("Note duplicated");
+        router.refresh();
+        if (result.note) {
+          router.push(`/dashboard/notes/${result.note.id}`);
+        }
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Failed to duplicate note");
+      }
+    });
+  };
+
+  const handleArchive = async () => {
+    startTransition(async () => {
+      try {
+        await archiveNote(note.id);
+        toast.success("Note archived");
+        router.refresh();
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Failed to archive note");
+      }
+    });
+  };
+
+  const handleRestore = async () => {
+    startTransition(async () => {
+      try {
+        await restoreNote(note.id);
+        toast.success("Note restored");
+        router.refresh();
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Failed to restore note");
       }
     });
   };
@@ -119,6 +165,16 @@ export function NoteCard({ note }: NoteCardProps) {
                 </Badge>
               )}
 
+              {/* Archived Badge */}
+              {note.archivedAt && (
+                <Badge
+                  variant="outline"
+                  className="bg-gray-500/10 text-gray-700 dark:text-gray-300"
+                >
+                  Archived
+                </Badge>
+              )}
+
               {/* Project */}
               {note.project && (
                 <Badge variant="outline" style={{ borderColor: note.project.color || undefined }}>
@@ -147,6 +203,21 @@ export function NoteCard({ note }: NoteCardProps) {
                   Edit
                 </Link>
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDuplicate} disabled={isPending}>
+                <Copy className="h-4 w-4 mr-2" />
+                Duplicate
+              </DropdownMenuItem>
+              {note.archivedAt ? (
+                <DropdownMenuItem onClick={handleRestore} disabled={isPending}>
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Restore
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={handleArchive} disabled={isPending}>
+                  <Archive className="h-4 w-4 mr-2" />
+                  Archive
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 onClick={handleToggleFavorite}
                 disabled={isPending}

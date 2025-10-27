@@ -65,9 +65,19 @@ export const tagFilterLogicSchema = z.enum(["AND", "OR"], {
 });
 
 /**
+ * View filter enum schema
+ */
+export const viewFilterSchema = z.enum(["active", "archived", "all"], {
+  message: "View must be active, archived, or all",
+});
+
+/**
  * Schema for note filters
  */
 export const noteFilterSchema = z.object({
+  // View filter (active/archived/all)
+  view: viewFilterSchema.default("active").optional(),
+
   type: noteTypeSchema.optional(),
   projectId: z.string().uuid().optional(),
   parentNoteId: z.string().uuid().optional().nullable(),
@@ -108,3 +118,4 @@ export type UpdateNoteInput = z.infer<typeof updateNoteSchema>;
 export type NoteFilterInput = z.infer<typeof noteFilterSchema>;
 export type BulkNoteOperationInput = z.infer<typeof bulkNoteOperationSchema>;
 export type NoteType = z.infer<typeof noteTypeSchema>;
+export type ViewFilter = z.infer<typeof viewFilterSchema>;

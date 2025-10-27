@@ -1,10 +1,8 @@
 "use server";
 
-import { getSession } from "@/lib/auth";
 import { db } from "@/db";
 import { task } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 import { syncAssignedToLink } from "@/features/links/helpers";
 import {
   createTaskSchema,
@@ -12,6 +10,19 @@ import {
   bulkTaskOperationSchema,
   type UpdateTaskInput,
 } from "./schema";
+import {
+  validateSession,
+  checkOwnership,
+  revalidateEntityPaths,
+  revalidateProjectChange,
+  handleEntityError,
+  copyEntityTags,
+  softDeleteEntity,
+  hardDeleteEntity,
+  restoreEntityFromTrash,
+  archiveEntity,
+  restoreArchivedEntity,
+} from "@/lib/entity-helpers";
 
 // ============================================================================
 // CREATE OPERATIONS
@@ -25,11 +36,7 @@ import {
  * @throws Error if user is not authenticated or validation fails
  */
 export async function createTask(input: unknown) {
-  const session = await getSession();
-
-  if (!session?.user) {
-    throw new Error("Unauthorized: You must be logged in to create a task");
-  }
+  const session = await validateSession("create a task");
 
   // Validate input
   const data = createTaskSchema.parse(input);
@@ -51,19 +58,12 @@ export async function createTask(input: unknown) {
       await syncAssignedToLink(session.user.id, "task", createdTask.id, data.projectId);
     }
 
-    // Revalidate tasks page
-    revalidatePath("/dashboard/tasks");
-    if (data.projectId) {
-      revalidatePath(`/dashboard/projects/${data.projectId}`);
-    }
+    // Revalidate paths
+    revalidateEntityPaths("task", undefined, data.projectId);
 
     return { success: true, task: createdTask };
   } catch (error) {
-    console.error("Error creating task:", error);
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error("Failed to create task");
+    handleEntityError(error, "creating", "task");
   }
 }
 
@@ -80,30 +80,22 @@ export async function createTask(input: unknown) {
  * @throws Error if user is not authenticated, task not found, or not authorized
  */
 export async function updateTask(id: string, input: unknown) {
-  const session = await getSession();
-
-  if (!session?.user) {
-    throw new Error("Unauthorized: You must be logged in to update a task");
-  }
+  const session = await validateSession("update a task");
 
   // Validate input
   const data = updateTaskSchema.parse(input);
 
   try {
-    // Verify task exists and user owns it
-    const existingTask = await db
-      .select()
-      .from(task)
-      .where(and(eq(task.id, id), eq(task.userId, session.user.id)))
-      .limit(1);
-
-    if (existingTask.length === 0) {
-      throw new Error("Task not found or you don't have permission to update it");
-    }
+    // Verify ownership
+    const existingTask = await checkOwnership<typeof task.$inferSelect>(
+      "task",
+      id,
+      session.user.id
+    );
 
     // Auto-set completedAt when status changes to 'done'
     const updateData: UpdateTaskInput & { completedAt?: Date | null } = { ...data };
-    if (data.status === "done" && existingTask[0].status !== "done") {
+    if (data.status === "done" && existingTask.status !== "done") {
       updateData.completedAt = new Date();
     } else if (data.status && data.status !== "done") {
       updateData.completedAt = null;
@@ -117,23 +109,13 @@ export async function updateTask(id: string, input: unknown) {
       await syncAssignedToLink(session.user.id, "task", id, data.projectId);
     }
 
-    // Revalidate relevant pages
-    revalidatePath("/dashboard/tasks");
-    revalidatePath(`/dashboard/tasks/${id}`);
-    if (existingTask[0].projectId) {
-      revalidatePath(`/dashboard/projects/${existingTask[0].projectId}`);
-    }
-    if (data.projectId && data.projectId !== existingTask[0].projectId) {
-      revalidatePath(`/dashboard/projects/${data.projectId}`);
-    }
+    // Revalidate paths
+    revalidateEntityPaths("task", id, existingTask.projectId);
+    revalidateProjectChange("task", existingTask.projectId, data.projectId);
 
     return { success: true, task: updatedTask };
   } catch (error) {
-    console.error("Error updating task:", error);
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error("Failed to update task");
+    handleEntityError(error, "updating", "task");
   }
 }
 
@@ -176,46 +158,166 @@ export async function updateTaskStatus(
 // ============================================================================
 
 /**
- * Delete a task
+ * Soft delete a task (move to trash)
+ *
+ * Sets deleted_at timestamp. Task can be restored within 30 days.
  *
  * @param id - Task UUID
  * @returns Success response
  * @throws Error if user is not authenticated, task not found, or not authorized
  */
 export async function deleteTask(id: string) {
-  const session = await getSession();
-
-  if (!session?.user) {
-    throw new Error("Unauthorized: You must be logged in to delete a task");
-  }
+  const session = await validateSession("delete a task");
 
   try {
-    // Verify task exists and user owns it
-    const existingTask = await db
-      .select()
-      .from(task)
-      .where(and(eq(task.id, id), eq(task.userId, session.user.id)))
-      .limit(1);
-
-    if (existingTask.length === 0) {
-      throw new Error("Task not found or you don't have permission to delete it");
-    }
-
-    await db.delete(task).where(eq(task.id, id));
-
-    // Revalidate relevant pages
-    revalidatePath("/dashboard/tasks");
-    if (existingTask[0].projectId) {
-      revalidatePath(`/dashboard/projects/${existingTask[0].projectId}`);
-    }
-
-    return { success: true };
+    return await softDeleteEntity("task", id, session.user.id);
   } catch (error) {
-    console.error("Error deleting task:", error);
-    if (error instanceof Error) {
-      throw error;
+    handleEntityError(error, "deleting", "task");
+  }
+}
+
+/**
+ * Permanently delete a task (hard delete from trash)
+ *
+ * This action cannot be undone.
+ *
+ * @param id - Task UUID
+ * @returns Success response
+ */
+export async function hardDeleteTask(id: string) {
+  const session = await validateSession("permanently delete a task");
+
+  try {
+    return await hardDeleteEntity("task", id, session.user.id);
+  } catch (error) {
+    handleEntityError(error, "permanently deleting", "task");
+  }
+}
+
+/**
+ * Restore a task from trash
+ *
+ * @param id - Task UUID
+ * @returns Success response
+ */
+export async function restoreFromTrashTask(id: string) {
+  const session = await validateSession("restore a task from trash");
+
+  try {
+    return await restoreEntityFromTrash("task", id, session.user.id);
+  } catch (error) {
+    handleEntityError(error, "restoring", "task");
+  }
+}
+
+/**
+ * Duplicate a task
+ *
+ * Creates a copy of an existing task with:
+ * - Title prefixed with "Copy of"
+ * - Same description, priority, project assignment
+ * - Status reset to "todo"
+ * - Dates and completion cleared
+ * - Tags copied
+ * - Comments, links, attachments, and subtasks NOT copied
+ *
+ * @param id - Task UUID to duplicate
+ * @returns Newly created task object
+ * @throws Error if user is not authenticated, task not found, or not authorized
+ */
+export async function duplicateTask(id: string) {
+  const session = await validateSession("duplicate a task");
+
+  try {
+    // Verify ownership
+    const originalTask = await checkOwnership<typeof task.$inferSelect>(
+      "task",
+      id,
+      session.user.id
+    );
+
+    // Create duplicated task
+    const [duplicatedTask] = await db
+      .insert(task)
+      .values({
+        userId: session.user.id,
+        title: `Copy of ${originalTask.title}`,
+        description: originalTask.description,
+        priority: originalTask.priority,
+        projectId: originalTask.projectId,
+        status: "todo",
+        dueDate: null,
+        startDate: null,
+        duration: originalTask.duration,
+        completedAt: null,
+        parentTaskId: null, // Don't copy parent relationship
+        position: 0,
+        metadata: originalTask.metadata,
+      })
+      .returning();
+
+    // Copy tags
+    await copyEntityTags("task", id, "task", duplicatedTask.id, session.user.id);
+
+    // Sync assigned_to link if projectId exists
+    if (duplicatedTask.projectId) {
+      await syncAssignedToLink(
+        session.user.id,
+        "task",
+        duplicatedTask.id,
+        duplicatedTask.projectId
+      );
     }
-    throw new Error("Failed to delete task");
+
+    // Revalidate paths
+    revalidateEntityPaths("task", undefined, duplicatedTask.projectId);
+
+    return { success: true, task: duplicatedTask };
+  } catch (error) {
+    handleEntityError(error, "duplicating", "task");
+  }
+}
+
+// ============================================================================
+// ARCHIVE OPERATIONS
+// ============================================================================
+
+/**
+ * Archive a task
+ *
+ * Sets archived_at timestamp to hide task from default views.
+ * Task remains in database and can be restored.
+ *
+ * @param id - Task UUID to archive
+ * @returns Success response
+ * @throws Error if user is not authenticated, task not found, or not authorized
+ */
+export async function archiveTask(id: string) {
+  const session = await validateSession("archive a task");
+
+  try {
+    return await archiveEntity("task", id, session.user.id);
+  } catch (error) {
+    handleEntityError(error, "archiving", "task");
+  }
+}
+
+/**
+ * Restore an archived task
+ *
+ * Clears archived_at timestamp to show task in default views.
+ *
+ * @param id - Task UUID to restore
+ * @returns Success response
+ * @throws Error if user is not authenticated, task not found, or not authorized
+ */
+export async function restoreTask(id: string) {
+  const session = await validateSession("restore a task from archive");
+
+  try {
+    return await restoreArchivedEntity("task", id, session.user.id);
+  } catch (error) {
+    handleEntityError(error, "restoring", "task");
   }
 }
 
@@ -237,11 +339,7 @@ export async function deleteTask(id: string) {
  * @throws Error if user is not authenticated or validation fails
  */
 export async function bulkTaskOperation(input: unknown) {
-  const session = await getSession();
-
-  if (!session?.user) {
-    throw new Error("Unauthorized: You must be logged in to perform bulk operations");
-  }
+  const session = await validateSession("perform bulk operations");
 
   // Validate input
   const data = bulkTaskOperationSchema.parse(input);
@@ -302,20 +400,16 @@ export async function bulkTaskOperation(input: unknown) {
         throw new Error(`Unsupported bulk operation: ${data.operation}`);
     }
 
-    // Revalidate tasks page and affected project pages
-    revalidatePath("/dashboard/tasks");
+    // Revalidate paths
+    revalidateEntityPaths("task");
     const projectIds = new Set(existingTasks.map((t) => t.projectId).filter(Boolean));
     projectIds.forEach((projectId) => {
-      if (projectId) revalidatePath(`/dashboard/projects/${projectId}`);
+      if (projectId) revalidateEntityPaths("project", projectId);
     });
 
     return { success: true, affectedCount };
   } catch (error) {
-    console.error("Error performing bulk operation:", error);
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error("Failed to perform bulk operation");
+    handleEntityError(error, "performing bulk operation on", "task");
   }
 }
 

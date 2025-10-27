@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { task, project, link, entityTag } from "@/db/schema";
-import { eq, and, gte, lte, desc, asc, or, ilike, isNull, sql } from "drizzle-orm";
+import { eq, and, gte, lte, desc, asc, or, ilike, isNull, isNotNull, sql } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { taskFilterSchema, type TaskFilterInput } from "./schema";
 
@@ -127,6 +127,23 @@ export async function getTasks(input: unknown = {}) {
   try {
     // Build where conditions
     const conditions = [eq(task.userId, session.user.id)];
+
+    // Handle view filter (active/archived/all)
+    const view = filters.view ?? "active";
+    switch (view) {
+      case "active":
+        conditions.push(isNull(task.deletedAt));
+        conditions.push(isNull(task.archivedAt));
+        break;
+      case "archived":
+        conditions.push(isNull(task.deletedAt));
+        conditions.push(isNotNull(task.archivedAt));
+        break;
+      case "all":
+        conditions.push(isNull(task.deletedAt)); // Always exclude deleted
+        // No filter on archivedAt - show both active and archived
+        break;
+    }
 
     if (filters.status) {
       conditions.push(eq(task.status, filters.status));
@@ -298,7 +315,14 @@ export async function getSubtasks(parentTaskId: string) {
     const subtasks = await db
       .select()
       .from(task)
-      .where(and(eq(task.parentTaskId, parentTaskId), eq(task.userId, session.user.id)))
+      .where(
+        and(
+          eq(task.parentTaskId, parentTaskId),
+          eq(task.userId, session.user.id),
+          isNull(task.deletedAt),
+          isNull(task.archivedAt)
+        )
+      )
       .orderBy(asc(task.position));
 
     return subtasks;
@@ -338,6 +362,8 @@ export async function searchTasks(query: string, limit = 20) {
       .where(
         and(
           eq(task.userId, session.user.id),
+          isNull(task.deletedAt),
+          isNull(task.archivedAt),
           or(ilike(task.title, `%${query}%`), ilike(task.description, `%${query}%`))!
         )
       )
@@ -432,7 +458,15 @@ export async function getOverdueTasks() {
         )
       )
       .leftJoin(project, eq(link.toId, project.id))
-      .where(and(eq(task.userId, session.user.id), eq(task.status, "todo"), lte(task.dueDate, now)))
+      .where(
+        and(
+          eq(task.userId, session.user.id),
+          eq(task.status, "todo"),
+          lte(task.dueDate, now),
+          isNull(task.deletedAt),
+          isNull(task.archivedAt)
+        )
+      )
       .orderBy(asc(task.dueDate));
 
     return overdueTasks.map((row) => ({

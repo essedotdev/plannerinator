@@ -1,10 +1,8 @@
 "use server";
 
-import { getSession } from "@/lib/auth";
 import { db } from "@/db";
 import { note } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 import { syncAssignedToLink } from "@/features/links/helpers";
 import {
   createNoteSchema,
@@ -12,6 +10,19 @@ import {
   bulkNoteOperationSchema,
   type UpdateNoteInput,
 } from "./schema";
+import {
+  validateSession,
+  checkOwnership,
+  revalidateEntityPaths,
+  revalidateProjectChange,
+  handleEntityError,
+  copyEntityTags,
+  softDeleteEntity,
+  hardDeleteEntity,
+  restoreEntityFromTrash,
+  archiveEntity,
+  restoreArchivedEntity,
+} from "@/lib/entity-helpers";
 
 // ============================================================================
 // CREATE OPERATIONS
@@ -25,11 +36,7 @@ import {
  * @throws Error if user is not authenticated or validation fails
  */
 export async function createNote(input: unknown) {
-  const session = await getSession();
-
-  if (!session?.user) {
-    throw new Error("Unauthorized: You must be logged in to create a note");
-  }
+  const session = await validateSession("create a note");
 
   // Validate input
   const data = createNoteSchema.parse(input);
@@ -50,19 +57,12 @@ export async function createNote(input: unknown) {
       await syncAssignedToLink(session.user.id, "note", createdNote.id, data.projectId);
     }
 
-    // Revalidate notes page
-    revalidatePath("/dashboard/notes");
-    if (data.projectId) {
-      revalidatePath(`/dashboard/projects/${data.projectId}`);
-    }
+    // Revalidate paths
+    revalidateEntityPaths("note", undefined, data.projectId);
 
     return { success: true, note: createdNote };
   } catch (error) {
-    console.error("Error creating note:", error);
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error("Failed to create note");
+    handleEntityError(error, "creating", "note");
   }
 }
 
@@ -79,24 +79,18 @@ export async function createNote(input: unknown) {
  * @throws Error if user is not authenticated, note not found, or not authorized
  */
 export async function updateNote(id: string, input: unknown) {
-  const session = await getSession();
-
-  if (!session?.user) {
-    throw new Error("Unauthorized: You must be logged in to update a note");
-  }
+  const session = await validateSession("update a note");
 
   // Validate input
   const data = updateNoteSchema.parse(input);
 
   try {
     // Verify ownership
-    const existingNote = await db.query.note.findFirst({
-      where: and(eq(note.id, id), eq(note.userId, session.user.id)),
-    });
-
-    if (!existingNote) {
-      throw new Error("Note not found or you don't have permission to update it");
-    }
+    const existingNote = await checkOwnership<typeof note.$inferSelect>(
+      "note",
+      id,
+      session.user.id
+    );
 
     const updates: UpdateNoteInput = { ...data };
 
@@ -108,23 +102,13 @@ export async function updateNote(id: string, input: unknown) {
       await syncAssignedToLink(session.user.id, "note", id, data.projectId);
     }
 
-    // Revalidate relevant pages
-    revalidatePath("/dashboard/notes");
-    revalidatePath(`/dashboard/notes/${id}`);
-    if (existingNote.projectId) {
-      revalidatePath(`/dashboard/projects/${existingNote.projectId}`);
-    }
-    if (data.projectId && data.projectId !== existingNote.projectId) {
-      revalidatePath(`/dashboard/projects/${data.projectId}`);
-    }
+    // Revalidate paths
+    revalidateEntityPaths("note", id, existingNote.projectId);
+    revalidateProjectChange("note", existingNote.projectId, data.projectId);
 
     return { success: true, note: updatedNote };
   } catch (error) {
-    console.error("Error updating note:", error);
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error("Failed to update note");
+    handleEntityError(error, "updating", "note");
   }
 }
 
@@ -133,44 +117,142 @@ export async function updateNote(id: string, input: unknown) {
 // ============================================================================
 
 /**
- * Delete a note
+ * Soft delete a note (move to trash)
+ *
+ * Sets deleted_at timestamp. Note can be restored within 30 days.
  *
  * @param id - Note UUID
  * @returns Success status
  * @throws Error if user is not authenticated, note not found, or not authorized
  */
 export async function deleteNote(id: string) {
-  const session = await getSession();
-
-  if (!session?.user) {
-    throw new Error("Unauthorized: You must be logged in to delete a note");
-  }
+  const session = await validateSession("delete a note");
 
   try {
-    // Verify ownership before deleting
-    const existingNote = await db.query.note.findFirst({
-      where: and(eq(note.id, id), eq(note.userId, session.user.id)),
-    });
-
-    if (!existingNote) {
-      throw new Error("Note not found or you don't have permission to delete it");
-    }
-
-    await db.delete(note).where(eq(note.id, id));
-
-    // Revalidate relevant pages
-    revalidatePath("/dashboard/notes");
-    if (existingNote.projectId) {
-      revalidatePath(`/dashboard/projects/${existingNote.projectId}`);
-    }
-
-    return { success: true };
+    return await softDeleteEntity("note", id, session.user.id);
   } catch (error) {
-    console.error("Error deleting note:", error);
-    if (error instanceof Error) {
-      throw error;
+    handleEntityError(error, "deleting", "note");
+  }
+}
+
+/**
+ * Permanently delete a note (hard delete from trash)
+ *
+ * This action cannot be undone.
+ *
+ * @param id - Note UUID
+ * @returns Success response
+ */
+export async function hardDeleteNote(id: string) {
+  const session = await validateSession("permanently delete a note");
+
+  try {
+    return await hardDeleteEntity("note", id, session.user.id);
+  } catch (error) {
+    handleEntityError(error, "permanently deleting", "note");
+  }
+}
+
+/**
+ * Restore a note from trash
+ *
+ * @param id - Note UUID
+ * @returns Success response
+ */
+export async function restoreFromTrashNote(id: string) {
+  const session = await validateSession("restore a note from trash");
+
+  try {
+    return await restoreEntityFromTrash("note", id, session.user.id);
+  } catch (error) {
+    handleEntityError(error, "restoring", "note");
+  }
+}
+
+/**
+ * Duplicate a note
+ *
+ * Creates a copy of an existing note with:
+ * - Title prefixed with "Copy of"
+ * - Same content, type, project assignment
+ * - Favorite status reset to false
+ * - Parent relationship cleared
+ * - Tags copied
+ * - Comments, links, and attachments NOT copied
+ *
+ * @param id - Note UUID to duplicate
+ * @returns Newly created note object
+ * @throws Error if user is not authenticated, note not found, or not authorized
+ */
+export async function duplicateNote(id: string) {
+  const session = await validateSession("duplicate a note");
+
+  try {
+    // Verify ownership
+    const originalNote = await checkOwnership<typeof note.$inferSelect>(
+      "note",
+      id,
+      session.user.id
+    );
+
+    // Create duplicated note
+    const [duplicatedNote] = await db
+      .insert(note)
+      .values({
+        userId: session.user.id,
+        title: originalNote.title ? `Copy of ${originalNote.title}` : "Copy of note",
+        content: originalNote.content,
+        type: originalNote.type,
+        projectId: originalNote.projectId,
+        parentNoteId: null, // Don't copy parent relationship
+        isFavorite: false, // Reset favorite status
+        metadata: originalNote.metadata,
+      })
+      .returning();
+
+    // Copy tags
+    await copyEntityTags("note", id, "note", duplicatedNote.id, session.user.id);
+
+    // Sync assigned_to link if projectId exists
+    if (duplicatedNote.projectId) {
+      await syncAssignedToLink(
+        session.user.id,
+        "note",
+        duplicatedNote.id,
+        duplicatedNote.projectId
+      );
     }
-    throw new Error("Failed to delete note");
+
+    // Revalidate paths
+    revalidateEntityPaths("note", undefined, duplicatedNote.projectId);
+
+    return { success: true, note: duplicatedNote };
+  } catch (error) {
+    handleEntityError(error, "duplicating", "note");
+  }
+}
+
+// ============================================================================
+// ARCHIVE OPERATIONS
+// ============================================================================
+
+export async function archiveNote(id: string) {
+  const session = await validateSession("archive a note");
+
+  try {
+    return await archiveEntity("note", id, session.user.id);
+  } catch (error) {
+    handleEntityError(error, "archiving", "note");
+  }
+}
+
+export async function restoreNote(id: string) {
+  const session = await validateSession("restore a note from archive");
+
+  try {
+    return await restoreArchivedEntity("note", id, session.user.id);
+  } catch (error) {
+    handleEntityError(error, "restoring", "note");
   }
 }
 
@@ -187,21 +269,11 @@ export async function deleteNote(id: string) {
  * @throws Error if user is not authenticated or note not found
  */
 export async function toggleNoteFavorite(id: string, isFavorite: boolean) {
-  const session = await getSession();
-
-  if (!session?.user) {
-    throw new Error("Unauthorized: You must be logged in to favorite a note");
-  }
+  const session = await validateSession("favorite a note");
 
   try {
     // Verify ownership
-    const existingNote = await db.query.note.findFirst({
-      where: and(eq(note.id, id), eq(note.userId, session.user.id)),
-    });
-
-    if (!existingNote) {
-      throw new Error("Note not found or you don't have permission to update it");
-    }
+    await checkOwnership("note", id, session.user.id);
 
     const [updatedNote] = await db
       .update(note)
@@ -209,16 +281,11 @@ export async function toggleNoteFavorite(id: string, isFavorite: boolean) {
       .where(eq(note.id, id))
       .returning();
 
-    revalidatePath("/dashboard/notes");
-    revalidatePath(`/dashboard/notes/${id}`);
+    revalidateEntityPaths("note", id);
 
     return { success: true, note: updatedNote };
   } catch (error) {
-    console.error("Error toggling note favorite:", error);
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error("Failed to toggle note favorite");
+    handleEntityError(error, "toggling favorite for", "note");
   }
 }
 
@@ -241,11 +308,7 @@ export async function toggleNoteFavorite(id: string, isFavorite: boolean) {
  * @throws Error if user is not authenticated or validation fails
  */
 export async function bulkNoteOperation(input: unknown) {
-  const session = await getSession();
-
-  if (!session?.user) {
-    throw new Error("Unauthorized: You must be logged in to perform bulk operations");
-  }
+  const session = await validateSession("perform bulk operations");
 
   // Validate input
   const data = bulkNoteOperationSchema.parse(input);
@@ -291,25 +354,19 @@ export async function bulkNoteOperation(input: unknown) {
         throw new Error("Invalid operation");
     }
 
-    // Revalidate notes page
-    revalidatePath("/dashboard/notes");
-
-    // Revalidate project pages if affected
+    // Revalidate paths
+    revalidateEntityPaths("note");
     const projectIds = [...new Set(notes.map((n) => n.projectId).filter(Boolean))];
     projectIds.forEach((projectId) => {
-      if (projectId) revalidatePath(`/dashboard/projects/${projectId}`);
+      if (projectId) revalidateEntityPaths("project", projectId);
     });
 
     if (data.projectId) {
-      revalidatePath(`/dashboard/projects/${data.projectId}`);
+      revalidateEntityPaths("project", data.projectId);
     }
 
     return { success: true, count: data.noteIds.length };
   } catch (error) {
-    console.error("Error performing bulk operation:", error);
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error("Failed to perform bulk operation");
+    handleEntityError(error, "performing bulk operation on", "note");
   }
 }

@@ -7,6 +7,76 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2025-10-27
+
+### Added
+
+**Trash System with Soft Delete**
+
+- Trash page at `/dashboard/trash` showing all deleted items across entities
+- Soft delete functionality for tasks, events, notes, and projects
+- Restore functionality to recover deleted items from trash
+- Permanent delete option (hard delete) for items in trash
+- TrashList component displaying deleted items grouped by type
+- New `deletedAt` and `archivedAt` timestamp columns in all entity tables
+- Database indexes for `archivedAt` and `deletedAt` for efficient querying
+
+**Shared Entity Helpers**
+
+- `entity-helpers.ts` library with reusable utility functions for CRUD operations
+- Session validation helper (`validateSession`)
+- Ownership verification helper (`checkOwnership`)
+- Soft delete operations (`softDeleteEntity`, `restoreEntityFromTrash`)
+- Hard delete operations (`hardDeleteEntity`)
+- Archive operations (`archiveEntity`, `restoreArchivedEntity`)
+- Cache revalidation helpers (`revalidateEntityPaths`, `revalidateProjectChange`)
+- Error handling helper (`handleEntityError`)
+- Tag copying helper (`copyEntityTags`)
+
+**UI Improvements**
+
+- Trash icon added to AppSidebar navigation
+- Entity type icons in trash list (ListChecks, Calendar, FileText, FolderKanban)
+- Restore and permanent delete actions in trash interface
+- Empty state for trash when no deleted items exist
+
+### Changed
+
+**Code Quality & Architecture**
+
+- Refactored all entity actions (tasks, events, notes, projects) to use shared entity helpers
+- Reduced code duplication across action files by ~40%
+- Consistent error handling patterns across all CRUD operations
+- Unified session validation and ownership checks
+- Standardized cache revalidation logic
+- All delete operations now soft delete by default (move to trash)
+
+**Database Schema**
+
+- Added `archivedAt` timestamp field to task, event, note, and project tables
+- Added `deletedAt` timestamp field to task, event, note, and project tables
+- New database indexes for efficient trash and archive queries
+- Database migration for soft delete schema changes
+
+**Entity Queries**
+
+- Task queries now exclude deleted items by default (filter by `deletedAt IS NULL`)
+- Event queries now exclude deleted items by default
+- Note queries now exclude deleted items by default
+- Project queries now exclude deleted items by default
+- New trash queries to fetch deleted items across all entity types
+
+**Dependencies**
+
+- Updated workspace configuration in `pnpm-workspace.yaml`
+- Updated dependencies in `package.json` and `pnpm-lock.yaml`
+
+### Fixed
+
+- Project edit page now properly converts date strings to Date objects
+- Consistent behavior when deleting entities (now moves to trash instead of permanent delete)
+- Improved type safety in entity action functions
+
 ## [0.7.0] - 2025-10-26
 
 ### Added
@@ -716,7 +786,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code splitting
 - Lazy loading for components
 
-[unreleased]: https://github.com/essedev/plannerinator/compare/v0.7.0...HEAD
+[unreleased]: https://github.com/essedev/plannerinator/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/essedev/plannerinator/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/essedev/plannerinator/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/essedev/plannerinator/compare/v0.5.4...v0.6.0
 [0.5.4]: https://github.com/essedev/plannerinator/compare/v0.5.3...v0.5.4

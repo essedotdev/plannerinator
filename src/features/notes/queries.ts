@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { note, project, link, entityTag } from "@/db/schema";
-import { eq, and, desc, asc, or, ilike, isNull, sql } from "drizzle-orm";
+import { eq, and, desc, asc, or, ilike, isNull, isNotNull, sql } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { noteFilterSchema, type NoteFilterInput } from "./schema";
 
@@ -138,6 +138,23 @@ export async function getNotes(filters: NoteFilterInput = {}) {
 
     // Build WHERE conditions
     const conditions = [eq(note.userId, session.user.id)];
+
+    // Handle view filter (active/archived/all)
+    const view = validatedFilters.view ?? "active";
+    switch (view) {
+      case "active":
+        conditions.push(isNull(note.deletedAt));
+        conditions.push(isNull(note.archivedAt));
+        break;
+      case "archived":
+        conditions.push(isNull(note.deletedAt));
+        conditions.push(isNotNull(note.archivedAt));
+        break;
+      case "all":
+        conditions.push(isNull(note.deletedAt)); // Always exclude deleted
+        // No filter on archivedAt - show both active and archived
+        break;
+    }
 
     if (type) {
       conditions.push(eq(note.type, type));
@@ -293,7 +310,14 @@ export async function getFavoriteNotes(limit = 20) {
         )
       )
       .leftJoin(project, eq(link.toId, project.id))
-      .where(and(eq(note.userId, session.user.id), eq(note.isFavorite, true)))
+      .where(
+        and(
+          eq(note.userId, session.user.id),
+          eq(note.isFavorite, true),
+          isNull(note.deletedAt),
+          isNull(note.archivedAt)
+        )
+      )
       .orderBy(desc(note.updatedAt))
       .limit(limit);
 
@@ -338,7 +362,7 @@ export async function getRecentNotes(limit = 10) {
         )
       )
       .leftJoin(project, eq(link.toId, project.id))
-      .where(eq(note.userId, session.user.id))
+      .where(and(eq(note.userId, session.user.id), isNull(note.deletedAt), isNull(note.archivedAt)))
       .orderBy(desc(note.updatedAt))
       .limit(limit);
 
@@ -370,7 +394,14 @@ export async function getNotesByProject(projectId: string) {
     const notes = await db
       .select()
       .from(note)
-      .where(and(eq(note.userId, session.user.id), eq(note.projectId, projectId)))
+      .where(
+        and(
+          eq(note.userId, session.user.id),
+          eq(note.projectId, projectId),
+          isNull(note.deletedAt),
+          isNull(note.archivedAt)
+        )
+      )
       .orderBy(desc(note.updatedAt));
 
     return notes;
@@ -398,7 +429,14 @@ export async function getChildNotes(parentNoteId: string) {
     const notes = await db
       .select()
       .from(note)
-      .where(and(eq(note.userId, session.user.id), eq(note.parentNoteId, parentNoteId)))
+      .where(
+        and(
+          eq(note.userId, session.user.id),
+          eq(note.parentNoteId, parentNoteId),
+          isNull(note.deletedAt),
+          isNull(note.archivedAt)
+        )
+      )
       .orderBy(desc(note.updatedAt));
 
     return notes;
@@ -449,6 +487,8 @@ export async function searchNotes(query: string, limit = 20) {
       .where(
         and(
           eq(note.userId, session.user.id),
+          isNull(note.deletedAt),
+          isNull(note.archivedAt),
           or(ilike(note.title, `%${query}%`), ilike(note.content, `%${query}%`))!
         )
       )

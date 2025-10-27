@@ -373,7 +373,7 @@ export function EventForm({ mode, initialData }: EventFormProps) {
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : mode === "create" ? "Create Event" : "Update Event"}
+              {isSubmitting ? "Saving..." : mode === "create" ? "Create Event" : "Save Changes"}
             </Button>
           </div>
         </form>

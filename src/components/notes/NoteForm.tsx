@@ -51,6 +51,7 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [projects, setProjects] = useState<ProjectOption[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
+  const [isFocusMode, setIsFocusMode] = useState(false);
 
   const { register, handleSubmit, formState, watch, setValue } = useForm({
     resolver: zodResolver(mode === "edit" ? updateNoteSchema : createNoteSchema),
@@ -120,110 +121,116 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
       <CardContent>
         <form onSubmit={onSubmit} className="space-y-6">
           {/* Title */}
-          <div className="space-y-2">
-            <Label htmlFor="title">Title (optional)</Label>
-            <Input
-              id="title"
-              {...register("title")}
-              placeholder="Enter note title"
-              disabled={isSubmitting}
-            />
-            {formState.errors.title && (
-              <p className="text-sm text-destructive">{formState.errors.title.message}</p>
-            )}
-          </div>
-
-          {/* Row 2: Project | Type */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Project Selection */}
+          {!isFocusMode && (
             <div className="space-y-2">
-              <Label htmlFor="project">Project</Label>
-              <Select
-                value={watch("projectId") || undefined}
-                onValueChange={(value) =>
-                  setValue("projectId", value || undefined, { shouldValidate: true })
-                }
-                disabled={isSubmitting || loadingProjects}
-              >
-                <SelectTrigger id="project" className="w-full">
-                  <SelectValue placeholder={loadingProjects ? "Loading..." : "No project"} />
-                </SelectTrigger>
-                <SelectContent className="w-[var(--radix-select-trigger-width)]">
-                  {projects.map((project) => (
-                    <SelectItem key={project.id} value={project.id}>
-                      <span className="flex items-center gap-2">
-                        {project.icon && <span>{project.icon}</span>}
-                        <span className="flex-1 truncate">{project.name}</span>
-                        {project.status && project.status !== "active" && (
-                          <span className="text-xs text-muted-foreground">
-                            (
-                            {
-                              PROJECT_STATUS_LABELS[
-                                project.status as keyof typeof PROJECT_STATUS_LABELS
-                              ]
-                            }
-                            )
-                          </span>
-                        )}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {watch("projectId") && (
-                <button
-                  type="button"
-                  onClick={() => setValue("projectId", undefined, { shouldValidate: true })}
-                  className="text-xs text-muted-foreground hover:text-foreground"
-                >
-                  Clear
-                </button>
+              <Label htmlFor="title">Title (optional)</Label>
+              <Input
+                id="title"
+                {...register("title")}
+                placeholder="Enter note title"
+                disabled={isSubmitting}
+              />
+              {formState.errors.title && (
+                <p className="text-sm text-destructive">{formState.errors.title.message}</p>
               )}
             </div>
+          )}
 
-            {/* Type */}
-            <div className="space-y-2">
-              <Label htmlFor="type">Type</Label>
-              <Select
-                value={watch("type") || "note"}
-                onValueChange={(value) => setValue("type", value as NoteType)}
-                disabled={isSubmitting}
-              >
-                <SelectTrigger id="type" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="note">{NOTE_TYPE_LABELS.note}</SelectItem>
-                  <SelectItem value="document">{NOTE_TYPE_LABELS.document}</SelectItem>
-                  <SelectItem value="research">{NOTE_TYPE_LABELS.research}</SelectItem>
-                  <SelectItem value="idea">{NOTE_TYPE_LABELS.idea}</SelectItem>
-                  <SelectItem value="snippet">{NOTE_TYPE_LABELS.snippet}</SelectItem>
-                </SelectContent>
-              </Select>
+          {/* Row 2: Project | Type */}
+          {!isFocusMode && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Project Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="project">Project</Label>
+                <Select
+                  value={watch("projectId") || undefined}
+                  onValueChange={(value) =>
+                    setValue("projectId", value || undefined, { shouldValidate: true })
+                  }
+                  disabled={isSubmitting || loadingProjects}
+                >
+                  <SelectTrigger id="project" className="w-full">
+                    <SelectValue placeholder={loadingProjects ? "Loading..." : "No project"} />
+                  </SelectTrigger>
+                  <SelectContent className="w-[var(--radix-select-trigger-width)]">
+                    {projects.map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        <span className="flex items-center gap-2">
+                          {project.icon && <span>{project.icon}</span>}
+                          <span className="flex-1 truncate">{project.name}</span>
+                          {project.status && project.status !== "active" && (
+                            <span className="text-xs text-muted-foreground">
+                              (
+                              {
+                                PROJECT_STATUS_LABELS[
+                                  project.status as keyof typeof PROJECT_STATUS_LABELS
+                                ]
+                              }
+                              )
+                            </span>
+                          )}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {watch("projectId") && (
+                  <button
+                    type="button"
+                    onClick={() => setValue("projectId", undefined, { shouldValidate: true })}
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+
+              {/* Type */}
+              <div className="space-y-2">
+                <Label htmlFor="type">Type</Label>
+                <Select
+                  value={watch("type") || "note"}
+                  onValueChange={(value) => setValue("type", value as NoteType)}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger id="type" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="note">{NOTE_TYPE_LABELS.note}</SelectItem>
+                    <SelectItem value="document">{NOTE_TYPE_LABELS.document}</SelectItem>
+                    <SelectItem value="research">{NOTE_TYPE_LABELS.research}</SelectItem>
+                    <SelectItem value="idea">{NOTE_TYPE_LABELS.idea}</SelectItem>
+                    <SelectItem value="snippet">{NOTE_TYPE_LABELS.snippet}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Favorite */}
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="isFavorite"
-              checked={watch("isFavorite") || false}
-              onCheckedChange={(checked) =>
-                setValue("isFavorite", checked as boolean, { shouldValidate: true })
-              }
-              disabled={isSubmitting}
-            />
-            <label
-              htmlFor="isFavorite"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-            >
-              Mark as favorite
-            </label>
-          </div>
+          {!isFocusMode && (
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="isFavorite"
+                checked={watch("isFavorite") || false}
+                onCheckedChange={(checked) =>
+                  setValue("isFavorite", checked as boolean, { shouldValidate: true })
+                }
+                disabled={isSubmitting}
+              />
+              <label
+                htmlFor="isFavorite"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+              >
+                Mark as favorite
+              </label>
+            </div>
+          )}
 
           {/* Content - Markdown Editor */}
           <div className="space-y-2">
-            <Label htmlFor="content">Content</Label>
+            {!isFocusMode && <Label htmlFor="content">Content</Label>}
             <MarkdownEditor
               value={watch("content") || ""}
               onChange={(value) =>
@@ -231,6 +238,8 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
               }
               placeholder="Write your note in markdown..."
               minHeight="400px"
+              isFocusMode={isFocusMode}
+              onFocusModeChange={setIsFocusMode}
             />
             {formState.errors.content && (
               <p className="text-sm text-destructive">{formState.errors.content.message}</p>
@@ -238,19 +247,21 @@ export function NoteForm({ mode, initialData }: NoteFormProps) {
           </div>
 
           {/* Form Actions */}
-          <div className="flex gap-4">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : mode === "create" ? "Create Note" : "Update Note"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.back()}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-          </div>
+          {!isFocusMode && (
+            <div className="flex gap-2 justify-end pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.back()}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Saving..." : mode === "create" ? "Create Note" : "Save Changes"}
+              </Button>
+            </div>
+          )}
         </form>
       </CardContent>
     </Card>

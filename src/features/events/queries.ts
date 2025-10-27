@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { event, project, link, entityTag } from "@/db/schema";
-import { eq, and, gte, lte, desc, asc, or, ilike, sql } from "drizzle-orm";
+import { eq, and, gte, lte, desc, asc, or, ilike, isNull, isNotNull, sql } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { eventFilterSchema, type EventFilterInput } from "./schema";
 
@@ -117,6 +117,23 @@ export async function getEvents(filters: EventFilterInput = {}) {
 
     // Build WHERE conditions
     const conditions = [eq(event.userId, session.user.id)];
+
+    // Handle view filter (active/archived/all)
+    const view = validatedFilters.view ?? "active";
+    switch (view) {
+      case "active":
+        conditions.push(isNull(event.deletedAt));
+        conditions.push(isNull(event.archivedAt));
+        break;
+      case "archived":
+        conditions.push(isNull(event.deletedAt));
+        conditions.push(isNotNull(event.archivedAt));
+        break;
+      case "all":
+        conditions.push(isNull(event.deletedAt)); // Always exclude deleted
+        // No filter on archivedAt - show both active and archived
+        break;
+    }
 
     if (calendarType) {
       conditions.push(eq(event.calendarType, calendarType));
@@ -283,7 +300,9 @@ export async function getEventsByDateRange(startDate: Date, endDate: Date) {
         and(
           eq(event.userId, session.user.id),
           gte(event.startTime, startDate),
-          lte(event.startTime, endDate)
+          lte(event.startTime, endDate),
+          isNull(event.deletedAt),
+          isNull(event.archivedAt)
         )
       )
       .orderBy(asc(event.startTime));
@@ -331,7 +350,14 @@ export async function getUpcomingEvents(limit = 10) {
         )
       )
       .leftJoin(project, eq(link.toId, project.id))
-      .where(and(eq(event.userId, session.user.id), gte(event.startTime, now)))
+      .where(
+        and(
+          eq(event.userId, session.user.id),
+          gte(event.startTime, now),
+          isNull(event.deletedAt),
+          isNull(event.archivedAt)
+        )
+      )
       .orderBy(asc(event.startTime))
       .limit(limit);
 
@@ -363,7 +389,14 @@ export async function getEventsByProject(projectId: string) {
     const events = await db
       .select()
       .from(event)
-      .where(and(eq(event.userId, session.user.id), eq(event.projectId, projectId)))
+      .where(
+        and(
+          eq(event.userId, session.user.id),
+          eq(event.projectId, projectId),
+          isNull(event.deletedAt),
+          isNull(event.archivedAt)
+        )
+      )
       .orderBy(asc(event.startTime));
 
     return events;
@@ -411,7 +444,9 @@ export async function getTodaysEvents() {
         and(
           eq(event.userId, session.user.id),
           gte(event.startTime, startOfDay),
-          lte(event.startTime, endOfDay)
+          lte(event.startTime, endOfDay),
+          isNull(event.deletedAt),
+          isNull(event.archivedAt)
         )
       )
       .orderBy(asc(event.startTime));
@@ -467,6 +502,8 @@ export async function searchEvents(query: string, limit = 20) {
       .where(
         and(
           eq(event.userId, session.user.id),
+          isNull(event.deletedAt),
+          isNull(event.archivedAt),
           or(
             ilike(event.title, `%${query}%`),
             ilike(event.description, `%${query}%`),

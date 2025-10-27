@@ -10,10 +10,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, Edit, Trash2, Archive, CheckCircle } from "lucide-react";
+import { MoreVertical, Edit, Trash2, Archive, CheckCircle, Copy, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { deleteProject, archiveProject, completeProject } from "@/features/projects/actions";
+import {
+  deleteProject,
+  archiveProject,
+  completeProject,
+  duplicateProject,
+  restoreProject,
+} from "@/features/projects/actions";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { PROJECT_STATUS_LABELS } from "@/lib/labels";
@@ -43,6 +49,7 @@ interface ProjectCardProps {
     endDate: Date | string | null;
     createdAt: Date | string;
     updatedAt: Date | string;
+    archivedAt?: Date | null;
   };
 }
 
@@ -65,6 +72,21 @@ export function ProjectCard({ project }: ProjectCardProps) {
     });
   };
 
+  const handleDuplicate = async () => {
+    startTransition(async () => {
+      try {
+        const result = await duplicateProject(project.id);
+        toast.success("Project duplicated");
+        router.refresh();
+        if (result.project) {
+          router.push(`/dashboard/projects/${result.project.id}`);
+        }
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Failed to duplicate project");
+      }
+    });
+  };
+
   const handleArchive = async () => {
     startTransition(async () => {
       try {
@@ -73,6 +95,18 @@ export function ProjectCard({ project }: ProjectCardProps) {
         router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to archive project");
+      }
+    });
+  };
+
+  const handleRestore = async () => {
+    startTransition(async () => {
+      try {
+        await restoreProject(project.id);
+        toast.success("Project restored");
+        router.refresh();
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Failed to restore project");
       }
     });
   };
@@ -124,25 +158,30 @@ export function ProjectCard({ project }: ProjectCardProps) {
                   View Details
                 </Link>
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDuplicate} disabled={isPending}>
+                <Copy className="h-4 w-4 mr-2" />
+                Duplicate
+              </DropdownMenuItem>
               {project.status === "active" && (
-                <>
-                  <DropdownMenuItem
-                    onClick={handleComplete}
-                    disabled={isPending}
-                    className="cursor-pointer"
-                  >
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Mark as Completed
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={handleArchive}
-                    disabled={isPending}
-                    className="cursor-pointer"
-                  >
-                    <Archive className="h-4 w-4 mr-2" />
-                    Archive
-                  </DropdownMenuItem>
-                </>
+                <DropdownMenuItem
+                  onClick={handleComplete}
+                  disabled={isPending}
+                  className="cursor-pointer"
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Mark as Completed
+                </DropdownMenuItem>
+              )}
+              {project.archivedAt ? (
+                <DropdownMenuItem onClick={handleRestore} disabled={isPending}>
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Restore
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={handleArchive} disabled={isPending}>
+                  <Archive className="h-4 w-4 mr-2" />
+                  Archive
+                </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -171,6 +210,16 @@ export function ProjectCard({ project }: ProjectCardProps) {
           >
             {PROJECT_STATUS_LABELS[project.status]}
           </Badge>
+
+          {/* Archived Badge */}
+          {project.archivedAt && (
+            <Badge
+              variant="outline"
+              className="bg-gray-500/10 text-gray-700 dark:text-gray-300 flex-shrink-0"
+            >
+              Archived
+            </Badge>
+          )}
 
           {/* Due Date */}
           {project.endDate && (

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X, FolderKanban } from "lucide-react";
+import { X, FolderKanban, Eye } from "lucide-react";
 import { useCallback } from "react";
 import { PROJECT_STATUS_LABELS } from "@/lib/labels";
 import { TagFilter } from "@/components/common/TagFilter";
@@ -48,7 +48,10 @@ export function ProjectFilters() {
   }, [router]);
 
   const hasFilters =
-    searchParams.has("status") || searchParams.has("search") || searchParams.has("tags");
+    searchParams.has("view") ||
+    searchParams.has("status") ||
+    searchParams.has("search") ||
+    searchParams.has("tags");
 
   return (
     <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center flex-wrap">
@@ -66,6 +69,24 @@ export function ProjectFilters() {
           className="w-full"
         />
       </div>
+
+      {/* View Filter */}
+      <Select
+        value={searchParams.get("view") || "active"}
+        onValueChange={(value) => updateFilter("view", value === "active" ? null : value)}
+      >
+        <SelectTrigger className="w-full sm:w-[160px]">
+          <span className="flex items-center gap-2">
+            <Eye className="h-4 w-4" />
+            <SelectValue placeholder="Active" />
+          </span>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="active">Active</SelectItem>
+          <SelectItem value="archived">Archived</SelectItem>
+          <SelectItem value="all">All Items</SelectItem>
+        </SelectContent>
+      </Select>
 
       {/* Status Filter */}
       <Select

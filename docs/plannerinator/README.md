@@ -89,8 +89,8 @@ Tutte le entità supportano:
 
 - **Tags** - organizzazione flessibile (#urgent, #work, #personal)
 - **Comments** - conversazioni su qualsiasi risorsa
-- **Attachments** - file collegati (futuro con R2)
-- **Activity log** - storico modifiche
+- **Attachments** - file collegati con Cloudflare R2 (v0.6.0)
+- **Activity log** - storico modifiche (in sviluppo)
 - **Search** - full-text search su tutti i contenuti
 
 ## Tech Stack
@@ -125,13 +125,36 @@ Tutte le entità supportano:
 - Links system (8 relationship types)
 - Global search (Cmd+K command palette)
 
-### Phase 2.5: UX Improvements ✅
+### Phase 2.5: Dashboard & Kanban ✅
 
 - Calendar view per eventi
 - Tag filters (multi-select AND/OR)
 - Markdown editor (split view, live preview)
 - Dashboard (QuickStats, TodayView)
 - Kanban board per task
+
+### Phase 2.6: Modern Dashboard Layout ✅
+
+- Collapsible sidebar (Cmd+B)
+- Dynamic breadcrumbs
+- Full-width dashboard
+- Unified auth page
+- Mobile responsive sidebar
+
+### Phase 2.7: File Attachments ✅
+
+- Cloudflare R2 integration
+- Drag-and-drop upload
+- Image preview con lightbox
+- Storage quota tracking
+- Presigned URLs per downloads
+
+### Phase 2.8: Optimistic UI ✅
+
+- Optimistic comments updates
+- Form consistency improvements
+- Project edit page
+- Layout improvements
 
 ### Phase 3: Collections & Advanced 🚧 (Current)
 

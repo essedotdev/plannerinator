@@ -89,9 +89,19 @@ export const tagFilterLogicSchema = z.enum(["AND", "OR"], {
 });
 
 /**
+ * View filter enum schema
+ */
+export const viewFilterSchema = z.enum(["active", "archived", "all"], {
+  message: "View must be active, archived, or all",
+});
+
+/**
  * Schema for event filters
  */
 export const eventFilterSchema = z.object({
+  // View filter (active/archived/all)
+  view: viewFilterSchema.default("active").optional(),
+
   calendarType: eventCalendarTypeSchema.optional(),
   projectId: z.string().uuid().optional(),
   allDay: z.boolean().optional(),
@@ -123,3 +133,4 @@ export type CreateEventInput = z.infer<typeof createEventSchema>;
 export type UpdateEventInput = z.infer<typeof updateEventSchema>;
 export type EventFilterInput = z.infer<typeof eventFilterSchema>;
 export type EventCalendarType = z.infer<typeof eventCalendarTypeSchema>;
+export type ViewFilter = z.infer<typeof viewFilterSchema>;

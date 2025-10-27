@@ -1,3 +1,6 @@
+ignoredBuiltDependencies:
+  - rclone.js
+
 onlyBuiltDependencies:
   - "@tailwindcss/oxide"
   - esbuild

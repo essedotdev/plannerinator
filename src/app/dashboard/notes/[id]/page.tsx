@@ -67,31 +67,45 @@ export default async function NoteDetailPage({ params }: NoteDetailPageProps) {
       <NoteForm mode="edit" initialData={noteData} />
 
       {/* Tags Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Tag className="h-4 w-4" />
-            Tags
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <TagInput entityType="note" entityId={id} initialTags={tags} />
-        </CardContent>
-      </Card>
+      {noteData.parentNote ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Tag className="h-4 w-4" />
+                Tags
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TagInput entityType="note" entityId={id} initialTags={tags} />
+            </CardContent>
+          </Card>
 
-      {/* Parent Note Card */}
-      {noteData.parentNote && (
+          {/* Parent Note Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Parent Note</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Link
+                href={`/dashboard/notes/${noteData.parentNote.id}`}
+                className="block hover:text-primary transition-colors"
+              >
+                <p className="font-medium">{noteData.parentNote.title || "Untitled Note"}</p>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Parent Note</CardTitle>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Tag className="h-4 w-4" />
+              Tags
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <Link
-              href={`/dashboard/notes/${noteData.parentNote.id}`}
-              className="block hover:text-primary transition-colors"
-            >
-              <p className="font-medium">{noteData.parentNote.title || "Untitled Note"}</p>
-            </Link>
+            <TagInput entityType="note" entityId={id} initialTags={tags} />
           </CardContent>
         </Card>
       )}

@@ -197,10 +197,7 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
           </div>
 
           {/* Form Actions */}
-          <div className="flex gap-4">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : mode === "create" ? "Create Project" : "Update Project"}
-            </Button>
+          <div className="flex gap-2 justify-end pt-4">
             <Button
               type="button"
               variant="outline"
@@ -208,6 +205,9 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
               disabled={isSubmitting}
             >
               Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : mode === "create" ? "Create Project" : "Save Changes"}
             </Button>
           </div>
         </form>

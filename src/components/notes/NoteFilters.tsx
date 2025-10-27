@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X, FileText, Star } from "lucide-react";
+import { X, FileText, Star, Eye } from "lucide-react";
 import { useCallback } from "react";
 import { TagFilter } from "@/components/common/TagFilter";
 
@@ -48,6 +48,7 @@ export function NoteFilters() {
   }, [router]);
 
   const hasFilters =
+    searchParams.has("view") ||
     searchParams.has("type") ||
     searchParams.has("isFavorite") ||
     searchParams.has("search") ||
@@ -69,6 +70,24 @@ export function NoteFilters() {
           className="w-full"
         />
       </div>
+
+      {/* View Filter */}
+      <Select
+        value={searchParams.get("view") || "active"}
+        onValueChange={(value) => updateFilter("view", value === "active" ? null : value)}
+      >
+        <SelectTrigger className="w-full sm:w-[160px]">
+          <span className="flex items-center gap-2">
+            <Eye className="h-4 w-4" />
+            <SelectValue placeholder="Active" />
+          </span>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="active">Active</SelectItem>
+          <SelectItem value="archived">Archived</SelectItem>
+          <SelectItem value="all">All Items</SelectItem>
+        </SelectContent>
+      </Select>
 
       {/* Type Filter */}
       <Select

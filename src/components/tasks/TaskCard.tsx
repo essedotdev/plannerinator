@@ -11,10 +11,26 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Calendar, MoreVertical, Trash2, Edit, CheckCircle2 } from "lucide-react";
+import {
+  Calendar,
+  MoreVertical,
+  Trash2,
+  Edit,
+  CheckCircle2,
+  Copy,
+  Archive,
+  RotateCcw,
+} from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { markTaskComplete, markTaskIncomplete, deleteTask } from "@/features/tasks/actions";
+import {
+  markTaskComplete,
+  markTaskIncomplete,
+  deleteTask,
+  duplicateTask,
+  archiveTask,
+  restoreTask,
+} from "@/features/tasks/actions";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { TASK_STATUS_LABELS, TASK_PRIORITY_LABELS } from "@/lib/labels";
@@ -49,6 +65,7 @@ interface TaskCardProps {
     dueDate: Date | null;
     status: "todo" | "in_progress" | "done" | "cancelled";
     priority: "low" | "medium" | "high" | "urgent" | null;
+    archivedAt?: Date | null;
     project?: {
       id: string;
       name: string;
@@ -98,6 +115,46 @@ export function TaskCard({ task }: TaskCardProps) {
     });
   };
 
+  const handleDuplicate = async () => {
+    startTransition(async () => {
+      try {
+        const result = await duplicateTask(task.id);
+        toast.success("Task duplicated");
+        router.refresh();
+        // Optionally navigate to the new task
+        if (result.task) {
+          router.push(`/dashboard/tasks/${result.task.id}`);
+        }
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Failed to duplicate task");
+      }
+    });
+  };
+
+  const handleArchive = async () => {
+    startTransition(async () => {
+      try {
+        await archiveTask(task.id);
+        toast.success("Task archived");
+        router.refresh();
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Failed to archive task");
+      }
+    });
+  };
+
+  const handleRestore = async () => {
+    startTransition(async () => {
+      try {
+        await restoreTask(task.id);
+        toast.success("Task restored");
+        router.refresh();
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Failed to restore task");
+      }
+    });
+  };
+
   // Check if task is overdue
   const isTaskOverdue = task.dueDate && isOverdue(task.dueDate, task.status === "done");
 
@@ -143,6 +200,16 @@ export function TaskCard({ task }: TaskCardProps) {
                 </Badge>
               )}
 
+              {/* Archived Badge */}
+              {task.archivedAt && (
+                <Badge
+                  variant="outline"
+                  className="bg-gray-500/10 text-gray-700 dark:text-gray-300"
+                >
+                  Archived
+                </Badge>
+              )}
+
               {/* Project */}
               {task.project && (
                 <Badge variant="outline" style={{ borderColor: task.project.color || undefined }}>
@@ -183,6 +250,21 @@ export function TaskCard({ task }: TaskCardProps) {
                 <CheckCircle2 className="h-4 w-4 mr-2" />
                 {isCompleted ? "Mark Incomplete" : "Mark Complete"}
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDuplicate} disabled={isPending}>
+                <Copy className="h-4 w-4 mr-2" />
+                Duplicate
+              </DropdownMenuItem>
+              {task.archivedAt ? (
+                <DropdownMenuItem onClick={handleRestore} disabled={isPending}>
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Restore
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={handleArchive} disabled={isPending}>
+                  <Archive className="h-4 w-4 mr-2" />
+                  Archive
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => setShowDeleteDialog(true)}
