@@ -6,9 +6,10 @@ import { getAttachmentsByEntity } from "@/features/attachments/queries";
 import { getSession } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Edit, Tag } from "lucide-react";
+import { Edit } from "lucide-react";
 import { PageHeader } from "@/components/common";
-import { TagInput } from "@/components/tags/TagInput";
+import { TagsCard } from "@/components/tags/TagsCard";
+import { ParentNoteCard } from "@/components/notes/ParentNoteCard";
 import { CommentThread } from "@/components/comments/CommentThread";
 import { EntityLinksSection } from "@/components/links/EntityLinksSection";
 import { AttachmentsSection } from "@/components/attachments/AttachmentsSection";
@@ -101,39 +102,10 @@ export default async function NoteDetailPage({ params }: NoteDetailPageProps) {
         </Card>
       )}
 
-      {/* Tags and Parent Note - Side by side */}
+      {/* Tags and Parent Note - Side by side (Read-only in view mode) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Tags Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <Tag className="h-4 w-4" />
-              Tags
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TagInput entityType="note" entityId={id} initialTags={tags} />
-          </CardContent>
-        </Card>
-
-        {/* Parent Note Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Parent Note</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {noteData.parentNote ? (
-              <Link
-                href={`/dashboard/notes/${noteData.parentNote.id}`}
-                className="block hover:text-primary transition-colors"
-              >
-                <p className="font-medium">{noteData.parentNote.title || "Untitled Note"}</p>
-              </Link>
-            ) : (
-              <p className="text-sm text-muted-foreground">No parent note</p>
-            )}
-          </CardContent>
-        </Card>
+        <TagsCard mode="view" entityType="note" initialTags={tags} />
+        <ParentNoteCard mode="view" parentNote={noteData.parentNote} />
       </div>
 
       {/* Child Notes Card */}

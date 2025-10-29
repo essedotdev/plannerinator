@@ -84,6 +84,23 @@ export const getEntityTagsSchema = z.object({
 });
 
 /**
+ * Schema for merging tags
+ */
+export const mergeTagsSchema = z.object({
+  sourceTagIds: z
+    .array(z.string().uuid("Invalid tag ID"))
+    .min(1, "At least one source tag is required"),
+  targetTagId: z.string().uuid("Invalid target tag ID"),
+});
+
+/**
+ * Schema for bulk deleting tags
+ */
+export const bulkDeleteTagsSchema = z.object({
+  tagIds: z.array(z.string().uuid("Invalid tag ID")).min(1, "At least one tag is required"),
+});
+
+/**
  * Inferred TypeScript types
  */
 export type CreateTagInput = z.infer<typeof createTagSchema>;
@@ -92,4 +109,6 @@ export type TagFilterInput = z.infer<typeof tagFilterSchema>;
 export type AssignTagInput = z.infer<typeof assignTagSchema>;
 export type RemoveTagInput = z.infer<typeof removeTagSchema>;
 export type GetEntityTagsInput = z.infer<typeof getEntityTagsSchema>;
+export type MergeTagsInput = z.infer<typeof mergeTagsSchema>;
+export type BulkDeleteTagsInput = z.infer<typeof bulkDeleteTagsSchema>;
 export type EntityType = z.infer<typeof entityTypeSchema>;

@@ -5,7 +5,14 @@ import { db } from "@/db";
 import { tag, entityTag } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
-import { createTagSchema, updateTagSchema, assignTagSchema, removeTagSchema } from "./schema";
+import {
+  createTagSchema,
+  updateTagSchema,
+  assignTagSchema,
+  removeTagSchema,
+  mergeTagsSchema,
+  bulkDeleteTagsSchema,
+} from "./schema";
 
 /**
  * Tag Server Actions
@@ -243,4 +250,124 @@ export async function removeTagsFromEntity(input: unknown) {
   revalidatePath(`/dashboard/${data.entityType}s/${data.entityId}`);
 
   return { success: true };
+}
+
+// ============================================================================
+// MERGE TAGS
+// ============================================================================
+
+/**
+ * Merge multiple tags into a target tag
+ *
+ * All entity_tag assignments from source tags will be reassigned to target tag,
+ * then source tags will be deleted.
+ *
+ * @param input - Source tag IDs to merge and target tag ID
+ */
+export async function mergeTags(input: unknown) {
+  // 1. Authenticate
+  const session = await getSession();
+  if (!session?.user) {
+    throw new Error("Unauthorized: You must be logged in to merge tags");
+  }
+
+  // 2. Validate input
+  const data = mergeTagsSchema.parse(input);
+
+  // 3. Verify all tags exist and belong to user
+  const allTagIds = [...data.sourceTagIds, data.targetTagId];
+  const tags = await db.query.tag.findMany({
+    where: and(inArray(tag.id, allTagIds), eq(tag.userId, session.user.id)),
+  });
+
+  if (tags.length !== allTagIds.length) {
+    throw new Error("Some tags not found or you don't have permission");
+  }
+
+  // 4. Verify target tag is not in source tags
+  if (data.sourceTagIds.includes(data.targetTagId)) {
+    throw new Error("Target tag cannot be one of the source tags");
+  }
+
+  // 5. Get all entity_tag assignments for source tags
+  const sourceAssignments = await db.query.entityTag.findMany({
+    where: and(eq(entityTag.userId, session.user.id), inArray(entityTag.tagId, data.sourceTagIds)),
+  });
+
+  // 6. For each source assignment, check if target already has same assignment
+  // If not, reassign to target tag. If yes, skip (to avoid duplicates)
+  const existingTargetAssignments = await db.query.entityTag.findMany({
+    where: and(eq(entityTag.userId, session.user.id), eq(entityTag.tagId, data.targetTagId)),
+  });
+
+  const existingTargetKeys = new Set(
+    existingTargetAssignments.map((a) => `${a.entityType}:${a.entityId}`)
+  );
+
+  const assignmentsToCreate = sourceAssignments
+    .filter((a) => !existingTargetKeys.has(`${a.entityType}:${a.entityId}`))
+    .map((a) => ({
+      userId: session.user.id,
+      entityType: a.entityType,
+      entityId: a.entityId,
+      tagId: data.targetTagId,
+    }));
+
+  // 7. Create new assignments for target tag
+  if (assignmentsToCreate.length > 0) {
+    await db.insert(entityTag).values(assignmentsToCreate);
+  }
+
+  // 8. Delete source tags (cascade will delete entity_tag assignments)
+  await db.delete(tag).where(inArray(tag.id, data.sourceTagIds));
+
+  // 9. Revalidate cache
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/tags");
+
+  return {
+    success: true,
+    mergedCount: data.sourceTagIds.length,
+    reassignedCount: assignmentsToCreate.length,
+  };
+}
+
+// ============================================================================
+// BULK DELETE TAGS
+// ============================================================================
+
+/**
+ * Delete multiple tags at once
+ *
+ * All entity_tag assignments will be cascade deleted.
+ *
+ * @param input - Array of tag IDs to delete
+ */
+export async function bulkDeleteTags(input: unknown) {
+  // 1. Authenticate
+  const session = await getSession();
+  if (!session?.user) {
+    throw new Error("Unauthorized: You must be logged in to delete tags");
+  }
+
+  // 2. Validate input
+  const data = bulkDeleteTagsSchema.parse(input);
+
+  // 3. Verify all tags exist and belong to user
+  const tags = await db.query.tag.findMany({
+    where: and(inArray(tag.id, data.tagIds), eq(tag.userId, session.user.id)),
+  });
+
+  if (tags.length !== data.tagIds.length) {
+    throw new Error("Some tags not found or you don't have permission to delete them");
+  }
+
+  // 4. Delete tags (cascade to entity_tags)
+  await db.delete(tag).where(inArray(tag.id, data.tagIds));
+
+  // 5. Revalidate cache
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/tags");
+
+  return { success: true, deletedCount: data.tagIds.length };
 }

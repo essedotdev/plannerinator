@@ -6,9 +6,10 @@ import { getAttachmentsByEntity } from "@/features/attachments/queries";
 import { getSession } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Edit, Tag } from "lucide-react";
+import { Edit } from "lucide-react";
 import { PageHeader } from "@/components/common";
-import { TagInput } from "@/components/tags/TagInput";
+import { TagsCard } from "@/components/tags/TagsCard";
+import { ParentEventCard } from "@/components/events/ParentEventCard";
 import { CommentThread } from "@/components/comments/CommentThread";
 import { EntityLinksSection } from "@/components/links/EntityLinksSection";
 import { AttachmentsSection } from "@/components/attachments/AttachmentsSection";
@@ -114,42 +115,10 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         </Card>
       )}
 
-      {/* Tags and Parent Event - Side by side */}
+      {/* Tags and Parent Event - Side by side (Read-only in view mode) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Tags Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <Tag className="h-4 w-4" />
-              Tags
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TagInput entityType="event" entityId={id} initialTags={tags} />
-          </CardContent>
-        </Card>
-
-        {/* Parent Event Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Parent Event</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {eventData.parentEvent ? (
-              <Link
-                href={`/dashboard/events/${eventData.parentEvent.id}`}
-                className="block hover:text-primary transition-colors"
-              >
-                <p className="font-medium">{eventData.parentEvent.title}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {formatFullDate(eventData.parentEvent.startTime)}
-                </p>
-              </Link>
-            ) : (
-              <p className="text-sm text-muted-foreground">No parent event</p>
-            )}
-          </CardContent>
-        </Card>
+        <TagsCard mode="view" entityType="event" initialTags={tags} />
+        <ParentEventCard mode="view" parentEvent={eventData.parentEvent} />
       </div>
 
       {/* Attachments Section */}

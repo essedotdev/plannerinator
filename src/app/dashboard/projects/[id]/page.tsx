@@ -135,6 +135,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         links={links}
         attachments={attachments}
         currentUserId={session.user.id}
+        parentProject={project.parentProject}
       />
     </div>
   );

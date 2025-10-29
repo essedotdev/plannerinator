@@ -6,13 +6,13 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { toast } from "sonner";
 import { createEvent, updateEvent } from "@/features/events/actions";
+import { createTag, assignTagsToEntity } from "@/features/tags/actions";
 import {
   createEventSchema,
   updateEventSchema,
   type EventCalendarType,
 } from "@/features/events/schema";
 import { getProjects } from "@/features/projects/queries";
-import { getEventsForParentSelection } from "@/features/events/parent-actions";
 import { PROJECT_STATUS_LABELS, EVENT_CALENDAR_TYPE_LABELS } from "@/lib/labels";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,13 +28,14 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatForDateTimeInput } from "@/lib/dates";
-import type { Project, Event } from "@/db/schema";
+import type { Project } from "@/db/schema";
 
 type ProjectOption = Pick<Project, "id" | "name" | "icon" | "color" | "status">;
-type EventOption = Pick<Event, "id" | "title" | "startTime">;
 
 interface EventFormProps {
   mode: "create" | "edit";
+  parentEventId?: string; // For create mode
+  selectedTags?: Array<{ id: string; name: string; color: string }>; // For create mode
   initialData?: {
     id?: string;
     title?: string;
@@ -46,7 +47,6 @@ interface EventFormProps {
     calendarType?: "personal" | "work" | "family" | "other";
     allDay?: boolean;
     projectId?: string | null;
-    parentEventId?: string | null;
     project?: {
       id: string;
       name: string;
@@ -57,13 +57,11 @@ interface EventFormProps {
   };
 }
 
-export function EventForm({ mode, initialData }: EventFormProps) {
+export function EventForm({ mode, initialData, parentEventId, selectedTags }: EventFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [projects, setProjects] = useState<ProjectOption[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
-  const [events, setEvents] = useState<EventOption[]>([]);
-  const [loadingEvents, setLoadingEvents] = useState(true);
 
   // Use refs to store saved datetime values (doesn't trigger re-renders)
   const savedStartTimeRef = useRef<string>("");
@@ -81,7 +79,6 @@ export function EventForm({ mode, initialData }: EventFormProps) {
       calendarType: initialData?.calendarType || "personal",
       allDay: initialData?.allDay || false,
       projectId: initialData?.projectId || undefined,
-      parentEventId: initialData?.parentEventId || undefined,
     },
   });
 
@@ -150,34 +147,43 @@ export function EventForm({ mode, initialData }: EventFormProps) {
     loadProjects();
   }, []);
 
-  // Load all events (exclude current event in edit mode)
-  useEffect(() => {
-    async function loadEvents() {
-      try {
-        const result = await getEventsForParentSelection(
-          mode === "edit" ? initialData?.id : undefined
-        );
-        if (result.success) {
-          setEvents(result.events);
-        } else {
-          toast.error("Failed to load events");
-        }
-      } catch (error) {
-        console.error("Failed to load events:", error);
-        toast.error("Failed to load events");
-      } finally {
-        setLoadingEvents(false);
-      }
-    }
-    loadEvents();
-  }, [mode, initialData?.id]);
-
   const onSubmit = handleSubmit(async (data) => {
     setIsSubmitting(true);
 
     try {
       if (mode === "create") {
-        await createEvent(data);
+        const result = await createEvent({
+          ...data,
+          parentEventId: parentEventId || null,
+        });
+
+        // Handle tag creation and assignment if tags were selected
+        if (selectedTags && selectedTags.length > 0 && result.event) {
+          const realTagIds: string[] = [];
+
+          for (const tag of selectedTags) {
+            if (tag.id.startsWith("temp-")) {
+              const newTagResult = await createTag({
+                name: tag.name,
+                color: tag.color,
+              });
+              if (newTagResult.tag) {
+                realTagIds.push(newTagResult.tag.id);
+              }
+            } else {
+              realTagIds.push(tag.id);
+            }
+          }
+
+          if (realTagIds.length > 0) {
+            await assignTagsToEntity({
+              entityType: "event",
+              entityId: result.event.id,
+              tagIds: realTagIds,
+            });
+          }
+        }
+
         toast.success("Event created successfully!");
         router.push("/dashboard/events");
       } else if (initialData?.id) {
@@ -231,8 +237,8 @@ export function EventForm({ mode, initialData }: EventFormProps) {
             )}
           </div>
 
-          {/* Row 3: Project | Parent Event | Calendar Type */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Row 3: Project | Calendar Type */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Project Selection */}
             <div className="space-y-2">
               <Label htmlFor="project">Project</Label>
@@ -272,38 +278,6 @@ export function EventForm({ mode, initialData }: EventFormProps) {
                 <button
                   type="button"
                   onClick={() => setValue("projectId", undefined, { shouldValidate: true })}
-                  className="text-xs text-muted-foreground hover:text-foreground"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
-
-            {/* Parent Event Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="parentEvent">Parent Event</Label>
-              <Select
-                value={watch("parentEventId") || undefined}
-                onValueChange={(value) =>
-                  setValue("parentEventId", value || undefined, { shouldValidate: true })
-                }
-                disabled={isSubmitting || loadingEvents}
-              >
-                <SelectTrigger id="parentEvent" className="w-full">
-                  <SelectValue placeholder={loadingEvents ? "Loading..." : "No parent event"} />
-                </SelectTrigger>
-                <SelectContent className="w-[var(--radix-select-trigger-width)]">
-                  {events.map((event) => (
-                    <SelectItem key={event.id} value={event.id}>
-                      <span className="flex-1 truncate">{event.title}</span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {watch("parentEventId") && (
-                <button
-                  type="button"
-                  onClick={() => setValue("parentEventId", undefined, { shouldValidate: true })}
                   className="text-xs text-muted-foreground hover:text-foreground"
                 >
                   Clear

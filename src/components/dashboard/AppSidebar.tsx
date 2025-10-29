@@ -24,6 +24,7 @@ import {
   FolderKanban,
   LayoutDashboard,
   LogOut,
+  Tag,
   Trash2,
   UserCircle,
   Users,
@@ -64,6 +65,11 @@ const navItems: NavItem[] = [
     label: "Projects",
     href: "/dashboard/projects",
     icon: FolderKanban,
+  },
+  {
+    label: "Tags",
+    href: "/dashboard/tags",
+    icon: Tag,
   },
   {
     label: "Trash",

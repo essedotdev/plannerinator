@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { createProject, updateProject } from "@/features/projects/actions";
+import { createTag, assignTagsToEntity } from "@/features/tags/actions";
 import { createProjectSchema, updateProjectSchema } from "@/features/projects/schema";
-import { getProjectsForParentSelection } from "@/features/projects/parent-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,13 +22,11 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatForDateInput } from "@/lib/dates";
 import { PROJECT_STATUS_LABELS } from "@/lib/labels";
-import { useEffect } from "react";
-import type { Project } from "@/db/schema";
-
-type ProjectOption = Pick<Project, "id" | "name" | "icon" | "status">;
 
 interface ProjectFormProps {
   mode: "create" | "edit";
+  parentProjectId?: string; // For create mode
+  selectedTags?: Array<{ id: string; name: string; color: string }>; // For create mode
   initialData?: {
     id: string;
     name: string;
@@ -38,15 +36,17 @@ interface ProjectFormProps {
     icon?: string | null;
     startDate?: Date | null;
     endDate?: Date | null;
-    parentProjectId?: string | null;
   };
 }
 
-export function ProjectForm({ mode, initialData }: ProjectFormProps) {
+export function ProjectForm({
+  mode,
+  initialData,
+  parentProjectId,
+  selectedTags,
+}: ProjectFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [projects, setProjects] = useState<ProjectOption[]>([]);
-  const [loadingProjects, setLoadingProjects] = useState(true);
 
   const { register, handleSubmit, formState, watch, setValue } = useForm({
     resolver: zodResolver(mode === "edit" ? updateProjectSchema : createProjectSchema),
@@ -58,38 +58,46 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
       ...(mode === "edit" && { status: initialData?.status || "active" }),
       startDate: initialData?.startDate ? formatForDateInput(initialData.startDate) : undefined,
       endDate: initialData?.endDate ? formatForDateInput(initialData.endDate) : undefined,
-      parentProjectId: initialData?.parentProjectId || undefined,
     },
   });
-
-  // Load all projects (exclude current project in edit mode)
-  useEffect(() => {
-    async function loadProjects() {
-      try {
-        const result = await getProjectsForParentSelection(
-          mode === "edit" ? initialData?.id : undefined
-        );
-        if (result.success) {
-          setProjects(result.projects);
-        } else {
-          toast.error("Failed to load projects");
-        }
-      } catch (error) {
-        console.error("Failed to load projects:", error);
-        toast.error("Failed to load projects");
-      } finally {
-        setLoadingProjects(false);
-      }
-    }
-    loadProjects();
-  }, [mode, initialData?.id]);
 
   const onSubmit = handleSubmit(async (data) => {
     setIsSubmitting(true);
 
     try {
       if (mode === "create") {
-        await createProject(data);
+        const result = await createProject({
+          ...data,
+          parentProjectId: parentProjectId || null,
+        });
+
+        // Handle tag creation and assignment if tags were selected
+        if (selectedTags && selectedTags.length > 0 && result.project) {
+          const realTagIds: string[] = [];
+
+          for (const tag of selectedTags) {
+            if (tag.id.startsWith("temp-")) {
+              const newTagResult = await createTag({
+                name: tag.name,
+                color: tag.color,
+              });
+              if (newTagResult.tag) {
+                realTagIds.push(newTagResult.tag.id);
+              }
+            } else {
+              realTagIds.push(tag.id);
+            }
+          }
+
+          if (realTagIds.length > 0) {
+            await assignTagsToEntity({
+              entityType: "project",
+              entityId: result.project.id,
+              tagIds: realTagIds,
+            });
+          }
+        }
+
         toast.success("Project created successfully!");
         router.push("/dashboard/projects");
       } else if (initialData?.id) {
@@ -143,82 +151,33 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
             )}
           </div>
 
-          {/* Parent Project & Status */}
-          <div className={`grid gap-4 ${mode === "edit" ? "md:grid-cols-2" : "md:grid-cols-1"}`}>
-            {/* Parent Project Selection */}
+          {/* Status - Only in Edit Mode */}
+          {mode === "edit" && (
             <div className="space-y-2">
-              <Label htmlFor="parentProject">Parent Project</Label>
+              <Label htmlFor="status">Status</Label>
               <Select
-                value={watch("parentProjectId") || undefined}
+                value={watch("status") || "active"}
                 onValueChange={(value) =>
-                  setValue("parentProjectId", value || undefined, { shouldValidate: true })
+                  setValue(
+                    "status",
+                    value as "active" | "on_hold" | "completed" | "archived" | "cancelled"
+                  )
                 }
-                disabled={isSubmitting || loadingProjects}
+                disabled={isSubmitting}
               >
-                <SelectTrigger id="parentProject" className="w-full">
-                  <SelectValue placeholder={loadingProjects ? "Loading..." : "No parent project"} />
+                <SelectTrigger id="status" className="w-full">
+                  <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="w-[var(--radix-select-trigger-width)]">
-                  {projects.map((project) => (
-                    <SelectItem key={project.id} value={project.id}>
-                      <span className="flex items-center gap-2">
-                        {project.icon && <span>{project.icon}</span>}
-                        <span className="flex-1 truncate">{project.name}</span>
-                        {project.status && project.status !== "active" && (
-                          <span className="text-xs text-muted-foreground">
-                            (
-                            {
-                              PROJECT_STATUS_LABELS[
-                                project.status as keyof typeof PROJECT_STATUS_LABELS
-                              ]
-                            }
-                            )
-                          </span>
-                        )}
-                      </span>
-                    </SelectItem>
-                  ))}
+                <SelectContent>
+                  <SelectItem value="active">{PROJECT_STATUS_LABELS.active}</SelectItem>
+                  <SelectItem value="on_hold">{PROJECT_STATUS_LABELS.on_hold}</SelectItem>
+                  <SelectItem value="completed">{PROJECT_STATUS_LABELS.completed}</SelectItem>
+                  <SelectItem value="archived">{PROJECT_STATUS_LABELS.archived}</SelectItem>
+                  <SelectItem value="cancelled">{PROJECT_STATUS_LABELS.cancelled}</SelectItem>
                 </SelectContent>
               </Select>
-              {watch("parentProjectId") && (
-                <button
-                  type="button"
-                  onClick={() => setValue("parentProjectId", undefined, { shouldValidate: true })}
-                  className="text-xs text-muted-foreground hover:text-foreground"
-                >
-                  Clear
-                </button>
-              )}
             </div>
-
-            {/* Status - Only in Edit Mode */}
-            {mode === "edit" && (
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select
-                  value={watch("status") || "active"}
-                  onValueChange={(value) =>
-                    setValue(
-                      "status",
-                      value as "active" | "on_hold" | "completed" | "archived" | "cancelled"
-                    )
-                  }
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger id="status" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">{PROJECT_STATUS_LABELS.active}</SelectItem>
-                    <SelectItem value="on_hold">{PROJECT_STATUS_LABELS.on_hold}</SelectItem>
-                    <SelectItem value="completed">{PROJECT_STATUS_LABELS.completed}</SelectItem>
-                    <SelectItem value="archived">{PROJECT_STATUS_LABELS.archived}</SelectItem>
-                    <SelectItem value="cancelled">{PROJECT_STATUS_LABELS.cancelled}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          </div>
+          )}
 
           {/* Icon & Color */}
           <div className="grid gap-4 md:grid-cols-2">

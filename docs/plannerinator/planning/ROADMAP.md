@@ -17,7 +17,7 @@ Roadmap delle feature di Plannerinator, focalizzata sul presente e futuro prossi
 
 ## 📊 Progress Overview
 
-**Overall Progress: ~75%**
+**Overall Progress: ~85%**
 
 - ✅ **Phase 0 (Foundation):** 100% Complete - [v0.1.0](../../../CHANGELOG.md#010)
 - ✅ **Phase 1 (Core Entities):** 100% Complete - [v0.2.0](../../../CHANGELOG.md#020)
@@ -26,7 +26,9 @@ Roadmap delle feature di Plannerinator, focalizzata sul presente e futuro prossi
 - ✅ **Phase 2.6 (Modern Dashboard):** 100% Complete - [v0.5.0](../../../CHANGELOG.md#050)
 - ✅ **Phase 2.7 (File Attachments):** 100% Complete - [v0.6.0](../../../CHANGELOG.md#060)
 - ✅ **Phase 2.8 (Optimistic UI):** 100% Complete - [v0.7.0](../../../CHANGELOG.md#070)
-- ⏳ **Phase 3 (Collections & Advanced):** 5% Complete - **CURRENT FOCUS**
+- ✅ **Phase 2.9 (Trash System):** 100% Complete - [v0.8.0](../../../CHANGELOG.md#080)
+- ✅ **Phase 2.10 (Enhanced Detail Pages):** 100% Complete - [v0.9.0](../../../CHANGELOG.md#090)
+- ⏳ **Phase 3 (Collections & Advanced):** 0% Complete - **CURRENT FOCUS**
 - 💭 **Phase 4+ (Collaboration/AI):** Pianificate - vedi [BACKLOG.md](./BACKLOG.md)
 
 ---
@@ -126,13 +128,44 @@ Miglioramenti UX con optimistic updates e consistency forms:
 - ✅ **Text Overflow Fixes:** Proper word breaking e line-clamping in ProjectCard
 - ✅ **Date Handling:** Convert date strings to Date objects in project edit page
 
+### Phase 2.9: Trash System & Entity Helpers (100% - v0.8.0)
+
+Sistema di gestione trash con soft delete e refactoring architetturale:
+
+- ✅ **Trash System:** Soft delete per tasks, events, notes, projects con restore functionality
+- ✅ **Trash Page:** `/dashboard/trash` con TrashList component per gestione cestino
+- ✅ **Hard Delete:** Opzione per eliminazione permanente da trash
+- ✅ **Entity Helpers Library:** `entity-helpers.ts` con utilities condivise per CRUD operations
+- ✅ **Code Quality:** Riduzione duplicazione codice del ~40% tramite helpers riutilizzabili
+- ✅ **Database Schema:** Campi `deletedAt` e `archivedAt` aggiunti a tutte le entità
+- ✅ **Database Indexes:** Indici per `deletedAt` e `archivedAt` per query efficienti
+- ✅ **Archive Operations:** `archiveEntity` e `restoreArchivedEntity` helpers
+- ✅ **Session & Ownership:** Unified validation tramite `validateSession` e `checkOwnership`
+- ✅ **Error Handling:** Standardized error handling con `handleEntityError`
+
+### Phase 2.10: Enhanced Detail Pages & Parent Relationships (100% - v0.9.0)
+
+Miglioramento detail pages con action buttons e gestione parent relationships:
+
+- ✅ **View-Only Detail Pages:** Separazione visualizzazione e modifica con edit su route dedicate
+- ✅ **Action Buttons:** Archive, Delete, Edit buttons in page headers per tutte le entità
+- ✅ **Parent Relationships:** Parent selection in EventForm, NoteForm, ProjectForm, TaskForm
+- ✅ **Parent Display:** Parent relationship cards su detail pages con clickable links
+- ✅ **Dedicated Edit Routes:** `/edit` routes per events, notes, tasks
+- ✅ **ProjectDetailView:** Component tabbed con overview, tasks, events, notes tabs
+- ✅ **Statistics Cards:** Task counts, completion rate, upcoming events in project detail
+- ✅ **Task Breakdown:** Status distribution visualization in project overview
+- ✅ **Server Actions:** Fetch parent selection options per form dropdowns
+- ✅ **Database Migration:** Schema update per parent relationship support
+- ✅ **Delete Confirmation:** ConfirmDialog per delete operations su tutte le entità
+
 ---
 
 ## ⏳ Phase 3: Collections & Advanced Features (CURRENT FOCUS)
 
 **Obiettivo:** Sistema Collections + Activity tracking + data management avanzato.
 
-**Status:** 5% Complete - Database schema pronto, implementazione in corso
+**Status:** 0% Complete - Database schema pronto, implementazione non ancora iniziata
 
 ### 3.1 Collections System ⭐⭐⭐
 
@@ -386,6 +419,31 @@ export const FEATURES = {
 
 ## 📝 Recent Milestones
 
+### v0.9.0 - Enhanced Detail Pages & Parent Relationships (2025-10-27)
+
+Miglioramento detail pages con action buttons e gestione parent relationships:
+
+- Detail pages refactored to view-only con edit su route dedicate
+- Archive, Delete, Edit buttons in page headers
+- Parent relationship management per tutte le entità
+- ProjectDetailView component con interfaccia tabbed
+- Statistics cards e task breakdown in project detail
+- Database migration per parent relationship support
+
+Dettagli completi: [CHANGELOG.md](../../../CHANGELOG.md#090)
+
+### v0.8.0 - Trash System & Entity Helpers (2025-10-27)
+
+Sistema trash con soft delete e refactoring architetturale:
+
+- Trash system completo con soft delete e restore functionality
+- Entity helpers library per ridurre duplicazione codice (~40%)
+- Database schema updates (deletedAt, archivedAt fields)
+- Unified session validation e ownership checks
+- Standardized error handling patterns
+
+Dettagli completi: [CHANGELOG.md](../../../CHANGELOG.md#080)
+
 ### v0.7.0 - Optimistic UI & Form Improvements (2025-10-26)
 
 Miglioramenti UX con optimistic updates e form consistency:
@@ -396,18 +454,6 @@ Miglioramenti UX con optimistic updates e form consistency:
 - Layout improvements (ProjectCard, PageHeader, 2-column grid)
 
 Dettagli completi: [CHANGELOG.md](../../../CHANGELOG.md#070)
-
-### v0.6.0 - File Attachments System (2025-10-24)
-
-Sistema completo di file attachments con Cloudflare R2:
-
-- Cloudflare R2 integration per storage sicuro
-- Drag-and-drop upload con progress tracking
-- Image preview con lightbox
-- Storage quota tracking per user
-- AttachmentsSection component completo
-
-Dettagli completi: [CHANGELOG.md](../../../CHANGELOG.md#060)
 
 ### v0.5.0-v0.5.4 - Modern Dashboard Layout (2025-10-23/24)
 
@@ -453,8 +499,8 @@ Dettagli completi: [CHANGELOG.md](../../../CHANGELOG.md#010)
 
 ---
 
-**Milestone attuale:** Phase 3 - Collections System & Advanced Features (5%)
-**Prossima release:** v0.8.0 (Collections MVP o Data Management)
+**Milestone attuale:** Phase 3 - Collections System & Advanced Features (0%)
+**Prossima release:** v0.10.0 (Collections MVP o Data Management)
 
 > **📋 Per lista completa di enhancement e feature ideas, vedi [BACKLOG.md](./BACKLOG.md)**
 > **📖 Per storico release complete, vedi [CHANGELOG.md](../../../CHANGELOG.md)**

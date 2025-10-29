@@ -6,9 +6,10 @@ import { getAttachmentsByEntity } from "@/features/attachments/queries";
 import { getSession } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Edit, Tag } from "lucide-react";
+import { Edit } from "lucide-react";
 import { PageHeader } from "@/components/common";
-import { TagInput } from "@/components/tags/TagInput";
+import { TagsCard } from "@/components/tags/TagsCard";
+import { ParentTaskCard } from "@/components/tasks/ParentTaskCard";
 import { CommentThread } from "@/components/comments/CommentThread";
 import { EntityLinksSection } from "@/components/links/EntityLinksSection";
 import { AttachmentsSection } from "@/components/attachments/AttachmentsSection";
@@ -105,42 +106,10 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
         )}
       </div>
 
-      {/* Tags and Parent Task - Side by side */}
+      {/* Tags and Parent Task - Side by side (Read-only in view mode) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Tags Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <Tag className="h-4 w-4" />
-              Tags
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TagInput entityType="task" entityId={id} initialTags={tags} />
-          </CardContent>
-        </Card>
-
-        {/* Parent Task Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Parent Task</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {taskData.parentTask ? (
-              <Link
-                href={`/dashboard/tasks/${taskData.parentTask.id}`}
-                className="block hover:text-primary transition-colors"
-              >
-                <p className="font-medium">{taskData.parentTask.title}</p>
-                <Badge variant="outline" className="mt-2 text-xs">
-                  {TASK_STATUS_LABELS[taskData.parentTask.status]}
-                </Badge>
-              </Link>
-            ) : (
-              <p className="text-sm text-muted-foreground">No parent task</p>
-            )}
-          </CardContent>
-        </Card>
+        <TagsCard mode="view" entityType="task" initialTags={tags} />
+        <ParentTaskCard mode="view" parentTask={taskData.parentTask} />
       </div>
 
       {/* Subtasks Card */}

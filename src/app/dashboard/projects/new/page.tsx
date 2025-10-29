@@ -1,5 +1,10 @@
+"use client";
+
+import { useState } from "react";
 import { PageHeader } from "@/components/common";
 import { ProjectForm } from "@/components/projects/ProjectForm";
+import { TagsCard } from "@/components/tags/TagsCard";
+import { ParentProjectCard } from "@/components/projects/ParentProjectCard";
 
 /**
  * New Project Page
@@ -8,6 +13,9 @@ import { ProjectForm } from "@/components/projects/ProjectForm";
  */
 
 export default function NewProjectPage() {
+  const [parentProjectId, setParentProjectId] = useState<string | undefined>();
+  const [tags, setTags] = useState<Array<{ id: string; name: string; color: string }>>([]);
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -18,7 +26,13 @@ export default function NewProjectPage() {
       />
 
       {/* Project Form */}
-      <ProjectForm mode="create" />
+      <ProjectForm mode="create" parentProjectId={parentProjectId} selectedTags={tags} />
+
+      {/* Tags and Parent Project - Side by side */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <TagsCard mode="create" entityType="project" initialTags={tags} onTagsChange={setTags} />
+        <ParentProjectCard mode="create" onParentChange={setParentProjectId} />
+      </div>
     </div>
   );
 }

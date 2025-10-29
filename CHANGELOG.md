@@ -7,6 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2025-10-29
+
+### Added
+
+**Tag Management System**
+
+- Tag Manager page at `/dashboard/tags` with comprehensive tag management
+- Create new tags with name and color selection via CreateTagDialog
+- Edit existing tags (rename and recolor) via EditTagDialog
+- Delete single or multiple tags with confirmation
+- Merge duplicate tags functionality via MergeTagsDialog
+- Tag usage statistics showing usage count by entity type (tasks, events, notes, projects)
+- Search tags by name
+- Sort tags by name, creation date, or usage count
+- TagManagerList component displaying all tags with actions
+- TagSelector component for improved tag selection in forms
+- TagsCard component for displaying tags on entity detail pages
+- Radio group UI component for tag merge selection
+
+**Parent Relationship Cards**
+
+- ParentEventCard component for event parent relationships
+- ParentNoteCard component for note parent relationships
+- ParentProjectCard component for project parent relationships
+- ParentTaskCard component for task parent relationships
+- Clickable parent links on all entity detail pages
+- Parent selection dropdowns in all entity forms
+
+### Fixed
+
+- Missing `Link` import in notes edit page that prevented build
+- Type error in project edit page with invalid `parentProjectId` prop
+- Type error in `ProjectDetailView` component missing `parentProject` prop
+- Build errors related to parent project status field type mismatch
+
+### Changed
+
+- Tag input system refactored to use new TagSelector component
+- Tag actions enhanced with merge, bulk delete, and edit capabilities
+- Tag schema updated with new validation for tag operations
+- Entity helpers updated to support tag management operations
+- Removed unused imports across 10+ component files for cleaner code
+- Removed unused error variables in catch blocks (replaced with empty catch)
+- Updated dependencies: @aws-sdk packages, better-auth, drizzle-kit, resend, wrangler, and others
+- Sidebar navigation updated with Tags menu item
+
 ## [0.9.0] - 2025-10-27
 
 ### Added
@@ -862,7 +908,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code splitting
 - Lazy loading for components
 
-[unreleased]: https://github.com/essedev/plannerinator/compare/v0.9.0...HEAD
+[unreleased]: https://github.com/essedev/plannerinator/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/essedev/plannerinator/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/essedev/plannerinator/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/essedev/plannerinator/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/essedev/plannerinator/compare/v0.6.0...v0.7.0

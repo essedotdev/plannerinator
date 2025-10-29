@@ -4,14 +4,16 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LayoutGrid, CheckSquare, Calendar, FileText, Tag } from "lucide-react";
+import { LayoutGrid, CheckSquare, Calendar, FileText } from "lucide-react";
 import { TaskList } from "@/components/tasks/TaskList";
 import { EventList } from "@/components/events/EventList";
 import { NoteList } from "@/components/notes/NoteList";
-import { TagInput } from "@/components/tags/TagInput";
+import { TagsCard } from "@/components/tags/TagsCard";
+import { ParentProjectCard } from "@/components/projects/ParentProjectCard";
 import { CommentThread } from "@/components/comments/CommentThread";
 import { EntityLinksSection } from "@/components/links/EntityLinksSection";
 import { AttachmentsSection } from "@/components/attachments/AttachmentsSection";
+import type { Tag as DbTag, Comment, Link, Attachment } from "@/db/schema";
 
 type ViewMode = "overview" | "tasks" | "events" | "notes";
 
@@ -49,9 +51,12 @@ interface Event {
 
 interface Note {
   id: string;
-  title: string;
-  content: string;
-  isPinned: boolean;
+  title: string | null;
+  content: string | null;
+  type: "note" | "document" | "research" | "idea" | "snippet";
+  isFavorite: boolean;
+  createdAt: Date;
+  updatedAt: Date;
   project?: {
     id: string;
     name: string;
@@ -88,11 +93,31 @@ interface ProjectDetailViewProps {
   tasks: Task[];
   events: Event[];
   notes: Note[];
-  tags: any[];
-  comments: any[];
-  links: any[];
-  attachments: any[];
+  tags: DbTag[];
+  comments: Array<{
+    comment: Comment;
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      image: string | null;
+    };
+  }>;
+  links: Array<
+    Link & {
+      fromEntity: { type: "task" | "event" | "note" | "project"; id: string; title: string } | null;
+      toEntity: { type: "task" | "event" | "note" | "project"; id: string; title: string } | null;
+    }
+  >;
+  attachments: Attachment[];
   currentUserId: string;
+  parentProject?: {
+    id: string;
+    name: string;
+    icon: string | null;
+    color: string | null;
+    status: "active" | "on_hold" | "completed" | "archived" | "cancelled";
+  } | null;
   defaultView?: ViewMode;
 }
 
@@ -108,6 +133,7 @@ export function ProjectDetailView({
   links,
   attachments,
   currentUserId,
+  parentProject,
   defaultView = "overview",
 }: ProjectDetailViewProps) {
   const [view, setView] = useState<ViewMode>(defaultView);
@@ -243,18 +269,9 @@ export function ProjectDetailView({
             </CardContent>
           </Card>
 
-          {/* Tags Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Tag className="h-4 w-4" />
-                Tags
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <TagInput entityType="project" entityId={projectId} initialTags={tags} />
-            </CardContent>
-          </Card>
+          {/* Tags and Parent - Read-only in view mode */}
+          <TagsCard mode="view" entityType="project" initialTags={tags} />
+          <ParentProjectCard mode="view" parentProject={parentProject} />
 
           {/* Attachments Section */}
           <AttachmentsSection

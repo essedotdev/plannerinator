@@ -1,20 +1,17 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { Tag } from "lucide-react";
 import { PageHeader } from "@/components/common";
 import { EventForm } from "@/components/events/EventForm";
-import { TagInput } from "@/components/tags/TagInput";
+import { TagsCard } from "@/components/tags/TagsCard";
+import { ParentEventCard } from "@/components/events/ParentEventCard";
 import { CommentThread } from "@/components/comments/CommentThread";
 import { EntityLinksSection } from "@/components/links/EntityLinksSection";
 import { AttachmentsSection } from "@/components/attachments/AttachmentsSection";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getEventById } from "@/features/events/queries";
 import { getEntityTags } from "@/features/tags/queries";
 import { getEntityComments } from "@/features/comments/queries";
 import { getEntityLinks } from "@/features/links/queries";
 import { getAttachmentsByEntity } from "@/features/attachments/queries";
 import { getSession } from "@/lib/auth";
-import { formatFullDate } from "@/lib/dates";
 
 /**
  * Event Edit Page
@@ -59,50 +56,12 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
       <PageHeader title="Edit Event" description={`Editing event: ${eventData.title}`} backButton />
 
       {/* Event Form */}
-      <EventForm
-        mode="edit"
-        initialData={{
-          ...eventData,
-          parentEventId: eventData.parentEventId,
-        }}
-      />
+      <EventForm mode="edit" initialData={eventData} />
 
       {/* Tags and Parent Event - Side by side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Tags Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <Tag className="h-4 w-4" />
-              Tags
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TagInput entityType="event" entityId={id} initialTags={tags} />
-          </CardContent>
-        </Card>
-
-        {/* Parent Event Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Parent Event</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {eventData.parentEvent ? (
-              <Link
-                href={`/dashboard/events/${eventData.parentEvent.id}`}
-                className="block hover:text-primary transition-colors"
-              >
-                <p className="font-medium">{eventData.parentEvent.title}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {formatFullDate(eventData.parentEvent.startTime)}
-                </p>
-              </Link>
-            ) : (
-              <p className="text-sm text-muted-foreground">No parent event</p>
-            )}
-          </CardContent>
-        </Card>
+        <TagsCard mode="edit" entityType="event" entityId={id} initialTags={tags} />
+        <ParentEventCard mode="edit" eventId={id} parentEvent={eventData.parentEvent} />
       </div>
 
       {/* Attachments Section */}
