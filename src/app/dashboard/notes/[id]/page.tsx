@@ -1,15 +1,13 @@
 import { getNoteById } from "@/features/notes/queries";
-import { getEntityTags } from "@/features/tags/queries";
-import { getEntityComments } from "@/features/comments/queries";
-import { getEntityLinks } from "@/features/links/queries";
-import { getAttachmentsByEntity } from "@/features/attachments/queries";
+import { fetchEntityPageData } from "@/lib/entity-data";
 import { getSession } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Edit } from "lucide-react";
 import { PageHeader } from "@/components/common";
 import { TagsCard } from "@/components/tags/TagsCard";
-import { ParentNoteCard } from "@/components/notes/ParentNoteCard";
+import { ParentEntityCard } from "@/components/common/ParentEntityCard";
+import { parentNoteConfig } from "@/components/notes/parent-note-config";
 import { CommentThread } from "@/components/comments/CommentThread";
 import { EntityLinksSection } from "@/components/links/EntityLinksSection";
 import { AttachmentsSection } from "@/components/attachments/AttachmentsSection";
@@ -49,12 +47,12 @@ export default async function NoteDetailPage({ params }: NoteDetailPageProps) {
   }
 
   // Fetch tags, comments, links, and attachments in parallel
-  const [tags, commentsData, links, attachments] = await Promise.all([
-    getEntityTags({ entityType: "note", entityId: id }),
-    getEntityComments({ entityType: "note", entityId: id }),
-    getEntityLinks({ entityType: "note", entityId: id }),
-    getAttachmentsByEntity("note", id),
-  ]);
+  const {
+    tags,
+    comments: commentsData,
+    links,
+    attachments,
+  } = await fetchEntityPageData("note", id);
 
   return (
     <div className="space-y-6">
@@ -105,7 +103,11 @@ export default async function NoteDetailPage({ params }: NoteDetailPageProps) {
       {/* Tags and Parent Note - Side by side (Read-only in view mode) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <TagsCard mode="view" entityType="note" initialTags={tags} />
-        <ParentNoteCard mode="view" parentNote={noteData.parentNote} />
+        <ParentEntityCard
+          mode="view"
+          config={parentNoteConfig}
+          parentEntity={noteData.parentNote}
+        />
       </div>
 
       {/* Child Notes Card */}

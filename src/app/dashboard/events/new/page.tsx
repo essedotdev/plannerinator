@@ -5,7 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/common";
 import { EventForm } from "@/components/events/EventForm";
 import { TagsCard } from "@/components/tags/TagsCard";
-import { ParentEventCard } from "@/components/events/ParentEventCard";
+import { ParentEntityCard } from "@/components/common/ParentEntityCard";
+import { parentEventConfig } from "@/components/events/parent-event-config";
 
 /**
  * Create new event page
@@ -44,7 +45,11 @@ export default function NewEventPage() {
       {/* Tags and Parent Event - Side by side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <TagsCard mode="create" entityType="event" initialTags={tags} onTagsChange={setTags} />
-        <ParentEventCard mode="create" onParentChange={setParentEventId} />
+        <ParentEntityCard
+          mode="create"
+          config={parentEventConfig}
+          onParentChange={setParentEventId}
+        />
       </div>
     </div>
   );

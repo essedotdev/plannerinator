@@ -4,7 +4,8 @@ import { useState } from "react";
 import { PageHeader } from "@/components/common";
 import { TaskForm } from "@/components/tasks/TaskForm";
 import { TagsCard } from "@/components/tags/TagsCard";
-import { ParentTaskCard } from "@/components/tasks/ParentTaskCard";
+import { ParentEntityCard } from "@/components/common/ParentEntityCard";
+import { parentTaskConfig } from "@/components/tasks/parent-task-config";
 
 /**
  * Create new task page
@@ -21,7 +22,11 @@ export default function NewTaskPage() {
       {/* Tags and Parent Task - Side by side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <TagsCard mode="create" entityType="task" initialTags={tags} onTagsChange={setTags} />
-        <ParentTaskCard mode="create" onParentChange={setParentTaskId} />
+        <ParentEntityCard
+          mode="create"
+          config={parentTaskConfig}
+          onParentChange={setParentTaskId}
+        />
       </div>
     </div>
   );

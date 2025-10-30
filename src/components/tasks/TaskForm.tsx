@@ -3,19 +3,18 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { createTask, updateTask } from "@/features/tasks/actions";
-import { createTag, assignTagsToEntity } from "@/features/tags/actions";
+import { createAndAssignTags } from "@/features/tags/utils";
 import {
   createTaskSchema,
   updateTaskSchema,
   type TaskPriority,
   type TaskStatus,
 } from "@/features/tasks/schema";
-import { getProjects } from "@/features/projects/queries";
+import { useProjectSelection } from "@/hooks/useProjectSelection";
 import { PROJECT_STATUS_LABELS, TASK_STATUS_LABELS } from "@/lib/labels";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -27,9 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Project } from "@/db/schema";
-
-type ProjectOption = Pick<Project, "id" | "name" | "icon" | "color" | "status">;
+import { FormActions } from "@/components/forms/FormActions";
 
 interface TaskFormProps {
   mode: "create" | "edit";
@@ -58,8 +55,7 @@ interface TaskFormProps {
 export function TaskForm({ mode, initialData, parentTaskId, selectedTags }: TaskFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [projects, setProjects] = useState<ProjectOption[]>([]);
-  const [loadingProjects, setLoadingProjects] = useState(true);
+  const { projects, loading: loadingProjects } = useProjectSelection();
 
   const { register, handleSubmit, formState, watch, setValue } = useForm({
     resolver: zodResolver(mode === "edit" ? updateTaskSchema : createTaskSchema),
@@ -75,22 +71,6 @@ export function TaskForm({ mode, initialData, parentTaskId, selectedTags }: Task
     },
   });
 
-  // Load all projects (regardless of status)
-  useEffect(() => {
-    async function loadProjects() {
-      try {
-        const result = await getProjects({ sortBy: "name", sortOrder: "asc" });
-        setProjects(result.projects);
-      } catch (error) {
-        console.error("Failed to load projects:", error);
-        toast.error("Failed to load projects");
-      } finally {
-        setLoadingProjects(false);
-      }
-    }
-    loadProjects();
-  }, []);
-
   const onSubmit = handleSubmit(async (data) => {
     setIsSubmitting(true);
 
@@ -103,34 +83,8 @@ export function TaskForm({ mode, initialData, parentTaskId, selectedTags }: Task
         });
 
         // Handle tag creation and assignment if tags were selected
-        if (selectedTags && selectedTags.length > 0 && result.task) {
-          const realTagIds: string[] = [];
-
-          // Create new tags (those with temporary IDs) and collect all tag IDs
-          for (const tag of selectedTags) {
-            if (tag.id.startsWith("temp-")) {
-              // This is a temporary tag that needs to be created
-              const newTagResult = await createTag({
-                name: tag.name,
-                color: tag.color,
-              });
-              if (newTagResult.tag) {
-                realTagIds.push(newTagResult.tag.id);
-              }
-            } else {
-              // This is an existing tag
-              realTagIds.push(tag.id);
-            }
-          }
-
-          // Assign all tags to the task
-          if (realTagIds.length > 0) {
-            await assignTagsToEntity({
-              entityType: "task",
-              entityId: result.task.id,
-              tagIds: realTagIds,
-            });
-          }
+        if (result.task && selectedTags) {
+          await createAndAssignTags(selectedTags, "task", result.task.id);
         }
 
         toast.success("Task created successfully!");
@@ -322,19 +276,12 @@ export function TaskForm({ mode, initialData, parentTaskId, selectedTags }: Task
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-2 justify-end pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.back()}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : mode === "create" ? "Create Task" : "Save Changes"}
-            </Button>
-          </div>
+          <FormActions
+            isSubmitting={isSubmitting}
+            mode={mode}
+            onCancel={() => router.back()}
+            submitLabel={mode === "create" ? "Create Task" : "Save Changes"}
+          />
         </form>
       </CardContent>
     </Card>

@@ -6,9 +6,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { createProject, updateProject } from "@/features/projects/actions";
-import { createTag, assignTagsToEntity } from "@/features/tags/actions";
+import { createAndAssignTags } from "@/features/tags/utils";
 import { createProjectSchema, updateProjectSchema } from "@/features/projects/schema";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -22,6 +21,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatForDateInput } from "@/lib/dates";
 import { PROJECT_STATUS_LABELS } from "@/lib/labels";
+import { FormActions } from "@/components/forms/FormActions";
 
 interface ProjectFormProps {
   mode: "create" | "edit";
@@ -72,30 +72,8 @@ export function ProjectForm({
         });
 
         // Handle tag creation and assignment if tags were selected
-        if (selectedTags && selectedTags.length > 0 && result.project) {
-          const realTagIds: string[] = [];
-
-          for (const tag of selectedTags) {
-            if (tag.id.startsWith("temp-")) {
-              const newTagResult = await createTag({
-                name: tag.name,
-                color: tag.color,
-              });
-              if (newTagResult.tag) {
-                realTagIds.push(newTagResult.tag.id);
-              }
-            } else {
-              realTagIds.push(tag.id);
-            }
-          }
-
-          if (realTagIds.length > 0) {
-            await assignTagsToEntity({
-              entityType: "project",
-              entityId: result.project.id,
-              tagIds: realTagIds,
-            });
-          }
+        if (result.project && selectedTags) {
+          await createAndAssignTags(selectedTags, "project", result.project.id);
         }
 
         toast.success("Project created successfully!");
@@ -236,19 +214,12 @@ export function ProjectForm({
           </div>
 
           {/* Form Actions */}
-          <div className="flex gap-2 justify-end pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.back()}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : mode === "create" ? "Create Project" : "Save Changes"}
-            </Button>
-          </div>
+          <FormActions
+            isSubmitting={isSubmitting}
+            mode={mode}
+            onCancel={() => router.back()}
+            submitLabel={mode === "create" ? "Create Project" : "Save Changes"}
+          />
         </form>
       </CardContent>
     </Card>

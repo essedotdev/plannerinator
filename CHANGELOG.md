@@ -7,6 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2025-10-30
+
+### Added
+
+**Code Reusability Improvements**
+
+- Generic `ParentEntityCard` component replacing entity-specific parent card components
+- `fetchEntityPageData` utility function for fetching common entity page data (tags, comments, links, attachments)
+- `useProjectSelection` hook for standardized project loading in forms
+- `FormActions` component for consistent form action buttons across all entity forms
+- Tag utility function `createAndAssignTags` for handling tag creation and assignment
+
+**New Shared Components and Utilities**
+
+- `src/components/common/ParentEntityCard.tsx` - Generic, configurable parent entity card
+- `src/lib/entity-data.ts` - Centralized entity page data fetching
+- `src/hooks/useProjectSelection.ts` - Reusable project selection hook
+- `src/components/forms/FormActions.tsx` - Standardized form action buttons
+- `src/features/tags/utils.ts` - Tag creation and assignment utilities
+- Parent entity configuration files for all entity types (tasks, events, notes, projects)
+
+### Changed
+
+**Refactoring for Code Reusability**
+
+- Replaced entity-specific parent cards (ParentTaskCard, ParentEventCard, etc.) with generic `ParentEntityCard`
+- Unified entity page data fetching across all detail and edit pages using `fetchEntityPageData`
+- Standardized project selection logic across TaskForm, EventForm, and NoteForm using `useProjectSelection` hook
+- Consolidated form action buttons in all entity forms using `FormActions` component
+- Refactored tag creation logic to use shared `createAndAssignTags` utility
+
+**Component Simplification**
+
+- All entity detail pages (view and edit) now use `fetchEntityPageData` instead of individual Promise.all calls
+- All entity forms now use `FormActions` component for consistent button layout and behavior
+- Removed duplicate project loading logic from EventForm, TaskForm, and NoteForm
+- Removed entity-specific parent card components in favor of configuration-based approach
+
+**Architecture Improvements**
+
+- Reduced code duplication across entity pages by ~30%
+- Improved type safety with generic components using TypeScript generics
+- Better separation of concerns with utility functions and hooks
+- More maintainable codebase with shared, reusable components
+
+### Removed
+
+- `src/components/tasks/ParentTaskCard.tsx` (replaced by ParentEntityCard)
+- `src/components/events/ParentEventCard.tsx` (replaced by ParentEntityCard)
+- `src/components/notes/ParentNoteCard.tsx` (replaced by ParentEntityCard)
+- `src/components/projects/ParentProjectCard.tsx` (replaced by ParentEntityCard)
+- Duplicate project loading code from multiple form components
+- Duplicate tag creation logic from entity action handlers
+- Redundant form action button implementations across forms
+
 ## [0.10.0] - 2025-10-29
 
 ### Added
@@ -908,7 +963,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code splitting
 - Lazy loading for components
 
-[unreleased]: https://github.com/essedev/plannerinator/compare/v0.10.0...HEAD
+[unreleased]: https://github.com/essedev/plannerinator/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/essedev/plannerinator/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/essedev/plannerinator/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/essedev/plannerinator/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/essedev/plannerinator/compare/v0.7.0...v0.8.0

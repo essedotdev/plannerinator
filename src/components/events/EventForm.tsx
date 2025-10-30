@@ -3,18 +3,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import { toast } from "sonner";
 import { createEvent, updateEvent } from "@/features/events/actions";
-import { createTag, assignTagsToEntity } from "@/features/tags/actions";
+import { createAndAssignTags } from "@/features/tags/utils";
 import {
   createEventSchema,
   updateEventSchema,
   type EventCalendarType,
 } from "@/features/events/schema";
-import { getProjects } from "@/features/projects/queries";
+import { useProjectSelection } from "@/hooks/useProjectSelection";
 import { PROJECT_STATUS_LABELS, EVENT_CALENDAR_TYPE_LABELS } from "@/lib/labels";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -28,9 +27,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatForDateTimeInput } from "@/lib/dates";
-import type { Project } from "@/db/schema";
-
-type ProjectOption = Pick<Project, "id" | "name" | "icon" | "color" | "status">;
+import { FormActions } from "@/components/forms/FormActions";
 
 interface EventFormProps {
   mode: "create" | "edit";
@@ -60,8 +57,7 @@ interface EventFormProps {
 export function EventForm({ mode, initialData, parentEventId, selectedTags }: EventFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [projects, setProjects] = useState<ProjectOption[]>([]);
-  const [loadingProjects, setLoadingProjects] = useState(true);
+  const { projects, loading: loadingProjects } = useProjectSelection();
 
   // Use refs to store saved datetime values (doesn't trigger re-renders)
   const savedStartTimeRef = useRef<string>("");
@@ -131,22 +127,6 @@ export function EventForm({ mode, initialData, parentEventId, selectedTags }: Ev
     [setValue, watch]
   );
 
-  // Load all projects (regardless of status)
-  useEffect(() => {
-    async function loadProjects() {
-      try {
-        const result = await getProjects({ sortBy: "name", sortOrder: "asc" });
-        setProjects(result.projects);
-      } catch (error) {
-        console.error("Failed to load projects:", error);
-        toast.error("Failed to load projects");
-      } finally {
-        setLoadingProjects(false);
-      }
-    }
-    loadProjects();
-  }, []);
-
   const onSubmit = handleSubmit(async (data) => {
     setIsSubmitting(true);
 
@@ -158,30 +138,8 @@ export function EventForm({ mode, initialData, parentEventId, selectedTags }: Ev
         });
 
         // Handle tag creation and assignment if tags were selected
-        if (selectedTags && selectedTags.length > 0 && result.event) {
-          const realTagIds: string[] = [];
-
-          for (const tag of selectedTags) {
-            if (tag.id.startsWith("temp-")) {
-              const newTagResult = await createTag({
-                name: tag.name,
-                color: tag.color,
-              });
-              if (newTagResult.tag) {
-                realTagIds.push(newTagResult.tag.id);
-              }
-            } else {
-              realTagIds.push(tag.id);
-            }
-          }
-
-          if (realTagIds.length > 0) {
-            await assignTagsToEntity({
-              entityType: "event",
-              entityId: result.event.id,
-              tagIds: realTagIds,
-            });
-          }
+        if (result.event && selectedTags) {
+          await createAndAssignTags(selectedTags, "event", result.event.id);
         }
 
         toast.success("Event created successfully!");
@@ -397,19 +355,12 @@ export function EventForm({ mode, initialData, parentEventId, selectedTags }: Ev
           </div>
 
           {/* Form Actions */}
-          <div className="flex gap-2 justify-end pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.back()}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : mode === "create" ? "Create Event" : "Save Changes"}
-            </Button>
-          </div>
+          <FormActions
+            isSubmitting={isSubmitting}
+            mode={mode}
+            onCancel={() => router.back()}
+            submitLabel={mode === "create" ? "Create Event" : "Save Changes"}
+          />
         </form>
       </CardContent>
     </Card>

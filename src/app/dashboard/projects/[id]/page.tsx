@@ -8,10 +8,7 @@ import { getProjectById, getProjectStats } from "@/features/projects/queries";
 import { getTasks } from "@/features/tasks/queries";
 import { getEvents } from "@/features/events/queries";
 import { getNotes } from "@/features/notes/queries";
-import { getEntityTags } from "@/features/tags/queries";
-import { getEntityComments } from "@/features/comments/queries";
-import { getEntityLinks } from "@/features/links/queries";
-import { getAttachmentsByEntity } from "@/features/attachments/queries";
+import { fetchEntityPageData } from "@/lib/entity-data";
 import { getSession } from "@/lib/auth";
 import { PROJECT_STATUS_LABELS } from "@/lib/labels";
 import { DeleteProjectButton } from "@/components/projects/DeleteProjectButton";
@@ -57,24 +54,14 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   const stats = await getProjectStats({ projectId: id });
 
   // Fetch related entities, tags, comments, links, and attachments in parallel
-  const tasksPromise = getTasks({ projectId: id, limit: 100 });
-  const eventsPromise = getEvents({ projectId: id, limit: 100 });
-  const notesPromise = getNotes({ projectId: id, limit: 100 });
-  const tagsPromise = getEntityTags({ entityType: "project", entityId: id });
-  const commentsPromise = getEntityComments({ entityType: "project", entityId: id });
-  const linksPromise = getEntityLinks({ entityType: "project", entityId: id });
-  const attachmentsPromise = getAttachmentsByEntity("project", id);
+  const [tasksData, eventsData, notesData, entityData] = await Promise.all([
+    getTasks({ projectId: id, limit: 100 }),
+    getEvents({ projectId: id, limit: 100 }),
+    getNotes({ projectId: id, limit: 100 }),
+    fetchEntityPageData("project", id),
+  ]);
 
-  const [tasksData, eventsData, notesData, tags, commentsData, links, attachments] =
-    await Promise.all([
-      tasksPromise,
-      eventsPromise,
-      notesPromise,
-      tagsPromise,
-      commentsPromise,
-      linksPromise,
-      attachmentsPromise,
-    ]);
+  const { tags, comments: commentsData, links, attachments } = entityData;
 
   return (
     <div className="space-y-6">

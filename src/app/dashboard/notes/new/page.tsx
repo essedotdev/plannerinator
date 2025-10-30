@@ -4,7 +4,8 @@ import { useState } from "react";
 import { PageHeader } from "@/components/common";
 import { NoteForm } from "@/components/notes/NoteForm";
 import { TagsCard } from "@/components/tags/TagsCard";
-import { ParentNoteCard } from "@/components/notes/ParentNoteCard";
+import { ParentEntityCard } from "@/components/common/ParentEntityCard";
+import { parentNoteConfig } from "@/components/notes/parent-note-config";
 
 /**
  * Create new note page
@@ -21,7 +22,11 @@ export default function NewNotePage() {
       {/* Tags and Parent Note - Side by side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <TagsCard mode="create" entityType="note" initialTags={tags} onTagsChange={setTags} />
-        <ParentNoteCard mode="create" onParentChange={setParentNoteId} />
+        <ParentEntityCard
+          mode="create"
+          config={parentNoteConfig}
+          onParentChange={setParentNoteId}
+        />
       </div>
     </div>
   );

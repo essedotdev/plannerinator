@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/common";
 import { TaskForm } from "@/components/tasks/TaskForm";
 import { TagsCard } from "@/components/tags/TagsCard";
-import { ParentTaskCard } from "@/components/tasks/ParentTaskCard";
+import { ParentEntityCard } from "@/components/common/ParentEntityCard";
+import { parentTaskConfig } from "@/components/tasks/parent-task-config";
 import { CommentThread } from "@/components/comments/CommentThread";
 import { EntityLinksSection } from "@/components/links/EntityLinksSection";
 import { AttachmentsSection } from "@/components/attachments/AttachmentsSection";
@@ -10,10 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TASK_STATUS_LABELS } from "@/lib/labels";
 import { getTaskById } from "@/features/tasks/queries";
-import { getEntityTags } from "@/features/tags/queries";
-import { getEntityComments } from "@/features/comments/queries";
-import { getEntityLinks } from "@/features/links/queries";
-import { getAttachmentsByEntity } from "@/features/attachments/queries";
+import { fetchEntityPageData } from "@/lib/entity-data";
 import { getSession } from "@/lib/auth";
 import Link from "next/link";
 
@@ -47,12 +45,12 @@ export default async function EditTaskPage({ params }: EditTaskPageProps) {
   }
 
   // Fetch tags, comments, links, and attachments in parallel
-  const [tags, commentsData, links, attachments] = await Promise.all([
-    getEntityTags({ entityType: "task", entityId: id }),
-    getEntityComments({ entityType: "task", entityId: id }),
-    getEntityLinks({ entityType: "task", entityId: id }),
-    getAttachmentsByEntity("task", id),
-  ]);
+  const {
+    tags,
+    comments: commentsData,
+    links,
+    attachments,
+  } = await fetchEntityPageData("task", id);
 
   return (
     <div className="space-y-6">
@@ -65,7 +63,12 @@ export default async function EditTaskPage({ params }: EditTaskPageProps) {
       {/* Tags and Parent Task - Side by side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <TagsCard mode="edit" entityType="task" entityId={id} initialTags={tags} />
-        <ParentTaskCard mode="edit" taskId={id} parentTask={taskData.parentTask} />
+        <ParentEntityCard
+          mode="edit"
+          config={parentTaskConfig}
+          entityId={id}
+          parentEntity={taskData.parentTask}
+        />
       </div>
 
       {/* Subtasks Card */}

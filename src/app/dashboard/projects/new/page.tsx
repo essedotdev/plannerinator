@@ -4,7 +4,8 @@ import { useState } from "react";
 import { PageHeader } from "@/components/common";
 import { ProjectForm } from "@/components/projects/ProjectForm";
 import { TagsCard } from "@/components/tags/TagsCard";
-import { ParentProjectCard } from "@/components/projects/ParentProjectCard";
+import { ParentEntityCard } from "@/components/common/ParentEntityCard";
+import { parentProjectConfig } from "@/components/projects/parent-project-config";
 
 /**
  * New Project Page
@@ -31,7 +32,11 @@ export default function NewProjectPage() {
       {/* Tags and Parent Project - Side by side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <TagsCard mode="create" entityType="project" initialTags={tags} onTagsChange={setTags} />
-        <ParentProjectCard mode="create" onParentChange={setParentProjectId} />
+        <ParentEntityCard
+          mode="create"
+          config={parentProjectConfig}
+          onParentChange={setParentProjectId}
+        />
       </div>
     </div>
   );

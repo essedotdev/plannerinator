@@ -1,15 +1,13 @@
 import { getTaskById } from "@/features/tasks/queries";
-import { getEntityTags } from "@/features/tags/queries";
-import { getEntityComments } from "@/features/comments/queries";
-import { getEntityLinks } from "@/features/links/queries";
-import { getAttachmentsByEntity } from "@/features/attachments/queries";
+import { fetchEntityPageData } from "@/lib/entity-data";
 import { getSession } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Edit } from "lucide-react";
 import { PageHeader } from "@/components/common";
 import { TagsCard } from "@/components/tags/TagsCard";
-import { ParentTaskCard } from "@/components/tasks/ParentTaskCard";
+import { ParentEntityCard } from "@/components/common/ParentEntityCard";
+import { parentTaskConfig } from "@/components/tasks/parent-task-config";
 import { CommentThread } from "@/components/comments/CommentThread";
 import { EntityLinksSection } from "@/components/links/EntityLinksSection";
 import { AttachmentsSection } from "@/components/attachments/AttachmentsSection";
@@ -52,12 +50,12 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
   }
 
   // Fetch tags, comments, links, and attachments in parallel
-  const [tags, commentsData, links, attachments] = await Promise.all([
-    getEntityTags({ entityType: "task", entityId: id }),
-    getEntityComments({ entityType: "task", entityId: id }),
-    getEntityLinks({ entityType: "task", entityId: id }),
-    getAttachmentsByEntity("task", id),
-  ]);
+  const {
+    tags,
+    comments: commentsData,
+    links,
+    attachments,
+  } = await fetchEntityPageData("task", id);
 
   return (
     <div className="space-y-6">
@@ -109,7 +107,11 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
       {/* Tags and Parent Task - Side by side (Read-only in view mode) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <TagsCard mode="view" entityType="task" initialTags={tags} />
-        <ParentTaskCard mode="view" parentTask={taskData.parentTask} />
+        <ParentEntityCard
+          mode="view"
+          config={parentTaskConfig}
+          parentEntity={taskData.parentTask}
+        />
       </div>
 
       {/* Subtasks Card */}

@@ -2,15 +2,13 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/common";
 import { ProjectForm } from "@/components/projects/ProjectForm";
 import { TagsCard } from "@/components/tags/TagsCard";
-import { ParentProjectCard } from "@/components/projects/ParentProjectCard";
+import { ParentEntityCard } from "@/components/common/ParentEntityCard";
+import { parentProjectConfig } from "@/components/projects/parent-project-config";
 import { CommentThread } from "@/components/comments/CommentThread";
 import { EntityLinksSection } from "@/components/links/EntityLinksSection";
 import { AttachmentsSection } from "@/components/attachments/AttachmentsSection";
 import { getProjectById } from "@/features/projects/queries";
-import { getEntityTags } from "@/features/tags/queries";
-import { getEntityComments } from "@/features/comments/queries";
-import { getEntityLinks } from "@/features/links/queries";
-import { getAttachmentsByEntity } from "@/features/attachments/queries";
+import { fetchEntityPageData } from "@/lib/entity-data";
 import { getSession } from "@/lib/auth";
 
 /**
@@ -45,12 +43,12 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
   }
 
   // Fetch tags, comments, links, and attachments in parallel
-  const [tags, commentsData, links, attachments] = await Promise.all([
-    getEntityTags({ entityType: "project", entityId: id }),
-    getEntityComments({ entityType: "project", entityId: id }),
-    getEntityLinks({ entityType: "project", entityId: id }),
-    getAttachmentsByEntity("project", id),
-  ]);
+  const {
+    tags,
+    comments: commentsData,
+    links,
+    attachments,
+  } = await fetchEntityPageData("project", id);
 
   return (
     <div className="space-y-6">
@@ -79,7 +77,12 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
       {/* Tags and Parent Project - Side by side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <TagsCard mode="edit" entityType="project" entityId={id} initialTags={tags} />
-        <ParentProjectCard mode="edit" projectId={id} parentProject={project.parentProject} />
+        <ParentEntityCard
+          mode="edit"
+          config={parentProjectConfig}
+          entityId={id}
+          parentEntity={project.parentProject}
+        />
       </div>
 
       {/* Attachments Section */}

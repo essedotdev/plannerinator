@@ -6,11 +6,10 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { createNote, updateNote } from "@/features/notes/actions";
-import { createTag, assignTagsToEntity } from "@/features/tags/actions";
+import { createAndAssignTags } from "@/features/tags/utils";
 import { createNoteSchema, updateNoteSchema, type NoteType } from "@/features/notes/schema";
-import { getProjects } from "@/features/projects/queries";
+import { useProjectSelection } from "@/hooks/useProjectSelection";
 import { PROJECT_STATUS_LABELS, NOTE_TYPE_LABELS } from "@/lib/labels";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -23,9 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MarkdownEditor } from "./MarkdownEditor";
-import type { Project } from "@/db/schema";
-
-type ProjectOption = Pick<Project, "id" | "name" | "icon" | "color" | "status">;
+import { FormActions } from "@/components/forms/FormActions";
 
 interface NoteFormProps {
   mode: "create" | "edit";
@@ -51,8 +48,7 @@ interface NoteFormProps {
 export function NoteForm({ mode, initialData, parentNoteId, selectedTags }: NoteFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [projects, setProjects] = useState<ProjectOption[]>([]);
-  const [loadingProjects, setLoadingProjects] = useState(true);
+  const { projects, loading: loadingProjects } = useProjectSelection();
   const [isFocusMode, setIsFocusMode] = useState(false);
 
   const { register, handleSubmit, formState, watch, setValue } = useForm({
@@ -71,22 +67,6 @@ export function NoteForm({ mode, initialData, parentNoteId, selectedTags }: Note
     register("content");
   }, [register]);
 
-  // Load all projects (regardless of status)
-  useEffect(() => {
-    async function loadProjects() {
-      try {
-        const result = await getProjects({ sortBy: "name", sortOrder: "asc" });
-        setProjects(result.projects);
-      } catch (error) {
-        console.error("Failed to load projects:", error);
-        toast.error("Failed to load projects");
-      } finally {
-        setLoadingProjects(false);
-      }
-    }
-    loadProjects();
-  }, []);
-
   const onSubmit = handleSubmit(async (data) => {
     setIsSubmitting(true);
 
@@ -101,30 +81,8 @@ export function NoteForm({ mode, initialData, parentNoteId, selectedTags }: Note
         }
 
         // Handle tag creation and assignment if tags were selected
-        if (selectedTags && selectedTags.length > 0 && result.note) {
-          const realTagIds: string[] = [];
-
-          for (const tag of selectedTags) {
-            if (tag.id.startsWith("temp-")) {
-              const newTagResult = await createTag({
-                name: tag.name,
-                color: tag.color,
-              });
-              if (newTagResult.tag) {
-                realTagIds.push(newTagResult.tag.id);
-              }
-            } else {
-              realTagIds.push(tag.id);
-            }
-          }
-
-          if (realTagIds.length > 0) {
-            await assignTagsToEntity({
-              entityType: "note",
-              entityId: result.note.id,
-              tagIds: realTagIds,
-            });
-          }
+        if (result.note && selectedTags) {
+          await createAndAssignTags(selectedTags, "note", result.note.id);
         }
 
         toast.success("Note created successfully!");
@@ -280,19 +238,12 @@ export function NoteForm({ mode, initialData, parentNoteId, selectedTags }: Note
 
           {/* Form Actions */}
           {!isFocusMode && (
-            <div className="flex gap-2 justify-end pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.back()}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : mode === "create" ? "Create Note" : "Save Changes"}
-              </Button>
-            </div>
+            <FormActions
+              isSubmitting={isSubmitting}
+              mode={mode}
+              onCancel={() => router.back()}
+              submitLabel={mode === "create" ? "Create Note" : "Save Changes"}
+            />
           )}
         </form>
       </CardContent>

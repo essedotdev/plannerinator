@@ -2,15 +2,13 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/common";
 import { EventForm } from "@/components/events/EventForm";
 import { TagsCard } from "@/components/tags/TagsCard";
-import { ParentEventCard } from "@/components/events/ParentEventCard";
+import { ParentEntityCard } from "@/components/common/ParentEntityCard";
+import { parentEventConfig } from "@/components/events/parent-event-config";
 import { CommentThread } from "@/components/comments/CommentThread";
 import { EntityLinksSection } from "@/components/links/EntityLinksSection";
 import { AttachmentsSection } from "@/components/attachments/AttachmentsSection";
 import { getEventById } from "@/features/events/queries";
-import { getEntityTags } from "@/features/tags/queries";
-import { getEntityComments } from "@/features/comments/queries";
-import { getEntityLinks } from "@/features/links/queries";
-import { getAttachmentsByEntity } from "@/features/attachments/queries";
+import { fetchEntityPageData } from "@/lib/entity-data";
 import { getSession } from "@/lib/auth";
 
 /**
@@ -43,12 +41,12 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
   }
 
   // Fetch tags, comments, links, and attachments in parallel
-  const [tags, commentsData, links, attachments] = await Promise.all([
-    getEntityTags({ entityType: "event", entityId: id }),
-    getEntityComments({ entityType: "event", entityId: id }),
-    getEntityLinks({ entityType: "event", entityId: id }),
-    getAttachmentsByEntity("event", id),
-  ]);
+  const {
+    tags,
+    comments: commentsData,
+    links,
+    attachments,
+  } = await fetchEntityPageData("event", id);
 
   return (
     <div className="space-y-6">
@@ -61,7 +59,12 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
       {/* Tags and Parent Event - Side by side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <TagsCard mode="edit" entityType="event" entityId={id} initialTags={tags} />
-        <ParentEventCard mode="edit" eventId={id} parentEvent={eventData.parentEvent} />
+        <ParentEntityCard
+          mode="edit"
+          config={parentEventConfig}
+          entityId={id}
+          parentEntity={eventData.parentEvent}
+        />
       </div>
 
       {/* Attachments Section */}

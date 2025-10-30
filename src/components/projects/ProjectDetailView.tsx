@@ -9,7 +9,8 @@ import { TaskList } from "@/components/tasks/TaskList";
 import { EventList } from "@/components/events/EventList";
 import { NoteList } from "@/components/notes/NoteList";
 import { TagsCard } from "@/components/tags/TagsCard";
-import { ParentProjectCard } from "@/components/projects/ParentProjectCard";
+import { ParentEntityCard } from "@/components/common/ParentEntityCard";
+import { parentProjectConfig } from "@/components/projects/parent-project-config";
 import { CommentThread } from "@/components/comments/CommentThread";
 import { EntityLinksSection } from "@/components/links/EntityLinksSection";
 import { AttachmentsSection } from "@/components/attachments/AttachmentsSection";
@@ -271,7 +272,7 @@ export function ProjectDetailView({
 
           {/* Tags and Parent - Read-only in view mode */}
           <TagsCard mode="view" entityType="project" initialTags={tags} />
-          <ParentProjectCard mode="view" parentProject={parentProject} />
+          <ParentEntityCard mode="view" config={parentProjectConfig} parentEntity={parentProject} />
 
           {/* Attachments Section */}
           <AttachmentsSection
