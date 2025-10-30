@@ -1,10 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckSquare, Calendar, Clock, AlertCircle } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getTodayItems } from "@/features/dashboard/queries";
 import { formatTime } from "@/lib/dates";
 import { TASK_PRIORITY_LABELS, TASK_STATUS_LABELS } from "@/lib/labels";
 import { isPast } from "date-fns";
+import { AlertCircle, Calendar, CheckSquare, Clock } from "lucide-react";
 import Link from "next/link";
 
 /**
@@ -65,9 +65,7 @@ export async function TodayView() {
                           </Badge>
                         </div>
                       </div>
-                      {isOverdue && (
-                        <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0" />
-                      )}
+                      {isOverdue && <AlertCircle className="h-4 w-4 text-destructive shrink-0" />}
                     </div>
                     {task.dueDate && (
                       <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">

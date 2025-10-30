@@ -198,7 +198,7 @@ export const FileUpload = forwardRef<FileUploadRef, FileUploadProps>(function Fi
             <Card key={`${uploadFile.file.name}-${index}`} className="p-3">
               <div className="flex items-center gap-3">
                 {/* Status Icon */}
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   {uploadFile.status === "uploading" || uploadFile.status === "processing" ? (
                     <Loader2 className="h-5 w-5 animate-spin text-primary" />
                   ) : uploadFile.status === "complete" ? (
@@ -238,7 +238,7 @@ export const FileUpload = forwardRef<FileUploadRef, FileUploadProps>(function Fi
                       e.stopPropagation();
                       handleRemoveFile(uploadFile.file);
                     }}
-                    className="flex-shrink-0"
+                    className="shrink-0"
                   >
                     <X className="h-4 w-4" />
                   </Button>

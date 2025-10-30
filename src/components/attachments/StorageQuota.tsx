@@ -1,9 +1,9 @@
 "use client";
 
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { HardDrive, AlertTriangle } from "lucide-react";
 import { formatBytes, type StorageQuota as StorageQuotaType } from "@/features/attachments/schema";
+import { AlertTriangle, HardDrive } from "lucide-react";
 
 interface StorageQuotaProps {
   quota: StorageQuotaType;
@@ -70,7 +70,7 @@ export function StorageQuota({ quota, showTitle = true, compact = false }: Stora
         {/* Warning Messages */}
         {isAtLimit && (
           <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
-            <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+            <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
             <div className="text-sm">
               <p className="font-medium text-destructive">Storage almost full</p>
               <p className="text-muted-foreground mt-1">
@@ -83,7 +83,7 @@ export function StorageQuota({ quota, showTitle = true, compact = false }: Stora
 
         {isNearLimit && !isAtLimit && (
           <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-900 rounded-md">
-            <AlertTriangle className="h-4 w-4 text-yellow-600 dark:text-yellow-500 mt-0.5 flex-shrink-0" />
+            <AlertTriangle className="h-4 w-4 text-yellow-600 dark:text-yellow-500 mt-0.5 shrink-0" />
             <div className="text-sm">
               <p className="font-medium text-yellow-800 dark:text-yellow-400">
                 Storage running low

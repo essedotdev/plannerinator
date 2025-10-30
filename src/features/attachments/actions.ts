@@ -379,3 +379,54 @@ export async function getAttachmentDownloadUrl(id: string) {
     throw new Error("Failed to generate download URL");
   }
 }
+
+/**
+ * Get attachment image data for copying to clipboard
+ *
+ * Fetches the image server-side to bypass CORS restrictions.
+ *
+ * @param id - Attachment UUID
+ * @returns Image as base64 data URL
+ * @throws Error if user is not authenticated or not authorized
+ */
+export async function getAttachmentImageData(id: string) {
+  const session = await getSession();
+
+  if (!session?.user) {
+    throw new Error("Unauthorized: You must be logged in to access attachments");
+  }
+
+  try {
+    // Verify ownership
+    const existingAttachment = await db.query.attachment.findFirst({
+      where: and(eq(attachment.id, id), eq(attachment.userId, session.user.id)),
+    });
+
+    if (!existingAttachment) {
+      throw new Error("Attachment not found or you don't have permission to access it");
+    }
+
+    // Generate signed URL
+    const downloadUrl = await r2.getDownloadUrl({
+      Key: existingAttachment.storageKey,
+    });
+
+    // Fetch image server-side (bypasses CORS)
+    const response = await fetch(downloadUrl);
+    if (!response.ok) {
+      throw new Error("Failed to fetch image");
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString("base64");
+    const dataUrl = `data:${existingAttachment.mimeType};base64,${base64}`;
+
+    return { success: true, dataUrl };
+  } catch (error) {
+    console.error("Error getting image data:", error);
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Failed to get image data");
+  }
+}

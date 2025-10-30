@@ -1,10 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CalendarClock } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getUpcomingDeadlines } from "@/features/dashboard/queries";
 import { formatShortDate } from "@/lib/dates";
 import { TASK_PRIORITY_LABELS, TASK_STATUS_LABELS } from "@/lib/labels";
 import { differenceInDays, isToday, isTomorrow } from "date-fns";
+import { CalendarClock } from "lucide-react";
 import Link from "next/link";
 
 /**
@@ -66,10 +66,7 @@ export async function UpcomingDeadlines() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="font-medium text-sm truncate">{task.title}</p>
-                      <Badge
-                        variant="outline"
-                        className={`text-xs flex-shrink-0 ${priorityColorClass}`}
-                      >
+                      <Badge variant="outline" className={`text-xs shrink-0 ${priorityColorClass}`}>
                         {TASK_PRIORITY_LABELS[task.priority as keyof typeof TASK_PRIORITY_LABELS]}
                       </Badge>
                     </div>
@@ -80,7 +77,7 @@ export async function UpcomingDeadlines() {
                     </div>
                   </div>
                   {dueDate && (
-                    <div className="text-right flex-shrink-0 ml-4">
+                    <div className="text-right shrink-0 ml-4">
                       <p className="text-xs font-medium">{getRelativeDate(dueDate)}</p>
                       <p className="text-xs text-muted-foreground">{formatShortDate(dueDate)}</p>
                     </div>

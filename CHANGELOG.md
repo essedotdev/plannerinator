@@ -7,6 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.0] - 2025-10-30
+
+### Added
+
+**Enhanced Attachment System**
+
+- AttachmentCard component extracted from AttachmentList for better reusability
+- Image preview modal with navigation between images
+- Click-to-preview functionality for image attachments
+- Keyboard navigation support for image galleries (prev/next)
+- `useAttachment` hook for managing attachment state and operations
+- `useAttachmentDownload` hook for handling file downloads with progress tracking
+- ImagePreviewModal component with fullscreen viewing and navigation controls
+- Attachment helper utilities for file type detection and icon selection
+
+### Changed
+
+**Component Architecture Improvements**
+
+- AttachmentList refactored to use new AttachmentCard component for better code organization
+- Image attachments now open in a preview modal instead of downloading directly
+- Attachment cards now have preview capability in addition to download and delete actions
+- FileUpload component improved with consistent shrink class usage
+
+**UI/UX Enhancements**
+
+- Improved visual consistency across attachment-related components
+- Better file type indicators with color-coded icons and backgrounds
+- Enhanced attachment interaction patterns with click-to-preview for images
+- Improved spacing and layout in attachment cards
+
+**Code Quality & Consistency**
+
+- Replaced all instances of `flex-shrink-0` with Tailwind's `shrink-0` shorthand across 10+ components
+- Replaced all instances of `break-words` with `wrap-break-word` for consistent text wrapping
+- Standardized import ordering across all attachment components
+- Fixed CSS class inconsistencies in Command component
+- Removed unused variables and improved code cleanliness in StorageQuota component
+
+**Component Refactoring**
+
+- Attachment handling logic extracted into reusable hooks for better testability
+- Download logic centralized in useAttachmentDownload hook
+- File type detection and icon selection moved to utility functions
+- Preview state management separated into dedicated hook
+
+### Fixed
+
+- Command component CSS selector syntax corrected (replaced `[&_[cmdk-*]]` with proper syntax)
+- BreadcrumbList component text wrapping class updated to use correct Tailwind utility
+- CommentCard word wrapping behavior improved for better text display
+
 ## [0.11.0] - 2025-10-30
 
 ### Added
@@ -963,7 +1015,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code splitting
 - Lazy loading for components
 
-[unreleased]: https://github.com/essedev/plannerinator/compare/v0.11.0...HEAD
+[unreleased]: https://github.com/essedev/plannerinator/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/essedev/plannerinator/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/essedev/plannerinator/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/essedev/plannerinator/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/essedev/plannerinator/compare/v0.8.0...v0.9.0

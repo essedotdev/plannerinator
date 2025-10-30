@@ -85,6 +85,13 @@ export function getFileCategory(mimeType: string): keyof typeof FILE_TYPE_CATEGO
 }
 
 /**
+ * Check if MIME type is an image
+ */
+export function isImageMimeType(mimeType: string): boolean {
+  return FILE_TYPE_CATEGORIES.image.includes(mimeType as never);
+}
+
+/**
  * Entity type enum schema (must match database entityTypeEnum)
  */
 export const attachmentEntityTypeSchema = z.enum(

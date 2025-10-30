@@ -1,8 +1,9 @@
 "use client";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ConfirmDialog } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,21 +11,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, Edit, Trash2, Archive, CheckCircle, Copy, RotateCcw } from "lucide-react";
-import Link from "next/link";
-import { useState, useTransition } from "react";
 import {
-  deleteProject,
   archiveProject,
   completeProject,
+  deleteProject,
   duplicateProject,
   restoreProject,
 } from "@/features/projects/actions";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { formatDueDate, formatShortDate, getDueDateColorClass } from "@/lib/dates";
 import { PROJECT_STATUS_LABELS } from "@/lib/labels";
-import { formatShortDate, formatDueDate, getDueDateColorClass } from "@/lib/dates";
-import { ConfirmDialog } from "@/components/common";
+import { Archive, CheckCircle, Copy, Edit, MoreVertical, RotateCcw, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
 
 /**
  * Project status colors for badges
@@ -130,13 +130,13 @@ export function ProjectCard({ project }: ProjectCardProps) {
           {/* Project Icon & Title */}
           <Link href={`/dashboard/projects/${project.id}`} className="flex-1 min-w-0 group">
             <div className="flex items-start gap-3">
-              {project.icon && <span className="text-2xl flex-shrink-0">{project.icon}</span>}
+              {project.icon && <span className="text-2xl shrink-0">{project.icon}</span>}
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold group-hover:text-primary transition-colors truncate">
                   {project.name}
                 </h3>
                 {project.description && (
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2 break-words">
+                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2 wrap-break-word">
                     {project.description}
                   </p>
                 )}
@@ -147,7 +147,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           {/* Actions Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -203,7 +203,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           {/* Status Badge */}
           <Badge
             variant="outline"
-            className={`${PROJECT_STATUS_COLORS[project.status]} flex-shrink-0`}
+            className={`${PROJECT_STATUS_COLORS[project.status]} shrink-0`}
             style={{
               borderColor: project.color || undefined,
             }}
@@ -215,7 +215,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           {project.archivedAt && (
             <Badge
               variant="outline"
-              className="bg-gray-500/10 text-gray-700 dark:text-gray-300 flex-shrink-0"
+              className="bg-gray-500/10 text-gray-700 dark:text-gray-300 shrink-0"
             >
               Archived
             </Badge>
@@ -225,7 +225,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           {project.endDate && (
             <Badge
               variant="outline"
-              className={`${getDueDateColorClass(project.endDate)} flex-shrink-0`}
+              className={`${getDueDateColorClass(project.endDate)} shrink-0`}
             >
               {formatDueDate(project.endDate)}
             </Badge>

@@ -1,8 +1,8 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 
 interface PageHeaderProps {
   title: string;
@@ -62,7 +62,7 @@ export function PageHeader({ title, description, children, backButton, actions }
           {description && <p className="text-muted-foreground text-lg">{description}</p>}
         </div>
         {(children || actions) && (
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             {children}
             {actions}
           </div>

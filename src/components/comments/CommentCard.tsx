@@ -1,17 +1,5 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
-import { formatRelative, areDatesEqual } from "@/lib/dates";
-import Image from "next/image";
-import { MoreVertical, Edit, Trash2, Reply } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,10 +10,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { CommentForm } from "./CommentForm";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { deleteComment } from "@/features/comments/actions";
 import type { EntityType } from "@/features/comments/schema";
+import { areDatesEqual, formatRelative } from "@/lib/dates";
+import { Edit, MoreVertical, Reply, Trash2 } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
+import { CommentForm } from "./CommentForm";
 
 /**
  * Comment Card Component
@@ -163,7 +163,7 @@ export function CommentCard({
         </div>
 
         {/* Content */}
-        <p className="text-sm whitespace-pre-wrap break-words">{comment.content}</p>
+        <p className="text-sm whitespace-pre-wrap wrap-break-word">{comment.content}</p>
 
         {/* Reply Button (not shown for pending comments) */}
         {onReply && !isPending && (

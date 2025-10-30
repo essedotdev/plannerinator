@@ -1,15 +1,15 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Tag, ChevronDown } from "lucide-react";
-import { getTags } from "@/features/tags/queries";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import { getTags } from "@/features/tags/queries";
+import { ChevronDown, Tag } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface TagOption {
   id: string;
@@ -175,7 +175,7 @@ export function TagFilter({ basePath }: TagFilterProps) {
                       className="flex items-center gap-2 cursor-pointer flex-1"
                     >
                       <div
-                        className="w-3 h-3 rounded-full flex-shrink-0"
+                        className="w-3 h-3 rounded-full shrink-0"
                         style={{ backgroundColor: tag.color }}
                       />
                       <span className="text-sm">{tag.name}</span>
