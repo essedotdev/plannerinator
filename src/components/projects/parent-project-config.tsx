@@ -1,3 +1,5 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import { PROJECT_STATUS_LABELS } from "@/lib/labels";
 import { getProjectsForParentSelection } from "@/features/projects/parent-actions";

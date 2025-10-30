@@ -1,3 +1,5 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import { TASK_STATUS_LABELS } from "@/lib/labels";
 import { getTasksForParentSelection } from "@/features/tasks/parent-actions";

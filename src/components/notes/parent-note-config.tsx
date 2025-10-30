@@ -1,3 +1,5 @@
+"use client";
+
 import { getNotesForParentSelection } from "@/features/notes/parent-actions";
 import { updateNote } from "@/features/notes/actions";
 import type { ParentEntityCardConfig } from "@/components/common/ParentEntityCard";

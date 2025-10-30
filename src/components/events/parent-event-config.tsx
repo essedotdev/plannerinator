@@ -1,3 +1,5 @@
+"use client";
+
 import { formatFullDate } from "@/lib/dates";
 import { getEventsForParentSelection } from "@/features/events/parent-actions";
 import { updateEvent } from "@/features/events/actions";
