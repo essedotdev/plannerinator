@@ -3,6 +3,7 @@
 import { getPreviewType } from "@/features/attachments/preview-config";
 import type { Attachment } from "@/db/schema";
 import { useImagePreview } from "./useImagePreview";
+import { usePDFPreview } from "./usePDFPreview";
 
 /**
  * Generic hook for attachment previews
@@ -27,9 +28,9 @@ interface AttachmentPreviewResult {
 export function useAttachmentPreview(attachment: Attachment | null): AttachmentPreviewResult {
   const previewType = attachment ? getPreviewType(attachment.mimeType) : null;
 
-  // Delegate to type-specific hooks
-  // When adding new types (e.g., PDF, video), add cases here
+  // Call all hooks unconditionally (Rules of Hooks)
   const imagePreview = useImagePreview(attachment!);
+  const pdfPreview = usePDFPreview(attachment!);
 
   if (!attachment || !previewType) {
     // No preview available
@@ -42,16 +43,18 @@ export function useAttachmentPreview(attachment: Attachment | null): AttachmentP
     };
   }
 
+  // Return the appropriate preview based on type
   if (previewType === "image") {
     return imagePreview;
   }
 
+  if (previewType === "pdf") {
+    return pdfPreview;
+  }
+
   // Future preview types:
-  // if (previewType === 'pdf') {
-  //   return usePDFPreview(attachment);
-  // }
   // if (previewType === 'video') {
-  //   return useVideoPreview(attachment);
+  //   return videoPreview;
   // }
 
   // Fallback (should never reach here if config is correct)

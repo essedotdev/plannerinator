@@ -44,18 +44,10 @@ export function AttachmentThumbnail({
     );
   }
 
-  // Future preview types:
-  // if (previewType === 'pdf') {
-  //   return (
-  //     <PDFThumbnail
-  //       attachment={attachment}
-  //       className={className}
-  //       onClick={onClick}
-  //       square={square}
-  //     />
-  //   );
-  // }
+  // For PDF and other previewable types, use GenericThumbnail
+  // Only images have custom thumbnail previews
 
+  // Future preview types with custom thumbnails:
   // if (previewType === 'video') {
   //   return (
   //     <VideoThumbnail
@@ -67,6 +59,6 @@ export function AttachmentThumbnail({
   //   );
   // }
 
-  // Fallback: generic icon-based thumbnail
+  // Fallback: generic icon-based thumbnail (also used for PDF)
   return <GenericThumbnail attachment={attachment} className={className} onClick={onClick} />;
 }

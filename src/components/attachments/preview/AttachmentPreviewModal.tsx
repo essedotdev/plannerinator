@@ -3,6 +3,7 @@
 import { getPreviewType } from "@/features/attachments/preview-config";
 import type { Attachment } from "@/db/schema";
 import { ImagePreviewModal } from "./ImagePreviewModal";
+import { PDFPreviewModal } from "./PDFPreviewModal";
 
 /**
  * Generic wrapper for attachment preview modals
@@ -51,19 +52,19 @@ export function AttachmentPreviewModal({
     );
   }
 
-  // Future preview types:
-  // if (previewType === 'pdf') {
-  //   return (
-  //     <PDFPreviewModal
-  //       attachment={attachment}
-  //       open={open}
-  //       onOpenChange={onOpenChange}
-  //       allAttachments={allAttachments}
-  //       onNavigate={onNavigate}
-  //     />
-  //   );
-  // }
+  if (previewType === "pdf") {
+    return (
+      <PDFPreviewModal
+        attachment={attachment}
+        open={open}
+        onOpenChange={onOpenChange}
+        allAttachments={allAttachments}
+        onNavigate={onNavigate}
+      />
+    );
+  }
 
+  // Future preview types:
   // if (previewType === 'video') {
   //   return (
   //     <VideoPreviewModal

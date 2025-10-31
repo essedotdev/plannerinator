@@ -92,6 +92,13 @@ export function isImageMimeType(mimeType: string): boolean {
 }
 
 /**
+ * Check if MIME type is a PDF
+ */
+export function isPDFMimeType(mimeType: string): boolean {
+  return mimeType === "application/pdf";
+}
+
+/**
  * Entity type enum schema (must match database entityTypeEnum)
  */
 export const attachmentEntityTypeSchema = z.enum(

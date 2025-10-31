@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0] - 2025-10-31
+
+### Added
+
+**PDF Preview Support**
+
+- PDF preview modal with embedded viewer and navigation controls
+- `usePDFPreview` hook for managing PDF-specific preview functionality with URL caching
+- `PDFPreviewModal` component with download, keyboard shortcuts, and gallery navigation
+- PDF preview support integrated into the attachment preview system
+- `isPDFMimeType` utility function for PDF type detection
+
+### Changed
+
+**Attachment Preview System**
+
+- Extended preview configuration to support PDF files
+- Updated `useAttachmentPreview` hook to handle PDF previews via `usePDFPreview`
+- Modified `AttachmentPreviewModal` to render PDF preview modal for PDF files
+- Updated `AttachmentThumbnail` to use generic thumbnail for PDFs (icon-based)
+- Improved preview type handling to support multiple file types beyond images
+
+### Removed
+
+- Deleted `tsconfig.tsbuildinfo` build artifact from repository
+
 ## [0.13.0] - 2025-10-31
 
 ### Added
@@ -1047,7 +1073,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code splitting
 - Lazy loading for components
 
-[unreleased]: https://github.com/essedev/plannerinator/compare/v0.13.0...HEAD
+[unreleased]: https://github.com/essedev/plannerinator/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/essedev/plannerinator/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/essedev/plannerinator/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/essedev/plannerinator/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/essedev/plannerinator/compare/v0.10.0...v0.11.0

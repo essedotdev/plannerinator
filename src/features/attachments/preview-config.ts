@@ -1,4 +1,4 @@
-import { isImageMimeType } from "./schema";
+import { isImageMimeType, isPDFMimeType } from "./schema";
 
 /**
  * Preview configuration for different file types
@@ -28,12 +28,12 @@ export const PREVIEW_TYPES = {
     thumbnailComponent: "ImageThumbnail",
     modalComponent: "ImagePreviewModal",
   },
+  pdf: {
+    canPreview: isPDFMimeType,
+    thumbnailComponent: "PDFThumbnail",
+    modalComponent: "PDFPreviewModal",
+  },
   // Future preview types:
-  // pdf: {
-  //   canPreview: isPDFMimeType,
-  //   thumbnailComponent: 'PDFThumbnail',
-  //   modalComponent: 'PDFPreviewModal'
-  // },
   // video: {
   //   canPreview: isVideoMimeType,
   //   thumbnailComponent: 'VideoThumbnail',
