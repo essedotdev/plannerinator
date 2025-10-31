@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.0] - 2025-10-31
+
+### Added
+
+**Attachment Preview System Refactoring**
+
+- `AttachmentThumbnail` component as a generic wrapper for all thumbnail types
+- `GenericThumbnail` component for icon-based thumbnails (non-previewable files)
+- `AttachmentPreviewModal` component as a generic wrapper for preview modals
+- `useAttachmentPreview` hook as a unified interface for all preview types
+- Preview configuration system in `preview-config.ts` for managing preview types
+- Extensible architecture supporting future preview types (PDF, video, etc.)
+- Centralized preview type detection with `canPreview()` and `getPreviewType()` utilities
+
+### Changed
+
+**Attachment System Architecture**
+
+- Refactored attachment preview system to use generic wrapper components
+- Replaced direct usage of `ImageThumbnail` with `AttachmentThumbnail` in `AttachmentCard`
+- Replaced `ImagePreviewModal` with `AttachmentPreviewModal` in `AttachmentList`
+- Extracted file icon and color utilities from `AttachmentCard` to `GenericThumbnail`
+- Renamed `isImage` check to `hasPreview` for better semantics
+- Improved code organization with clear separation between preview types
+
+**Code Quality**
+
+- Reduced code duplication by centralizing file type detection logic
+- Better separation of concerns with dedicated components for each thumbnail type
+- Improved maintainability with configuration-based preview type system
+- Added comprehensive JSDoc comments explaining extensibility patterns
+
 ## [0.12.0] - 2025-10-30
 
 ### Added
@@ -1015,7 +1047,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code splitting
 - Lazy loading for components
 
-[unreleased]: https://github.com/essedev/plannerinator/compare/v0.12.0...HEAD
+[unreleased]: https://github.com/essedev/plannerinator/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/essedev/plannerinator/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/essedev/plannerinator/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/essedev/plannerinator/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/essedev/plannerinator/compare/v0.9.0...v0.10.0

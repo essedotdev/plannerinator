@@ -4,8 +4,8 @@ import { useState, useCallback } from "react";
 import { File, Paperclip } from "lucide-react";
 import type { Attachment } from "@/db/schema";
 import { AttachmentCard } from "./AttachmentCard";
-import { ImagePreviewModal } from "./preview/ImagePreviewModal";
-import { isImageMimeType } from "@/features/attachments/schema";
+import { AttachmentPreviewModal } from "./preview/AttachmentPreviewModal";
+import { canPreview } from "@/features/attachments/preview-config";
 
 interface AttachmentListProps {
   attachments: Attachment[];
@@ -17,8 +17,8 @@ export function AttachmentList({ attachments, onDelete, onFileDrop }: Attachment
   const [isDragging, setIsDragging] = useState(false);
   const [previewAttachment, setPreviewAttachment] = useState<Attachment | null>(null);
 
-  // Filter images for preview navigation
-  const imageAttachments = attachments.filter((att) => isImageMimeType(att.mimeType));
+  // Filter previewable attachments for preview navigation
+  const previewableAttachments = attachments.filter((att) => canPreview(att.mimeType));
 
   const handleDragEnter = useCallback(
     (e: React.DragEvent) => {
@@ -67,15 +67,17 @@ export function AttachmentList({ attachments, onDelete, onFileDrop }: Attachment
     (direction: "prev" | "next") => {
       if (!previewAttachment) return;
 
-      const currentIndex = imageAttachments.findIndex((img) => img.id === previewAttachment.id);
+      const currentIndex = previewableAttachments.findIndex(
+        (att) => att.id === previewAttachment.id
+      );
 
       if (direction === "prev" && currentIndex > 0) {
-        setPreviewAttachment(imageAttachments[currentIndex - 1]);
-      } else if (direction === "next" && currentIndex < imageAttachments.length - 1) {
-        setPreviewAttachment(imageAttachments[currentIndex + 1]);
+        setPreviewAttachment(previewableAttachments[currentIndex - 1]);
+      } else if (direction === "next" && currentIndex < previewableAttachments.length - 1) {
+        setPreviewAttachment(previewableAttachments[currentIndex + 1]);
       }
     },
-    [previewAttachment, imageAttachments]
+    [previewAttachment, previewableAttachments]
   );
 
   if (attachments.length === 0) {
@@ -139,14 +141,14 @@ export function AttachmentList({ attachments, onDelete, onFileDrop }: Attachment
         </div>
       </div>
 
-      {/* Image Preview Modal */}
+      {/* Attachment Preview Modal */}
       {previewAttachment && (
-        <ImagePreviewModal
+        <AttachmentPreviewModal
           attachment={previewAttachment}
           open={!!previewAttachment}
           onOpenChange={(open) => !open && setPreviewAttachment(null)}
-          allImages={imageAttachments}
-          onNavigate={imageAttachments.length > 1 ? handleNavigate : undefined}
+          allAttachments={previewableAttachments}
+          onNavigate={previewableAttachments.length > 1 ? handleNavigate : undefined}
         />
       )}
     </>

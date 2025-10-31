@@ -47,10 +47,7 @@ export function ImageThumbnail({
         src={previewUrl}
         alt={attachment.fileName}
         fill
-        className={cn(
-          "object-cover transition-transform duration-200",
-          "group-hover:scale-105"
-        )}
+        className={cn("object-cover transition-transform duration-200", "group-hover:scale-105")}
         onError={() => setImageError(true)}
       />
 
