@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -143,7 +142,6 @@ export function ParentEntityCard<T extends BaseEntity>({
   parentEntity,
   onParentChange,
 }: ParentEntityCardProps<T>) {
-  const router = useRouter();
   const [entities, setEntities] = useState<T[]>([]);
   const [loadingEntities, setLoadingEntities] = useState(mode !== "view");
   const [selectedParentId, setSelectedParentId] = useState<string | undefined>(
@@ -183,7 +181,6 @@ export function ParentEntityCard<T extends BaseEntity>({
       await config.updateEntity(entityId, newParentId || null);
       setSelectedParentId(newParentId);
       toast.success(`Parent ${config.entityTypeName.toLowerCase()} updated`);
-      router.refresh();
     } catch {
       toast.error(`Failed to update parent ${config.entityTypeName.toLowerCase()}`);
     } finally {

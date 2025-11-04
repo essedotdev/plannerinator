@@ -93,7 +93,6 @@ export function TaskCard({ task }: TaskCardProps) {
           await markTaskIncomplete(task.id);
           toast.success("Task reopened");
         }
-        router.refresh();
       } catch (error) {
         setIsCompleted(!newStatus); // Revert on error
         toast.error(error instanceof Error ? error.message : "Failed to update task");
@@ -108,7 +107,6 @@ export function TaskCard({ task }: TaskCardProps) {
       try {
         await deleteTask(task.id);
         toast.success("Task deleted");
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to delete task");
       }
@@ -120,8 +118,7 @@ export function TaskCard({ task }: TaskCardProps) {
       try {
         const result = await duplicateTask(task.id);
         toast.success("Task duplicated");
-        router.refresh();
-        // Optionally navigate to the new task
+        // Navigate to the new task
         if (result.task) {
           router.push(`/dashboard/tasks/${result.task.id}`);
         }
@@ -136,7 +133,6 @@ export function TaskCard({ task }: TaskCardProps) {
       try {
         await archiveTask(task.id);
         toast.success("Task archived");
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to archive task");
       }
@@ -148,7 +144,6 @@ export function TaskCard({ task }: TaskCardProps) {
       try {
         await restoreTask(task.id);
         toast.success("Task restored");
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to restore task");
       }

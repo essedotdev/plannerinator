@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { createComment, updateComment } from "@/features/comments/actions";
 import type { EntityType } from "@/features/comments/schema";
-import { useRouter } from "next/navigation";
 
 /**
  * Comment Form Component
@@ -38,7 +37,6 @@ export function CommentForm({
   onCancel,
   onOptimisticAdd,
 }: CommentFormProps) {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [content, setContent] = useState(initialContent);
 
@@ -75,7 +73,6 @@ export function CommentForm({
             parentCommentId,
           });
           toast.success(parentCommentId ? "Reply added" : "Comment added");
-          router.refresh();
         } catch (error) {
           toast.error(error instanceof Error ? error.message : "Failed to save comment");
         }
@@ -92,7 +89,6 @@ export function CommentForm({
           });
           toast.success("Comment updated");
           onSuccess?.();
-          router.refresh();
         } catch (error) {
           toast.error(error instanceof Error ? error.message : "Failed to save comment");
         }

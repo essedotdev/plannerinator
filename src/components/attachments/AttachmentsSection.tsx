@@ -7,7 +7,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import type { AttachmentEntityType } from "@/features/attachments/schema";
 import type { Attachment } from "@/db/schema";
 import { Paperclip, Upload, Download } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { getAttachmentDownloadUrl } from "@/features/attachments/actions";
 import { toast } from "sonner";
@@ -27,16 +26,15 @@ export function AttachmentsSection({
   title = "Attachments",
   maxFiles = 5,
 }: AttachmentsSectionProps) {
-  const router = useRouter();
   const fileUploadRef = useRef<FileUploadRef>(null);
   const [isDownloadingAll, setIsDownloadingAll] = useState(false);
 
   const handleUploadComplete = () => {
-    router.refresh();
+    // Server action handles revalidation
   };
 
   const handleDelete = () => {
-    router.refresh();
+    // Server action handles revalidation
   };
 
   const handleUploadClick = () => {

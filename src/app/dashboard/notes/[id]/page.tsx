@@ -13,8 +13,8 @@ import { EntityLinksSection } from "@/components/links/EntityLinksSection";
 import { AttachmentsSection } from "@/components/attachments/AttachmentsSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DeleteNoteButton } from "@/components/notes/DeleteNoteButton";
-import { ArchiveNoteButton } from "@/components/notes/ArchiveNoteButton";
+import { EntityActionButton } from "@/components/common";
+import { deleteNote, archiveNote } from "@/features/notes/actions";
 
 /**
  * Note detail page
@@ -68,8 +68,20 @@ export default async function NoteDetailPage({ params }: NoteDetailPageProps) {
                 Edit
               </Link>
             </Button>
-            <ArchiveNoteButton noteId={id} noteTitle={noteData.title || "Untitled Note"} />
-            <DeleteNoteButton noteId={id} noteTitle={noteData.title || "Untitled Note"} />
+            <EntityActionButton
+              entityType="note"
+              entityId={id}
+              entityTitle={noteData.title || "Untitled Note"}
+              actionType="archive"
+              onAction={archiveNote}
+            />
+            <EntityActionButton
+              entityType="note"
+              entityId={id}
+              entityTitle={noteData.title || "Untitled Note"}
+              actionType="delete"
+              onAction={deleteNote}
+            />
           </>
         }
       />

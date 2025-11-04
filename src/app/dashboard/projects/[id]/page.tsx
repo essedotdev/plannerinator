@@ -11,8 +11,8 @@ import { getNotes } from "@/features/notes/queries";
 import { fetchEntityPageData } from "@/lib/entity-data";
 import { getSession } from "@/lib/auth";
 import { PROJECT_STATUS_LABELS } from "@/lib/labels";
-import { DeleteProjectButton } from "@/components/projects/DeleteProjectButton";
-import { ArchiveProjectButton } from "@/components/projects/ArchiveProjectButton";
+import { EntityActionButton } from "@/components/common";
+import { deleteProject, archiveProject } from "@/features/projects/actions";
 import { ProjectDetailView } from "@/components/projects/ProjectDetailView";
 import { formatFullDate } from "@/lib/dates";
 
@@ -78,8 +78,20 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 Edit
               </Link>
             </Button>
-            <ArchiveProjectButton projectId={id} projectName={project.name} />
-            <DeleteProjectButton projectId={id} projectName={project.name} />
+            <EntityActionButton
+              entityType="project"
+              entityId={id}
+              entityTitle={project.name}
+              actionType="archive"
+              onAction={archiveProject}
+            />
+            <EntityActionButton
+              entityType="project"
+              entityId={id}
+              entityTitle={project.name}
+              actionType="delete"
+              onAction={deleteProject}
+            />
           </>
         }
       />

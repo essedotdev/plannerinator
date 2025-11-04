@@ -15,8 +15,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatFullDate } from "@/lib/dates";
-import { DeleteEventButton } from "@/components/events/DeleteEventButton";
-import { ArchiveEventButton } from "@/components/events/ArchiveEventButton";
+import { EntityActionButton } from "@/components/common";
+import { deleteEvent, archiveEvent } from "@/features/events/actions";
 
 /**
  * Event detail page
@@ -71,8 +71,20 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                 Edit
               </Link>
             </Button>
-            <ArchiveEventButton eventId={id} eventTitle={eventData.title} />
-            <DeleteEventButton eventId={id} eventTitle={eventData.title} />
+            <EntityActionButton
+              entityType="event"
+              entityId={id}
+              entityTitle={eventData.title}
+              actionType="archive"
+              onAction={archiveEvent}
+            />
+            <EntityActionButton
+              entityType="event"
+              entityId={id}
+              entityTitle={eventData.title}
+              actionType="delete"
+              onAction={deleteEvent}
+            />
           </>
         }
       />

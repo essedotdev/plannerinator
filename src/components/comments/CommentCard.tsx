@@ -22,7 +22,6 @@ import type { EntityType } from "@/features/comments/schema";
 import { areDatesEqual, formatRelative } from "@/lib/dates";
 import { Edit, MoreVertical, Reply, Trash2 } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { CommentForm } from "./CommentForm";
@@ -68,7 +67,6 @@ export function CommentCard({
   replies,
   isPending = false,
 }: CommentCardProps) {
-  const router = useRouter();
   const [isDeleting, startTransition] = useTransition();
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -81,7 +79,6 @@ export function CommentCard({
       try {
         await deleteComment(comment.id);
         toast.success("Comment deleted");
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to delete comment");
       }

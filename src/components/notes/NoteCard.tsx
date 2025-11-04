@@ -67,7 +67,6 @@ export function NoteCard({ note }: NoteCardProps) {
       try {
         await deleteNote(note.id);
         toast.success("Note deleted");
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to delete note");
       }
@@ -79,7 +78,6 @@ export function NoteCard({ note }: NoteCardProps) {
       try {
         const result = await duplicateNote(note.id);
         toast.success("Note duplicated");
-        router.refresh();
         if (result.note) {
           router.push(`/dashboard/notes/${result.note.id}`);
         }
@@ -94,7 +92,6 @@ export function NoteCard({ note }: NoteCardProps) {
       try {
         await archiveNote(note.id);
         toast.success("Note archived");
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to archive note");
       }
@@ -106,7 +103,6 @@ export function NoteCard({ note }: NoteCardProps) {
       try {
         await restoreNote(note.id);
         toast.success("Note restored");
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to restore note");
       }
@@ -118,7 +114,6 @@ export function NoteCard({ note }: NoteCardProps) {
       try {
         await toggleNoteFavorite(note.id, !note.isFavorite);
         toast.success(note.isFavorite ? "Removed from favorites" : "Added to favorites");
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to update favorite");
       }

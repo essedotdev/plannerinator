@@ -16,7 +16,6 @@ import { formatBytes } from "@/features/attachments/schema";
 import { canPreview } from "@/features/attachments/preview-config";
 import { formatShortDate } from "@/lib/dates";
 import { Download, Eye, Loader2, MoreVertical, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { AttachmentThumbnail } from "./preview/AttachmentThumbnail";
@@ -28,7 +27,6 @@ interface AttachmentCardProps {
 }
 
 export function AttachmentCard({ attachment, onDelete, onPreview }: AttachmentCardProps) {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isDownloading, setIsDownloading] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -60,7 +58,6 @@ export function AttachmentCard({ attachment, onDelete, onPreview }: AttachmentCa
       try {
         await deleteAttachment(attachment.id);
         toast.success("Attachment deleted");
-        router.refresh();
         onDelete?.();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to delete attachment");

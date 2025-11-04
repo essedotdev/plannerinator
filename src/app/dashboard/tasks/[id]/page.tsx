@@ -16,8 +16,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TASK_STATUS_LABELS, TASK_PRIORITY_LABELS } from "@/lib/labels";
 import { formatFullDate } from "@/lib/dates";
-import { DeleteTaskButton } from "@/components/tasks/DeleteTaskButton";
-import { ArchiveTaskButton } from "@/components/tasks/ArchiveTaskButton";
+import { EntityActionButton } from "@/components/common";
+import { deleteTask, archiveTask } from "@/features/tasks/actions";
 
 /**
  * Task detail page
@@ -72,8 +72,20 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
                 Edit
               </Link>
             </Button>
-            <ArchiveTaskButton taskId={id} taskTitle={taskData.title} />
-            <DeleteTaskButton taskId={id} taskTitle={taskData.title} />
+            <EntityActionButton
+              entityType="task"
+              entityId={id}
+              entityTitle={taskData.title}
+              actionType="archive"
+              onAction={archiveTask}
+            />
+            <EntityActionButton
+              entityType="task"
+              entityId={id}
+              entityTitle={taskData.title}
+              actionType="delete"
+              onAction={deleteTask}
+            />
           </>
         }
       />

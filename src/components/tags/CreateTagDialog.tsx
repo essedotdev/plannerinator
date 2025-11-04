@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -27,7 +26,6 @@ interface CreateTagDialogProps {
 }
 
 export function CreateTagDialog({ children }: CreateTagDialogProps) {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState("");
@@ -52,7 +50,6 @@ export function CreateTagDialog({ children }: CreateTagDialogProps) {
         setIsOpen(false);
         setName("");
         setColor("#6b7280");
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to create tag");
       }

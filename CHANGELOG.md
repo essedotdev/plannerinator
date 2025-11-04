@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.15.0] - 2025-11-04
+
+### Added
+
+**Code Reusability - Generic Entity Action Buttons**
+
+- `EntityActionButton` component replacing entity-specific delete and archive button components
+- Generic action button supporting both delete and archive operations for all entity types
+- Configurable confirmation dialogs with entity-specific messaging
+- Centralized loading states and error handling for destructive actions
+
+### Changed
+
+**Component Consolidation**
+
+- Replaced entity-specific delete buttons with generic `EntityActionButton` across all entity detail pages
+- Replaced entity-specific archive buttons with generic `EntityActionButton` across all entity detail pages
+- Updated entity detail pages (tasks, events, notes, projects) to use consolidated action buttons
+- Improved consistency in confirmation dialog messaging across all entity types
+- Enhanced error handling with consistent toast notifications for delete and archive operations
+
+**Code Quality**
+
+- Removed code duplication from delete and archive button components (reduced ~500 lines of duplicate code)
+- Centralized action button logic in a single reusable component
+- Improved maintainability with configuration-based approach for entity-specific behavior
+- Better type safety with TypeScript discriminated unions for action types
+- Removed unused imports across multiple components for cleaner code
+
+### Removed
+
+- `src/components/tasks/DeleteTaskButton.tsx` (replaced by EntityActionButton)
+- `src/components/tasks/ArchiveTaskButton.tsx` (replaced by EntityActionButton)
+- `src/components/events/DeleteEventButton.tsx` (replaced by EntityActionButton)
+- `src/components/events/ArchiveEventButton.tsx` (replaced by EntityActionButton)
+- `src/components/notes/DeleteNoteButton.tsx` (replaced by EntityActionButton)
+- `src/components/notes/ArchiveNoteButton.tsx` (replaced by EntityActionButton)
+- `src/components/projects/DeleteProjectButton.tsx` (replaced by EntityActionButton)
+- `src/components/projects/ArchiveProjectButton.tsx` (replaced by EntityActionButton)
+- Removed planning/documentation markdown files moved to docs folder (ENV_SETUP.md, PREVIEW_REFACTORING.md, REFACTORING_PLAN.md)
+
 ## [0.14.0] - 2025-10-31
 
 ### Added
@@ -1073,7 +1114,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code splitting
 - Lazy loading for components
 
-[unreleased]: https://github.com/essedev/plannerinator/compare/v0.14.0...HEAD
+[unreleased]: https://github.com/essedev/plannerinator/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/essedev/plannerinator/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/essedev/plannerinator/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/essedev/plannerinator/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/essedev/plannerinator/compare/v0.11.0...v0.12.0

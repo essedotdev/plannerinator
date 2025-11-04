@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -29,7 +28,6 @@ interface MergeTagsDialogProps {
 }
 
 export function MergeTagsDialog({ tags, isOpen, onClose }: MergeTagsDialogProps) {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [targetTagId, setTargetTagId] = useState(tags[0]?.id || "");
 
@@ -58,7 +56,6 @@ export function MergeTagsDialog({ tags, isOpen, onClose }: MergeTagsDialogProps)
           `Merged ${result.mergedCount} tag(s) into "${targetTag?.name}". Reassigned ${result.reassignedCount} entities.`
         );
         onClose();
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to merge tags");
       }

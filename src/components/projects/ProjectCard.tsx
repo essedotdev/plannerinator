@@ -65,7 +65,6 @@ export function ProjectCard({ project }: ProjectCardProps) {
       try {
         await deleteProject(project.id);
         toast.success("Project deleted");
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to delete project");
       }
@@ -77,7 +76,6 @@ export function ProjectCard({ project }: ProjectCardProps) {
       try {
         const result = await duplicateProject(project.id);
         toast.success("Project duplicated");
-        router.refresh();
         if (result.project) {
           router.push(`/dashboard/projects/${result.project.id}`);
         }
@@ -92,7 +90,6 @@ export function ProjectCard({ project }: ProjectCardProps) {
       try {
         await archiveProject(project.id);
         toast.success("Project archived");
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to archive project");
       }
@@ -104,7 +101,6 @@ export function ProjectCard({ project }: ProjectCardProps) {
       try {
         await restoreProject(project.id);
         toast.success("Project restored");
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to restore project");
       }
@@ -116,7 +112,6 @@ export function ProjectCard({ project }: ProjectCardProps) {
       try {
         await completeProject(project.id);
         toast.success("Project marked as completed");
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to complete project");
       }

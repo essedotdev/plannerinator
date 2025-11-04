@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { deleteLink } from "@/features/links/actions";
 import { LINK_RELATIONSHIP_LABELS, type LinkRelationship } from "@/features/links/schema";
-import { useRouter } from "next/navigation";
 
 /**
  * Link Card Component
@@ -45,7 +44,6 @@ interface LinkCardProps {
 }
 
 export function LinkCard({ linkId, relationship, entity }: LinkCardProps) {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -54,7 +52,6 @@ export function LinkCard({ linkId, relationship, entity }: LinkCardProps) {
       try {
         await deleteLink(linkId);
         toast.success("Link removed");
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to delete link");
       }

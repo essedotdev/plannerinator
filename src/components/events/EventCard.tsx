@@ -71,7 +71,6 @@ export function EventCard({ event }: EventCardProps) {
       try {
         await deleteEvent(event.id);
         toast.success("Event deleted");
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to delete event");
       }
@@ -83,7 +82,6 @@ export function EventCard({ event }: EventCardProps) {
       try {
         const result = await duplicateEvent(event.id);
         toast.success("Event duplicated");
-        router.refresh();
         if (result.event) {
           router.push(`/dashboard/events/${result.event.id}`);
         }
@@ -98,7 +96,6 @@ export function EventCard({ event }: EventCardProps) {
       try {
         await archiveEvent(event.id);
         toast.success("Event archived");
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to archive event");
       }
@@ -110,7 +107,6 @@ export function EventCard({ event }: EventCardProps) {
       try {
         await restoreEvent(event.id);
         toast.success("Event restored");
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to restore event");
       }

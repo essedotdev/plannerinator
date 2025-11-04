@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -29,7 +28,6 @@ interface EditTagDialogProps {
 }
 
 export function EditTagDialog({ tag, isOpen, onClose }: EditTagDialogProps) {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [name, setName] = useState(tag.name);
   const [color, setColor] = useState(tag.color);
@@ -64,7 +62,6 @@ export function EditTagDialog({ tag, isOpen, onClose }: EditTagDialogProps) {
 
         toast.success(`Tag "${name.trim()}" updated`);
         onClose();
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to update tag");
       }

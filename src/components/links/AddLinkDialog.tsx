@@ -28,7 +28,6 @@ import {
   type EntityType,
   type LinkRelationship,
 } from "@/features/links/schema";
-import { useRouter } from "next/navigation";
 
 /**
  * Add Link Dialog Component
@@ -47,7 +46,6 @@ interface AddLinkDialogProps {
 }
 
 export function AddLinkDialog({ fromType, fromId }: AddLinkDialogProps) {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -74,7 +72,6 @@ export function AddLinkDialog({ fromType, fromId }: AddLinkDialogProps) {
           relationship,
         });
         toast.success("Link created");
-        router.refresh();
         setIsOpen(false);
         // Reset form
         setToType("task");

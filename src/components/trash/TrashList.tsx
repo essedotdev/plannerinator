@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RotateCcw, Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { formatShortDate } from "@/lib/dates";
 import { ConfirmDialog } from "@/components/common";
@@ -42,7 +41,6 @@ const ENTITY_TYPE_CONFIG = {
 } as const;
 
 export function TrashList({ items }: TrashListProps) {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedItem, setSelectedItem] = useState<TrashItem | null>(null);
@@ -65,7 +63,6 @@ export function TrashList({ items }: TrashListProps) {
             break;
         }
         toast.success(`${ENTITY_TYPE_CONFIG[item.type].label} restored`);
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : `Failed to restore ${item.type}`);
       }
@@ -99,7 +96,6 @@ export function TrashList({ items }: TrashListProps) {
             break;
         }
         toast.success(`${ENTITY_TYPE_CONFIG[selectedItem.type].label} permanently deleted`);
-        router.refresh();
       } catch (error) {
         toast.error(
           error instanceof Error ? error.message : `Failed to delete ${selectedItem.type}`

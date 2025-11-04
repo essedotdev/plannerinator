@@ -11,7 +11,6 @@ import { Plus, Tag as TagIcon } from "lucide-react";
 import { searchTags } from "@/features/tags/queries";
 import { createTag, assignTagsToEntity, removeTagsFromEntity } from "@/features/tags/actions";
 import type { EntityType } from "@/features/tags/schema";
-import { useRouter } from "next/navigation";
 
 /**
  * Tag Input Component
@@ -31,7 +30,6 @@ interface TagInputProps {
 }
 
 export function TagInput({ entityType, entityId, initialTags }: TagInputProps) {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -87,7 +85,6 @@ export function TagInput({ entityType, entityId, initialTags }: TagInputProps) {
         setSearchQuery("");
         setIsOpen(false);
         toast.success(`Tag "${result.tag.name}" created and assigned`);
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to create tag");
       }
@@ -107,7 +104,6 @@ export function TagInput({ entityType, entityId, initialTags }: TagInputProps) {
         setSearchQuery("");
         setIsOpen(false);
         toast.success(`Tag "${tag.name}" assigned`);
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to assign tag");
       }
@@ -125,7 +121,6 @@ export function TagInput({ entityType, entityId, initialTags }: TagInputProps) {
 
         setAssignedTags(assignedTags.filter((t) => t.id !== tagId));
         toast.success(`Tag "${tagName}" removed`);
-        router.refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to remove tag");
       }
