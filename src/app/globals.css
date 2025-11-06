@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -153,5 +154,55 @@
     .container {
       max-width: 1536px;
     }
+  }
+}
+
+/* Markdown code block customization */
+@layer components {
+  /* Override prose code block backgrounds - Light mode */
+  .prose pre {
+    background-color: oklch(0.97 0 0) !important;
+    border: 1px solid oklch(0.922 0 0) !important;
+    line-height: 1.09 !important;
+  }
+
+  /* Dark mode - quando html ha classe .dark */
+  :is(.dark *) .prose pre {
+    background-color: oklch(0.205 0 0) !important;
+    border: 1px solid oklch(1 0 0 / 10%) !important;
+  }
+
+  /* Inline code styling - Light mode */
+  .prose code {
+    background-color: oklch(0.97 0 0) !important;
+    color: oklch(0.205 0 0) !important;
+    padding: 0.125rem 0.25rem !important;
+    border-radius: 0.25rem !important;
+    font-weight: 500 !important;
+  }
+
+  /* Inline code styling - Dark mode */
+  :is(.dark *) .prose code {
+    background-color: oklch(0.269 0 0) !important;
+    color: oklch(0.985 0 0) !important;
+  }
+
+  /* Code blocks should not have the inline code background */
+  .prose pre code,
+  :is(.dark *) .prose pre code {
+    background-color: transparent !important;
+    padding: 0 !important;
+    color: inherit !important;
+    font-weight: normal !important;
+    line-height: 1.09 !important;
+  }
+
+  /* Override react-syntax-highlighter background */
+  .prose pre > div {
+    background-color: transparent !important;
+  }
+
+  :is(.dark *) .prose pre > div {
+    background-color: transparent !important;
   }
 }

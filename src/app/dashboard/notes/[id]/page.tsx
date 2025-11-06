@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EntityActionButton } from "@/components/common";
 import { deleteNote, archiveNote } from "@/features/notes/actions";
+import { MarkdownRenderer } from "@/components/notes/MarkdownRenderer";
 
 /**
  * Note detail page
@@ -105,9 +106,7 @@ export default async function NoteDetailPage({ params }: NoteDetailPageProps) {
             <CardTitle className="text-base">Content</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="prose prose-sm dark:prose-invert max-w-none">
-              <p className="whitespace-pre-wrap">{noteData.content}</p>
-            </div>
+            <MarkdownRenderer content={noteData.content} />
           </CardContent>
         </Card>
       )}

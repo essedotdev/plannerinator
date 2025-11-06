@@ -1,18 +1,10 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
-import { createNote, updateNote } from "@/features/notes/actions";
-import { createAndAssignTags } from "@/features/tags/utils";
-import { createNoteSchema, updateNoteSchema, type NoteType } from "@/features/notes/schema";
-import { useProjectSelection } from "@/hooks/useProjectSelection";
-import { PROJECT_STATUS_LABELS, NOTE_TYPE_LABELS } from "@/lib/labels";
+import { FormActions } from "@/components/forms/FormActions";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -20,9 +12,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { createNote, updateNote } from "@/features/notes/actions";
+import { createNoteSchema, updateNoteSchema, type NoteType } from "@/features/notes/schema";
+import { createAndAssignTags } from "@/features/tags/utils";
+import { useProjectSelection } from "@/hooks/useProjectSelection";
+import { NOTE_TYPE_LABELS, PROJECT_STATUS_LABELS } from "@/lib/labels";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { MarkdownEditor } from "./MarkdownEditor";
-import { FormActions } from "@/components/forms/FormActions";
 
 interface NoteFormProps {
   mode: "create" | "edit";
@@ -142,7 +142,7 @@ export function NoteForm({ mode, initialData, parentNoteId, selectedTags }: Note
                   <SelectTrigger id="project" className="w-full">
                     <SelectValue placeholder={loadingProjects ? "Loading..." : "No project"} />
                   </SelectTrigger>
-                  <SelectContent className="w-[var(--radix-select-trigger-width)]">
+                  <SelectContent className="w-(--radix-select-trigger-width)">
                     {projects.map((project) => (
                       <SelectItem key={project.id} value={project.id}>
                         <span className="flex items-center gap-2">
@@ -227,7 +227,7 @@ export function NoteForm({ mode, initialData, parentNoteId, selectedTags }: Note
                 setValue("content", value, { shouldValidate: true, shouldDirty: true })
               }
               placeholder="Write your note in markdown..."
-              minHeight="400px"
+              minHeight="600px"
               isFocusMode={isFocusMode}
               onFocusModeChange={setIsFocusMode}
             />

@@ -1,11 +1,38 @@
 "use client";
 
-import { useState, useRef, useCallback, type KeyboardEvent, type ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import {
+  Bold,
+  CheckSquare,
+  Code,
+  Columns2,
+  Edit3,
+  Eye,
+  Heading1,
+  Heading2,
+  Image as ImageIcon,
+  Italic,
+  Link as LinkIcon,
+  List,
+  ListOrdered,
+  Maximize,
+  Minimize,
+  Minus,
+  Quote,
+  Table,
+  ZoomIn,
+  ZoomOut,
+} from "lucide-react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
-import SyntaxHighlighter from "react-syntax-highlighter/dist/esm/light";
-import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import bash from "react-syntax-highlighter/dist/esm/languages/hljs/bash";
 import cpp from "react-syntax-highlighter/dist/esm/languages/hljs/cpp";
 import csharp from "react-syntax-highlighter/dist/esm/languages/hljs/csharp";
@@ -25,28 +52,10 @@ import swift from "react-syntax-highlighter/dist/esm/languages/hljs/swift";
 import typescript from "react-syntax-highlighter/dist/esm/languages/hljs/typescript";
 import xml from "react-syntax-highlighter/dist/esm/languages/hljs/xml";
 import yaml from "react-syntax-highlighter/dist/esm/languages/hljs/yaml";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import {
-  Bold,
-  Italic,
-  Heading1,
-  Heading2,
-  List,
-  ListOrdered,
-  Code,
-  Link as LinkIcon,
-  Quote,
-  Table,
-  Eye,
-  Edit3,
-  Columns2,
-  Image as ImageIcon,
-  Minus,
-  CheckSquare,
-  Maximize,
-  Minimize,
-} from "lucide-react";
+import SyntaxHighlighter from "react-syntax-highlighter/dist/esm/light";
+import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
+import rehypeRaw from "rehype-raw";
+import remarkGfm from "remark-gfm";
 
 // Type definitions
 interface CodeProps {
@@ -108,7 +117,54 @@ export function MarkdownEditor({
   onFocusModeChange,
 }: MarkdownEditorProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("split");
+  const [previewZoom, setPreviewZoom] = useState<number>(100); // Zoom percentage
+  const [customHeight, setCustomHeight] = useState<number | null>(null); // Custom height from resize
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
+  const isResizing = useRef<boolean>(false);
+
+  // Zoom controls
+  const increaseZoom = () => setPreviewZoom((prev) => Math.min(prev + 10, 200));
+  const decreaseZoom = () => setPreviewZoom((prev) => Math.max(prev - 10, 50));
+  const resetZoom = () => setPreviewZoom(100);
+
+  // Resize handler
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isResizing.current = true;
+    document.body.style.cursor = "ns-resize";
+    document.body.style.userSelect = "none";
+  }, []);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isResizing.current || !previewRef.current) return;
+
+    const previewRect = previewRef.current.getBoundingClientRect();
+    const newHeight = e.clientY - previewRect.top;
+
+    // Clamp height between 200px and 900px
+    const clampedHeight = Math.max(200, Math.min(1200, newHeight));
+    setCustomHeight(clampedHeight);
+  }, []);
+
+  const handleMouseUp = useCallback(() => {
+    if (isResizing.current) {
+      isResizing.current = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    }
+  }, []);
+
+  // Add/remove event listeners for resize
+  useEffect(() => {
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [handleMouseMove, handleMouseUp]);
 
   // Insert markdown syntax at cursor position
   const insertMarkdown = useCallback(
@@ -191,8 +247,13 @@ export function MarkdownEditor({
     [insertMarkdown, isFocusMode, onFocusModeChange]
   );
 
-  // Calculate editor height based on focus mode
-  const editorHeight = isFocusMode ? "calc(100vh - 250px)" : minHeight;
+  // Calculate editor height based on focus mode and custom resize
+  const getHeight = () => {
+    if (customHeight) return `${customHeight}px`;
+    if (isFocusMode) return "calc(100vh - 250px)";
+    return minHeight;
+  };
+  const editorHeight = getHeight();
 
   return (
     <div className="space-y-2">
@@ -367,6 +428,41 @@ export function MarkdownEditor({
           </>
         )}
 
+        {/* Zoom controls - visible only in preview or split mode */}
+        {(viewMode === "preview" || viewMode === "split") && (
+          <>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={decreaseZoom}
+              disabled={previewZoom <= 50}
+              title="Zoom Out"
+            >
+              <ZoomOut className="h-4 w-4" />
+            </Button>
+            <button
+              type="button"
+              onClick={resetZoom}
+              className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-1 min-w-12 text-center"
+              title="Reset Zoom"
+            >
+              {previewZoom}%
+            </button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={increaseZoom}
+              disabled={previewZoom >= 200}
+              title="Zoom In"
+            >
+              <ZoomIn className="h-4 w-4" />
+            </Button>
+            <Separator orientation="vertical" className="h-6" />
+          </>
+        )}
+
         {/* View mode toggles */}
         <div className="inline-flex items-center gap-1 bg-muted/50 p-1 rounded-lg border border-border">
           <Button
@@ -408,50 +504,108 @@ export function MarkdownEditor({
       >
         {/* Editor */}
         {(viewMode === "edit" || viewMode === "split") && (
-          <div>
+          <div className="relative">
             <textarea
               ref={textareaRef}
               value={value}
               onChange={(e) => onChange(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={placeholder}
-              className="w-full p-4 border border-border rounded-md bg-background text-foreground font-mono text-sm resize-y focus:outline-none focus:ring-2 focus:ring-ring"
-              style={{ minHeight: editorHeight }}
+              className="w-full p-4 border border-border rounded-md bg-background text-foreground font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring overflow-auto"
+              style={{
+                height: editorHeight,
+                maxHeight: isFocusMode ? "calc(100vh - 250px)" : "1200px",
+              }}
             />
+            {/* Resize handle - only visible in edit-only mode */}
+            {viewMode === "edit" && (
+              <div
+                onMouseDown={handleMouseDown}
+                className="sticky bottom-1 right-1 ml-auto w-3 h-3 cursor-nwse-resize opacity-30 hover:opacity-80 transition-opacity"
+                title="Drag to resize"
+              >
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="text-muted-foreground"
+                >
+                  <path
+                    d="M11 6L11 11L6 11"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+            )}
           </div>
         )}
 
         {/* Preview */}
         {(viewMode === "preview" || viewMode === "split") && (
           <div
-            className="p-4 border border-border rounded-md bg-muted/20 overflow-auto prose prose-sm dark:prose-invert max-w-none"
-            style={{ minHeight: editorHeight }}
+            ref={previewRef}
+            className="relative border border-border rounded-md bg-muted/20 overflow-auto prose prose-sm dark:prose-invert max-w-none"
+            style={{
+              height: editorHeight,
+              maxHeight: isFocusMode ? "calc(100vh - 250px)" : "1200px",
+              fontSize: `${previewZoom}%`,
+            }}
           >
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeRaw]}
-              components={{
-                code({ inline, className, children, ...props }: CodeProps) {
-                  const match = /language-(\w+)/.exec(className || "");
-                  return !inline && match ? (
-                    <SyntaxHighlighter
-                      style={atomOneDark}
-                      language={match[1]}
-                      PreTag="div"
-                      {...props}
-                    >
-                      {String(children).replace(/\n$/, "")}
-                    </SyntaxHighlighter>
-                  ) : (
-                    <code className={className} {...props}>
-                      {children}
-                    </code>
-                  );
-                },
-              }}
+            <div className="min-h-full px-4 -mt-2">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw]}
+                components={{
+                  code({ inline, className, children, ...props }: CodeProps) {
+                    const match = /language-(\w+)/.exec(className || "");
+                    return !inline && match ? (
+                      <SyntaxHighlighter
+                        style={atomOneDark}
+                        language={match[1]}
+                        PreTag="div"
+                        {...props}
+                      >
+                        {String(children).replace(/\n$/, "")}
+                      </SyntaxHighlighter>
+                    ) : (
+                      <code className={className} {...props}>
+                        {children}
+                      </code>
+                    );
+                  },
+                }}
+              >
+                {value || "*No content to preview*"}
+              </ReactMarkdown>
+            </div>
+            {/* Resize handle - always visible in preview/split mode */}
+            <div
+              onMouseDown={handleMouseDown}
+              className="sticky bottom-2 right-2 ml-auto w-3 h-3 cursor-nwse-resize opacity-30 hover:opacity-80 transition-opacity"
+              title="Drag to resize"
             >
-              {value || "*No content to preview*"}
-            </ReactMarkdown>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="text-muted-foreground"
+              >
+                <path
+                  d="M11 6L11 11L6 11"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
           </div>
         )}
       </div>
