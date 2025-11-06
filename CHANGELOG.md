@@ -7,6 +7,85 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.16.0] - 2025-11-06
+
+### Added
+
+**AI Assistant Integration**
+
+- AI chat drawer component with conversational interface for natural language interactions
+- AI assistant powered by Claude Haiku 4.5 via OpenRouter API
+- Conversational AI interface accessible via Cmd+Shift+A keyboard shortcut or header button
+- Chat message components with markdown rendering support for rich AI responses
+- Token usage tracking and cost calculation for AI API calls
+- AI conversation persistence in database with message history
+- Tool/function calling support for AI to interact with app data (create tasks, search entities, get statistics)
+- AI assistant trigger button in dashboard header with tooltip
+- `AiDrawerProvider` context for managing chat drawer state across the app
+
+**AI Backend Infrastructure**
+
+- OpenRouter API integration for Claude model access
+- AI conversation database schema with JSONB message storage
+- AI usage tracking table for monitoring token consumption and costs
+- Server actions for sending AI messages and managing conversations
+- Tool handlers for AI function execution (entity operations, search, statistics)
+- Type-safe AI function definitions and response handling
+- Cost tracking in cents (USD) for precise billing calculations
+
+**AI Components**
+
+- `AiChatDrawer` - Main drawer UI with chat interface
+- `AiChatTrigger` - Button component to open AI assistant
+- `ChatInput` - Text input with auto-resize and keyboard shortcuts
+- `ChatMessage` - Message display with markdown rendering and tool indicators
+- `use-ai-drawer` hook for managing drawer open/close state
+
+**Hook Improvements**
+
+- Renamed `useProjectSelection` hook file from PascalCase to kebab-case for consistency
+- Renamed attachment preview hooks to kebab-case naming convention
+
+### Changed
+
+**Code Quality & Naming Conventions**
+
+- Migrated hook files to kebab-case naming convention:
+  - `useProjectSelection.ts` → `use-project-selection.ts`
+  - `useAttachmentPreview.ts` → `use-attachment-preview.ts`
+  - `useImagePreview.ts` → `use-image-preview.ts`
+  - `usePDFPreview.ts` → `use-pdf-preview.ts`
+- Updated all import statements across components to reference new hook file names
+- Improved markdown rendering in chat with syntax highlighting for code blocks
+- Enhanced chat message styling with proper text color inheritance in both light and dark modes
+
+**Dashboard Layout**
+
+- Dashboard layout now includes AI assistant trigger in header
+- Added `AiDrawerProvider` wrapper for AI state management
+- Header layout improved with AI chat button positioned in top-right
+
+**Environment Configuration**
+
+- Added OpenRouter API configuration to environment variables
+- Updated `.env.example` with AI assistant setup instructions
+- Added default Claude Haiku 4.5 model configuration
+
+**Documentation**
+
+- Updated roadmap with AI assistant implementation status
+- Removed `.env.local` from repository (moved to gitignore)
+- Moved planning documentation to docs folder (ENV_SETUP.md)
+
+**Dependencies**
+
+- Added `rehype-sanitize` (^6.0.0) for secure markdown rendering in AI chat
+- Added `react-markdown` and related plugins for chat message formatting
+
+### Removed
+
+- `.env.local` file removed from version control (should remain gitignored)
+
 ## [0.15.0] - 2025-11-04
 
 ### Added
@@ -1114,7 +1193,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code splitting
 - Lazy loading for components
 
-[unreleased]: https://github.com/essedev/plannerinator/compare/v0.15.0...HEAD
+[unreleased]: https://github.com/essedev/plannerinator/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/essedev/plannerinator/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/essedev/plannerinator/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/essedev/plannerinator/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/essedev/plannerinator/compare/v0.12.0...v0.13.0

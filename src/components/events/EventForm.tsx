@@ -12,7 +12,7 @@ import {
   updateEventSchema,
   type EventCalendarType,
 } from "@/features/events/schema";
-import { useProjectSelection } from "@/hooks/useProjectSelection";
+import { useProjectSelection } from "@/hooks/use-project-selection";
 import { PROJECT_STATUS_LABELS, EVENT_CALENDAR_TYPE_LABELS } from "@/lib/labels";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

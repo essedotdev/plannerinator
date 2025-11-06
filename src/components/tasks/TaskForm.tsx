@@ -13,7 +13,7 @@ import {
   type TaskPriority,
   type TaskStatus,
 } from "@/features/tasks/schema";
-import { useProjectSelection } from "@/hooks/useProjectSelection";
+import { useProjectSelection } from "@/hooks/use-project-selection";
 import { PROJECT_STATUS_LABELS, TASK_STATUS_LABELS } from "@/lib/labels";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

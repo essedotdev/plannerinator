@@ -15,7 +15,7 @@ import {
 import { createNote, updateNote } from "@/features/notes/actions";
 import { createNoteSchema, updateNoteSchema, type NoteType } from "@/features/notes/schema";
 import { createAndAssignTags } from "@/features/tags/utils";
-import { useProjectSelection } from "@/hooks/useProjectSelection";
+import { useProjectSelection } from "@/hooks/use-project-selection";
 import { NOTE_TYPE_LABELS, PROJECT_STATUS_LABELS } from "@/lib/labels";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";

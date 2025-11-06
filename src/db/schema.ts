@@ -886,6 +886,115 @@ export const activityLog = pgTable(
 );
 
 // ============================================
+// AI ASSISTANT TABLES
+// ============================================
+
+/**
+ * AI Conversations table
+ *
+ * Stores chat conversations with the AI assistant.
+ * Each conversation maintains message history for context.
+ *
+ * Features:
+ * - Persistent conversation history
+ * - Auto-generated titles from first message
+ * - Messages stored as JSONB array
+ *
+ * Message format:
+ * {
+ *   id: string,
+ *   role: "user" | "assistant",
+ *   content: string,
+ *   timestamp: string,
+ *   toolsUsed?: Array<{ name: string, result: any }>
+ * }
+ *
+ * Relations:
+ * - user: Owner of the conversation
+ * - aiUsage: Token usage records for this conversation
+ */
+export const aiConversation = pgTable(
+  "ai_conversation",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+
+    // Auto-generated from first message or user-provided
+    title: text("title"),
+
+    // Array of message objects
+    messages: jsonb("messages")
+      .$type<
+        Array<{
+          id: string;
+          role: "user" | "assistant";
+          content: string;
+          timestamp: string;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          toolsUsed?: Array<{ name: string; result: any }>;
+        }>
+      >()
+      .default([])
+      .notNull(),
+
+    // Timestamps
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index("idx_ai_conversations_user").on(table.userId, table.updatedAt)]
+);
+
+/**
+ * AI Usage table
+ *
+ * Tracks token usage and costs for AI interactions.
+ * Used for analytics, billing, and rate limiting.
+ *
+ * Cost calculation:
+ * - Claude Haiku 4.5 via OpenRouter
+ * - Input: $1 per 1M tokens
+ * - Output: $5 per 1M tokens
+ *
+ * Relations:
+ * - user: User who initiated the request
+ * - conversation: Associated conversation (optional)
+ */
+export const aiUsage = pgTable(
+  "ai_usage",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    conversationId: uuid("conversation_id").references(() => aiConversation.id, {
+      onDelete: "set null",
+    }),
+
+    // Token counts
+    inputTokens: integer("input_tokens").notNull(),
+    outputTokens: integer("output_tokens").notNull(),
+
+    // Cost in USD (calculated)
+    costUsd: integer("cost_usd").notNull(), // Store as integer cents for precision
+
+    // Model identifier
+    model: text("model").notNull().default("anthropic/claude-haiku-4.5"),
+
+    // Timestamp
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_ai_usage_user").on(table.userId, table.createdAt),
+    index("idx_ai_usage_conversation").on(table.conversationId),
+  ]
+);
+
+// ============================================
 // FUTURE TABLES
 // ============================================
 
@@ -979,3 +1088,15 @@ export type NewAttachment = typeof attachment.$inferInsert;
  */
 export type ActivityLog = typeof activityLog.$inferSelect;
 export type NewActivityLog = typeof activityLog.$inferInsert;
+
+/**
+ * AI Conversation types
+ */
+export type AiConversation = typeof aiConversation.$inferSelect;
+export type NewAiConversation = typeof aiConversation.$inferInsert;
+
+/**
+ * AI Usage types
+ */
+export type AiUsage = typeof aiUsage.$inferSelect;
+export type NewAiUsage = typeof aiUsage.$inferInsert;

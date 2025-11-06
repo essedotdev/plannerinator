@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Attachment } from "@/db/schema";
-import { useImagePreview } from "../hooks/useImagePreview";
+import { useImagePreview } from "../hooks/use-image-preview";
 
 interface ImageThumbnailProps {
   attachment: Attachment;

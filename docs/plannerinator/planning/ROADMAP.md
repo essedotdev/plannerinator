@@ -67,7 +67,7 @@ Implementazione CRUD completo per le 4 entità principali + Universal Features:
 - ✅ **Tagging System:** Create/edit/delete tags, autocomplete, usage statistics
 - ✅ **Comments System:** Nested comments, edit/delete, user avatars
 - ✅ **Linking System:** 8 relationship types, bidirectional, entity resolution
-- ✅ **Global Search:** Command palette (Cmd+K), search across all entities
+- ✅ **Global Search:** Command palette (Cmd+K), search across all entities, recent items
 
 ### Phase 2: Critical UX Improvements (100% - v0.3.0)
 
@@ -237,7 +237,15 @@ Strumenti per export/import/backup dei dati.
 
 Potenziamento del sistema di ricerca attuale (Cmd+K).
 
-**Features:**
+**Current Implementation (✅ Phase 1):**
+
+- Command palette (Cmd+K) con ricerca unificata
+- Search su tasks, events, notes, projects
+- Recent items display (ultimi 8 per tipo)
+- Case-insensitive pattern matching (SQL ILIKE)
+- Navigazione rapida con metadata ricchi
+
+**Planned Enhancements:**
 
 - ⏳ PostgreSQL full-text search (tsvector)
 - ⏳ Search ranking + highlight matches
@@ -245,8 +253,6 @@ Potenziamento del sistema di ricerca attuale (Cmd+K).
 - 💭 Saved searches
 - 💭 Smart searches (dynamic: "Tasks due this week")
 - 💭 Semantic search (AI-powered, embeddings)
-
-**Note:** Search basico già implementato in Phase 1, qui si aggiungono feature avanzate.
 
 ---
 

@@ -23,7 +23,7 @@ export const FEATURES = {
   TAGS: true, // ✅ Completato (CRUD + UI + Integration)
   COMMENTS: true, // ✅ Completato (CRUD + UI + Nested replies)
   LINKS: true, // ✅ Completato (CRUD + UI + 8 relationship types)
-  SEARCH: false, // ⏳ Pianificato (Cmd+K command palette)
+  SEARCH: true, // ✅ Completato (Cmd+K command palette)
 
   // Phase 2
   COLLECTIONS: false, // 💭 Futuro

@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useImagePreview } from "../hooks/useImagePreview";
+import { useImagePreview } from "../hooks/use-image-preview";
 
 interface ImagePreviewModalProps {
   attachment: Attachment;

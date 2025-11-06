@@ -2,8 +2,8 @@
 
 import { getPreviewType } from "@/features/attachments/preview-config";
 import type { Attachment } from "@/db/schema";
-import { useImagePreview } from "./useImagePreview";
-import { usePDFPreview } from "./usePDFPreview";
+import { useImagePreview } from "./use-image-preview";
+import { usePDFPreview } from "./use-pdf-preview";
 
 /**
  * Generic hook for attachment previews

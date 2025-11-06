@@ -15,7 +15,7 @@ import { formatShortDate } from "@/lib/dates";
 import { ChevronLeft, ChevronRight, Download, Loader2, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { usePDFPreview } from "../hooks/usePDFPreview";
+import { usePDFPreview } from "../hooks/use-pdf-preview";
 
 interface PDFPreviewModalProps {
   attachment: Attachment;
