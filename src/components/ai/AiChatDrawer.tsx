@@ -92,7 +92,7 @@ export function AiChatDrawer() {
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && close()}>
-      <SheetContent side="right" className="w-full sm:w-[440px] md:w-[500px] p-0 flex flex-col">
+      <SheetContent side="right" className="w-full sm:w-[440px] md:w-[500px] p-0 flex flex-col focus-visible:outline-none">
         {/* Header */}
         <SheetHeader className="px-6 py-4 border-b">
           <div className="flex items-center gap-2">

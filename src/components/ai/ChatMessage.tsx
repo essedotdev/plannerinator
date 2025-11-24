@@ -50,12 +50,17 @@ export function ChatMessage({ message }: ChatMessageProps) {
                   <p className="m-0 mb-2 last:mb-0 leading-relaxed text-foreground">{children}</p>
                 ),
                 ul: ({ children }) => (
-                  <ul className="m-0 mb-2 last:mb-0 ml-4 space-y-1 text-foreground">{children}</ul>
+                  <ul className="m-0 mb-3 last:mb-0 ml-0 space-y-2 list-none text-foreground">{children}</ul>
                 ),
                 ol: ({ children }) => (
-                  <ol className="m-0 mb-2 last:mb-0 ml-4 space-y-1 text-foreground">{children}</ol>
+                  <ol className="m-0 mb-3 last:mb-0 ml-4 space-y-2 list-decimal text-foreground">{children}</ol>
                 ),
-                li: ({ children }) => <li className="text-foreground leading-relaxed">{children}</li>,
+                li: ({ children }) => (
+                  <li className="text-foreground leading-relaxed flex items-start gap-2 pl-0">
+                    <span className="text-primary mt-1.5 text-lg leading-none">•</span>
+                    <span className="flex-1">{children}</span>
+                  </li>
+                ),
                 code: ({
                   inline,
                   children,
@@ -84,6 +89,20 @@ export function ChatMessage({ message }: ChatMessageProps) {
                   <a href={href} className="text-primary hover:underline font-medium">
                     {children}
                   </a>
+                ),
+                h1: ({ children }) => (
+                  <h1 className="text-lg font-bold mb-2 mt-3 first:mt-0 text-foreground">{children}</h1>
+                ),
+                h2: ({ children }) => (
+                  <h2 className="text-base font-bold mb-2 mt-3 first:mt-0 text-foreground">{children}</h2>
+                ),
+                h3: ({ children }) => (
+                  <h3 className="text-sm font-semibold mb-2 mt-2 first:mt-0 text-foreground">{children}</h3>
+                ),
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-2 border-primary/30 pl-3 py-1 my-2 italic text-muted-foreground">
+                    {children}
+                  </blockquote>
                 ),
               }}
             >

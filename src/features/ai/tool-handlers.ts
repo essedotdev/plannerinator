@@ -16,14 +16,16 @@ import { deleteNote } from "@/features/notes/actions";
 import { deleteProject } from "@/features/projects/actions";
 import { globalSearch } from "@/features/search/queries";
 import { db } from "@/db";
-import { task, event } from "@/db/schema";
-import { eq, and, gte, lt, ne, sql } from "drizzle-orm";
+import { task, event, note, project } from "@/db/schema";
+import { eq, and, gte, lt, ne, sql, desc, asc } from "drizzle-orm";
+import { aiLogger } from "@/lib/ai/logger";
 import type {
   ToolResult,
   CreateTaskInput,
   CreateEventInput,
   CreateNoteInput,
   CreateProjectInput,
+  QueryEntitiesInput,
   SearchEntitiesInput,
   UpdateTaskInput,
   DeleteEntityInput,
@@ -36,42 +38,75 @@ import type {
 export async function executeToolCall(
   toolName: string,
   toolInput: unknown,
-  userId: string
+  userId: string,
+  conversationId?: string
 ): Promise<ToolResult> {
+  const startTime = Date.now();
+
   try {
+    // Log tool call
+    await aiLogger.logToolCall(toolName, toolInput, userId, conversationId);
+
+    let result: ToolResult;
+
     switch (toolName) {
       case "create_task":
-        return await handleCreateTasks((toolInput as { tasks: CreateTaskInput[] }).tasks);
+        result = await handleCreateTasks((toolInput as { tasks: CreateTaskInput[] }).tasks, userId, conversationId);
+        break;
 
       case "create_event":
-        return await handleCreateEvents((toolInput as { events: CreateEventInput[] }).events);
+        result = await handleCreateEvents((toolInput as { events: CreateEventInput[] }).events, userId, conversationId);
+        break;
 
       case "create_note":
-        return await handleCreateNote(toolInput as CreateNoteInput);
+        result = await handleCreateNote(toolInput as CreateNoteInput, userId, conversationId);
+        break;
 
       case "create_project":
-        return await handleCreateProject(toolInput as CreateProjectInput);
+        result = await handleCreateProject(toolInput as CreateProjectInput, userId, conversationId);
+        break;
+
+      case "query_entities":
+        result = await handleQueryEntities(toolInput as QueryEntitiesInput, userId, conversationId);
+        break;
 
       case "search_entities":
-        return await handleSearchEntities(toolInput as SearchEntitiesInput);
+        result = await handleSearchEntities(toolInput as SearchEntitiesInput, userId, conversationId);
+        break;
 
       case "update_task":
-        return await handleUpdateTask(toolInput as UpdateTaskInput);
+        result = await handleUpdateTask(toolInput as UpdateTaskInput, userId, conversationId);
+        break;
 
       case "delete_entity":
-        return await handleDeleteEntity(toolInput as DeleteEntityInput);
+        result = await handleDeleteEntity(toolInput as DeleteEntityInput, userId, conversationId);
+        break;
 
       case "get_statistics":
-        return await handleGetStatistics(toolInput as GetStatisticsInput, userId);
+        result = await handleGetStatistics(toolInput as GetStatisticsInput, userId, conversationId);
+        break;
 
       default:
-        return {
+        result = {
           success: false,
           error: `Unknown tool: ${toolName}`,
         };
     }
+
+    // Log tool result
+    const executionTime = Date.now() - startTime;
+    await aiLogger.logToolResult(toolName, result, userId, executionTime, conversationId);
+
+    return result;
   } catch (error) {
-    console.error(`Tool execution error (${toolName}):`, error);
+    await aiLogger.error(`Tool execution error (${toolName})`, {
+      userId,
+      conversationId,
+      toolName,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+
     return {
       success: false,
       error: error instanceof Error ? error.message : "Tool execution failed",
@@ -82,7 +117,7 @@ export async function executeToolCall(
 /**
  * Handle create_task tool
  */
-async function handleCreateTasks(tasks: CreateTaskInput[]): Promise<ToolResult> {
+async function handleCreateTasks(tasks: CreateTaskInput[], userId: string, conversationId?: string): Promise<ToolResult> {
   const results = [];
   const errors = [];
 
@@ -144,7 +179,7 @@ async function handleCreateTasks(tasks: CreateTaskInput[]): Promise<ToolResult> 
 /**
  * Handle create_event tool
  */
-async function handleCreateEvents(events: CreateEventInput[]): Promise<ToolResult> {
+async function handleCreateEvents(events: CreateEventInput[], userId: string, conversationId?: string): Promise<ToolResult> {
   const results = [];
   const errors = [];
 
@@ -208,7 +243,7 @@ async function handleCreateEvents(events: CreateEventInput[]): Promise<ToolResul
 /**
  * Handle create_note tool
  */
-async function handleCreateNote(input: CreateNoteInput): Promise<ToolResult> {
+async function handleCreateNote(input: CreateNoteInput, userId: string, conversationId?: string): Promise<ToolResult> {
   try {
     // Resolve project
     let projectId = null;
@@ -259,7 +294,7 @@ async function handleCreateNote(input: CreateNoteInput): Promise<ToolResult> {
 /**
  * Handle create_project tool
  */
-async function handleCreateProject(input: CreateProjectInput): Promise<ToolResult> {
+async function handleCreateProject(input: CreateProjectInput, userId: string, conversationId?: string): Promise<ToolResult> {
   try {
     // Generate random color if not provided
     const colors = ["#3b82f6", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#06b6d4", "#6366f1"];
@@ -296,15 +331,225 @@ async function handleCreateProject(input: CreateProjectInput): Promise<ToolResul
 }
 
 /**
- * Handle search_entities tool
+ * Handle query_entities tool (direct list without text search)
  */
-async function handleSearchEntities(input: SearchEntitiesInput): Promise<ToolResult> {
+async function handleQueryEntities(input: QueryEntitiesInput, userId: string, conversationId?: string): Promise<ToolResult> {
   try {
     const limit = Math.min(input.limit || 10, 50);
+    const sortOrder = input.sortOrder || "desc";
+
+    await aiLogger.info("📋 Executing query_entities (direct list)", {
+      userId,
+      conversationId,
+      entityTypes: input.entityTypes,
+      filters: input.filters,
+      sortBy: input.sortBy,
+      sortOrder,
+      limit,
+    });
+
+    const results: {
+      tasks: unknown[];
+      events: unknown[];
+      notes: unknown[];
+      projects: unknown[];
+    } = {
+      tasks: [],
+      events: [],
+      notes: [],
+      projects: [],
+    };
+
+    // Query tasks
+    if (input.entityTypes.includes("task")) {
+      const conditions = [eq(task.userId, userId)];
+
+      // Apply filters
+      if (input.filters?.status) {
+        conditions.push(eq(task.status, input.filters.status));
+      }
+      if (input.filters?.priority) {
+        conditions.push(eq(task.priority, input.filters.priority));
+      }
+      if (input.filters?.dateRange?.start) {
+        conditions.push(gte(task.dueDate, new Date(input.filters.dateRange.start)));
+      }
+      if (input.filters?.dateRange?.end) {
+        conditions.push(lt(task.dueDate, new Date(input.filters.dateRange.end)));
+      }
+
+      const sortField = input.sortBy === "dueDate" ? task.dueDate : input.sortBy === "createdAt" ? task.createdAt : task.updatedAt;
+      const sortFn = sortOrder === "asc" ? asc : desc;
+
+      results.tasks = await db
+        .select()
+        .from(task)
+        .where(and(...conditions))
+        .orderBy(sortFn(sortField))
+        .limit(limit);
+
+      await aiLogger.logDbQuery(
+        "SELECT",
+        "task",
+        {
+          conditionsCount: conditions.length,
+          filters: input.filters,
+          sortBy: input.sortBy,
+          sortOrder
+        },
+        results.tasks.length,
+        userId,
+        conversationId
+      );
+    }
+
+    // Query events
+    if (input.entityTypes.includes("event")) {
+      const conditions = [eq(event.userId, userId)];
+
+      if (input.filters?.dateRange?.start) {
+        conditions.push(gte(event.startTime, new Date(input.filters.dateRange.start)));
+      }
+      if (input.filters?.dateRange?.end) {
+        conditions.push(lt(event.startTime, new Date(input.filters.dateRange.end)));
+      }
+
+      const sortField = input.sortBy === "startTime" ? event.startTime : input.sortBy === "createdAt" ? event.createdAt : event.updatedAt;
+      const sortFn = sortOrder === "asc" ? asc : desc;
+
+      results.events = await db
+        .select()
+        .from(event)
+        .where(and(...conditions))
+        .orderBy(sortFn(sortField))
+        .limit(limit);
+
+      await aiLogger.logDbQuery(
+        "SELECT",
+        "event",
+        { conditionsCount: conditions.length, filters: input.filters },
+        results.events.length,
+        userId,
+        conversationId
+      );
+    }
+
+    // Query notes
+    if (input.entityTypes.includes("note")) {
+      const conditions = [eq(note.userId, userId)];
+
+      const sortField = input.sortBy === "createdAt" ? note.createdAt : input.sortBy === "title" ? note.title : note.updatedAt;
+      const sortFn = sortOrder === "asc" ? asc : desc;
+
+      results.notes = await db
+        .select()
+        .from(note)
+        .where(and(...conditions))
+        .orderBy(sortFn(sortField))
+        .limit(limit);
+
+      await aiLogger.logDbQuery(
+        "SELECT",
+        "note",
+        { conditionsCount: conditions.length },
+        results.notes.length,
+        userId,
+        conversationId
+      );
+    }
+
+    // Query projects
+    if (input.entityTypes.includes("project")) {
+      const conditions = [eq(project.userId, userId)];
+
+      if (input.filters?.status) {
+        conditions.push(eq(project.status, input.filters.status));
+      }
+
+      const sortField = input.sortBy === "createdAt" ? project.createdAt : project.updatedAt;
+      const sortFn = sortOrder === "asc" ? asc : desc;
+
+      results.projects = await db
+        .select()
+        .from(project)
+        .where(and(...conditions))
+        .orderBy(sortFn(sortField))
+        .limit(limit);
+
+      await aiLogger.logDbQuery(
+        "SELECT",
+        "project",
+        { conditionsCount: conditions.length, filters: input.filters },
+        results.projects.length,
+        userId,
+        conversationId
+      );
+    }
+
+    const total = results.tasks.length + results.events.length + results.notes.length + results.projects.length;
+
+    await aiLogger.info("✅ query_entities completed", {
+      userId,
+      conversationId,
+      total,
+      breakdown: {
+        tasks: results.tasks.length,
+        events: results.events.length,
+        notes: results.notes.length,
+        projects: results.projects.length,
+      },
+    });
+
+    return {
+      success: true,
+      data: {
+        total,
+        results,
+      },
+    };
+  } catch (error) {
+    await aiLogger.error("❌ query_entities failed", {
+      userId,
+      conversationId,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+
+    return {
+      success: false,
+      error: `Query failed: ${error}`,
+    };
+  }
+}
+
+/**
+ * Handle search_entities tool
+ */
+async function handleSearchEntities(input: SearchEntitiesInput, userId: string, conversationId?: string): Promise<ToolResult> {
+  try {
+    const limit = Math.min(input.limit || 10, 50);
+
+    await aiLogger.debug("🔍 Executing search_entities", {
+      userId,
+      conversationId,
+      query: input.query,
+      entityTypes: input.entityTypes,
+      limit,
+    });
+
     const results = await globalSearch(input.query, {
       limit,
       entityTypes: input.entityTypes,
     });
+
+    // Log raw search results from globalSearch
+    await aiLogger.logSearch(
+      input.query,
+      input.entityTypes,
+      results,
+      userId,
+      conversationId
+    );
 
     // Filter by entity types if specified
     let filteredResults = results;
@@ -321,6 +566,24 @@ async function handleSearchEntities(input: SearchEntitiesInput): Promise<ToolRes
         projects,
         total: tasks.length + events.length + notes.length + projects.length,
       };
+
+      await aiLogger.debug("📊 Applied entity type filters", {
+        userId,
+        conversationId,
+        requestedTypes: input.entityTypes,
+        beforeFilter: {
+          tasks: results.tasks.length,
+          events: results.events.length,
+          notes: results.notes.length,
+          projects: results.projects.length,
+        },
+        afterFilter: {
+          tasks: filteredResults.tasks.length,
+          events: filteredResults.events.length,
+          notes: filteredResults.notes.length,
+          projects: filteredResults.projects.length,
+        },
+      });
     }
 
     // Calculate total
@@ -338,6 +601,14 @@ async function handleSearchEntities(input: SearchEntitiesInput): Promise<ToolRes
       },
     };
   } catch (error) {
+    await aiLogger.error("❌ Search failed", {
+      userId,
+      conversationId,
+      query: input.query,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+
     return {
       success: false,
       error: `Search failed: ${error}`,
@@ -348,7 +619,7 @@ async function handleSearchEntities(input: SearchEntitiesInput): Promise<ToolRes
 /**
  * Handle update_task tool
  */
-async function handleUpdateTask(input: UpdateTaskInput): Promise<ToolResult> {
+async function handleUpdateTask(input: UpdateTaskInput, userId: string, conversationId?: string): Promise<ToolResult> {
   try {
     // Try to find task by ID or title
     let taskId = input.taskIdentifier;
@@ -424,7 +695,7 @@ async function handleUpdateTask(input: UpdateTaskInput): Promise<ToolResult> {
 /**
  * Handle delete_entity tool
  */
-async function handleDeleteEntity(input: DeleteEntityInput): Promise<ToolResult> {
+async function handleDeleteEntity(input: DeleteEntityInput, userId: string, conversationId?: string): Promise<ToolResult> {
   try {
     const { entityType, entityIdentifier } = input;
 
@@ -494,7 +765,7 @@ async function handleDeleteEntity(input: DeleteEntityInput): Promise<ToolResult>
 /**
  * Handle get_statistics tool
  */
-async function handleGetStatistics(input: GetStatisticsInput, userId: string): Promise<ToolResult> {
+async function handleGetStatistics(input: GetStatisticsInput, userId: string, conversationId?: string): Promise<ToolResult> {
   try {
     const { metric, projectName } = input;
 

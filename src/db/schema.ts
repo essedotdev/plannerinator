@@ -994,6 +994,56 @@ export const aiUsage = pgTable(
   ]
 );
 
+/**
+ * AI Log table
+ *
+ * Comprehensive logging for AI assistant operations.
+ * Tracks tool calls, database queries, errors, and debugging information.
+ *
+ * Log levels:
+ * - DEBUG: Detailed debugging information (DB queries, API calls)
+ * - INFO: General informational messages (tool calls, search results)
+ * - WARNING: Warning messages (failed operations, missing data)
+ * - ERROR: Error messages (exceptions, failures)
+ *
+ * Usage:
+ * - Development: Always enabled for debugging
+ * - Production: Optional, can be enabled via AI_DB_LOGGING_ENABLED env var
+ *
+ * Relations:
+ * - user: User who triggered the operation
+ * - conversation: Associated conversation (if applicable)
+ */
+export const aiLog = pgTable(
+  "ai_log",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    conversationId: uuid("conversation_id").references(() => aiConversation.id, {
+      onDelete: "cascade",
+    }),
+
+    // Log level
+    level: text("level").notNull(), // DEBUG | INFO | WARNING | ERROR
+
+    // Log message
+    message: text("message").notNull(),
+
+    // Additional context (tool inputs, query results, etc.)
+    metadata: jsonb("metadata").$type<Record<string, unknown>>(),
+
+    // Timestamp
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_ai_log_user").on(table.userId, table.createdAt),
+    index("idx_ai_log_conversation").on(table.conversationId),
+    index("idx_ai_log_level").on(table.level, table.createdAt),
+  ]
+);
+
 // ============================================
 // FUTURE TABLES
 // ============================================

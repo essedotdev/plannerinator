@@ -219,11 +219,83 @@ export const aiTools = [
   {
     type: "function",
     function: {
+      name: "query_entities",
+      description:
+        "Retrieve a list of entities directly without text search. " +
+        "Use when the user asks for 'all', 'latest', 'recent', or lists of items. " +
+        "Examples: 'show me my notes', 'list all tasks', 'what are my recent projects'. " +
+        "This is more efficient than search_entities when no specific search term is needed.",
+      parameters: {
+        type: "object",
+        properties: {
+          entityTypes: {
+            type: "array",
+            items: {
+              type: "string",
+              enum: ["task", "event", "note", "project"],
+            },
+            description: "Types of entities to retrieve (required)",
+          },
+          filters: {
+            type: "object",
+            description: "Optional filters to narrow results",
+            properties: {
+              status: {
+                type: "string",
+                description: "Filter by status (e.g., 'todo', 'done', 'active')",
+              },
+              priority: {
+                type: "string",
+                description: "Filter by priority (low, medium, high, urgent)",
+              },
+              projectName: {
+                type: "string",
+                description: "Filter by project name",
+              },
+              dateRange: {
+                type: "object",
+                properties: {
+                  start: {
+                    type: "string",
+                    description: "ISO 8601 date for range start",
+                  },
+                  end: {
+                    type: "string",
+                    description: "ISO 8601 date for range end",
+                  },
+                },
+              },
+            },
+          },
+          sortBy: {
+            type: "string",
+            enum: ["createdAt", "updatedAt", "dueDate", "startTime", "title"],
+            description: "Field to sort by (default: updatedAt)",
+          },
+          sortOrder: {
+            type: "string",
+            enum: ["asc", "desc"],
+            description: "Sort order (default: desc for most recent first)",
+          },
+          limit: {
+            type: "number",
+            description: "Maximum number of results per entity type (default: 10, max: 50)",
+          },
+        },
+        required: ["entityTypes"],
+      },
+    },
+  },
+
+  {
+    type: "function",
+    function: {
       name: "search_entities",
       description:
-        "Search across all entities (tasks, events, notes, projects) in the system. " +
-        "Use when the user wants to find specific items, check what exists, or filter by criteria. " +
-        "Returns matching results with relevance scoring.",
+        "Search across entities using a text query. " +
+        "Use when the user provides a specific search term or wants to find items matching keywords. " +
+        "Examples: 'find tasks about meeting', 'search notes containing API'. " +
+        "For listing without search, use query_entities instead.",
       parameters: {
         type: "object",
         properties: {

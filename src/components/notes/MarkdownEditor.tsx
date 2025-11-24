@@ -556,7 +556,7 @@ export function MarkdownEditor({
               fontSize: `${previewZoom}%`,
             }}
           >
-            <div className="min-h-full px-4 -mt-2">
+            <div className="min-h-full px-4 pt-2">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeRaw]}

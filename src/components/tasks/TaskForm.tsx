@@ -252,6 +252,7 @@ export function TaskForm({ mode, initialData, parentTaskId, selectedTags }: Task
               <Input
                 id="startDate"
                 type="datetime-local"
+                max="9999-12-31T23:59"
                 {...register("startDate")}
                 disabled={isSubmitting}
               />
@@ -266,6 +267,7 @@ export function TaskForm({ mode, initialData, parentTaskId, selectedTags }: Task
               <Input
                 id="dueDate"
                 type="datetime-local"
+                max="9999-12-31T23:59"
                 {...register("dueDate")}
                 disabled={isSubmitting}
               />

@@ -58,6 +58,7 @@ interface CodeProps extends React.HTMLAttributes<HTMLElement> {
 interface MarkdownRendererProps {
   content: string;
   className?: string;
+  initialZoom?: number;
 }
 
 /**
@@ -69,10 +70,18 @@ interface MarkdownRendererProps {
  * - HTML sanitization for security
  * - Dark mode support
  * - Responsive typography with Tailwind prose classes
+ * - Optional zoom controls for adjusting content size
  */
-export function MarkdownRenderer({ content, className = "" }: MarkdownRendererProps) {
+export function MarkdownRenderer({
+  content,
+  className = "",
+  initialZoom = 100,
+}: MarkdownRendererProps) {
   return (
-    <div className={`prose prose-sm dark:prose-invert max-w-none ${className}`}>
+    <div
+      className={`prose prose-sm dark:prose-invert max-w-none ${className}`}
+      style={{ fontSize: `${initialZoom}%` }}
+    >
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw, rehypeSanitize]}

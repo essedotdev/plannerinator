@@ -13,6 +13,7 @@ import { aiConversation, aiUsage } from "@/db/schema";
 import { aiTools } from "@/lib/ai/functions";
 import { executeToolCall } from "./tool-handlers";
 import { eq, desc } from "drizzle-orm";
+import { aiLogger } from "@/lib/ai/logger";
 
 /**
  * OpenRouter configuration
@@ -78,13 +79,27 @@ Linee guida importanti:
 - Mostra i risultati in modo chiaro con bullet points o liste
 - Quando completi un'azione, conferma cosa hai fatto
 
-Formattazione delle risposte:
+Formattazione delle risposte (IMPORTANTE - Usa sempre Markdown):
 - Usa emoji occasionalmente per rendere le risposte più amichevoli (ma senza esagerare)
-- Usa **grassetto** per evidenziare informazioni importanti
-- Usa liste puntate per elenchi
-- Usa codice inline \`come questo\` per nomi di entità
+- Usa **grassetto** per evidenziare nomi, titoli e informazioni importanti
+- Usa liste puntate Markdown (- o *) per elencare risultati
+- Usa codice inline \`come questo\` per nomi di entità tecnici
+- Aggiungi una riga vuota tra il testo introduttivo e le liste
+- Struttura gerarchica: usa sottotitoli ### quando necessario
 
-Esempio di buona risposta:
+Esempio di risposta per liste:
+"Ecco le tue ultime 10 note: 📝
+
+- **Presentazione Simone** (Document)
+  Documento completo di presentazione per Yellow Tech
+
+- **Bash Commands Cheatsheet** (Note)
+  Ultima modifica: 22 ottobre
+
+- **TypeScript Utility Types** (Snippet)
+  Creato il 22 ottobre"
+
+Esempio per conferma azione:
 "Ho creato il task **Chiamare Mario** con scadenza domani alle 15:00. ✓
 
 Vuoi che aggiunga altri dettagli come priorità o progetto?"`;
@@ -226,9 +241,25 @@ export async function sendAiMessage(userMessage: string, conversationId?: string
       },
     ];
 
+    // Log API call
+    await aiLogger.logApiCall(messages.length, true, session.user.id, conversation.id);
+
     // First API call - get tool use or direct response
     const initialResponse = await callOpenRouter(messages);
     const initialChoice = initialResponse.choices[0];
+
+    // Log API response
+    await aiLogger.logApiResponse(
+      initialChoice.finish_reason,
+      initialChoice.message.tool_calls?.length || 0,
+      {
+        prompt: initialResponse.usage.prompt_tokens,
+        completion: initialResponse.usage.completion_tokens,
+        total: initialResponse.usage.total_tokens,
+      },
+      session.user.id,
+      conversation.id
+    );
 
     let finalResponse = initialResponse;
     const toolsUsedForHistory: Array<{ name: string; result: unknown }> = [];
@@ -247,7 +278,7 @@ export async function sendAiMessage(userMessage: string, conversationId?: string
         const toolName = toolCall.function.name;
         const toolInput = JSON.parse(toolCall.function.arguments);
 
-        const result = await executeToolCall(toolName, toolInput, session.user.id);
+        const result = await executeToolCall(toolName, toolInput, session.user.id, conversation.id);
 
         // Add tool result to messages
         messages.push({

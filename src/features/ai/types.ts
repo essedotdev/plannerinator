@@ -80,6 +80,25 @@ export type CreateProjectInput = {
 };
 
 /**
+ * Query entities input (list without search)
+ */
+export type QueryEntitiesInput = {
+  entityTypes: Array<"task" | "event" | "note" | "project">;
+  filters?: {
+    status?: string;
+    priority?: string;
+    projectName?: string;
+    dateRange?: {
+      start?: string;
+      end?: string;
+    };
+  };
+  sortBy?: "createdAt" | "updatedAt" | "dueDate" | "startTime" | "title";
+  sortOrder?: "asc" | "desc";
+  limit?: number;
+};
+
+/**
  * Search entities input
  */
 export type SearchEntitiesInput = {
@@ -144,6 +163,7 @@ export type ToolInput =
   | { events: CreateEventInput[] }
   | CreateNoteInput
   | CreateProjectInput
+  | QueryEntitiesInput
   | SearchEntitiesInput
   | UpdateTaskInput
   | DeleteEntityInput

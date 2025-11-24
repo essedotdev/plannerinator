@@ -274,6 +274,7 @@ export function EventForm({ mode, initialData, parentEventId, selectedTags }: Ev
               <Input
                 id="startTime"
                 type={isAllDay ? "date" : "datetime-local"}
+                max={isAllDay ? "9999-12-31" : "9999-12-31T23:59"}
                 {...register("startTime")}
                 disabled={isSubmitting}
               />
@@ -291,6 +292,7 @@ export function EventForm({ mode, initialData, parentEventId, selectedTags }: Ev
                   <Input
                     id="endTime"
                     type={isAllDay ? "date" : "datetime-local"}
+                    max={isAllDay ? "9999-12-31" : "9999-12-31T23:59"}
                     {...register("endTime")}
                     disabled={isSubmitting}
                   />

@@ -15,7 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EntityActionButton } from "@/components/common";
 import { deleteNote, archiveNote } from "@/features/notes/actions";
-import { MarkdownRenderer } from "@/components/notes/MarkdownRenderer";
+import { NoteContentCard } from "@/components/notes/NoteContentCard";
 
 /**
  * Note detail page
@@ -100,16 +100,7 @@ export default async function NoteDetailPage({ params }: NoteDetailPageProps) {
       )}
 
       {/* Content */}
-      {noteData.content && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Content</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <MarkdownRenderer content={noteData.content} />
-          </CardContent>
-        </Card>
-      )}
+      {noteData.content && <NoteContentCard content={noteData.content} />}
 
       {/* Tags and Parent Note - Side by side (Read-only in view mode) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

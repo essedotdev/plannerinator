@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.0] - 2025-11-24
+
+### Added
+
+**AI Assistant Enhancements**
+
+- `query_entities` tool for direct entity listing without text search (list tasks, events, notes, projects with filters and sorting)
+- `NoteContentCard` component for note content display with zoom controls
+- AI logging system with comprehensive operation tracking (`src/lib/ai/logger.ts`)
+- AI log database table for debugging and monitoring AI operations
+- Database migration for AI logging schema
+
+**AI Logging Infrastructure**
+
+- Log levels: DEBUG, INFO, WARNING, ERROR
+- Tool call and result logging with execution time tracking
+- API call and response logging with token usage metrics
+- Database query logging for AI operations
+- Search operation logging with query and result tracking
+
+### Changed
+
+**AI Assistant Improvements**
+
+- Enhanced AI system prompt with better markdown formatting instructions and examples
+- Improved AI chat message markdown rendering with proper heading, blockquote, and list styles
+- AI tool handlers now include comprehensive logging for debugging
+- AI chat drawer focus management improved (removed focus outline on sheet)
+
+**Form Improvements**
+
+- Date inputs in EventForm, TaskForm, and ProjectForm now have max date validation to prevent invalid dates (max year 9999)
+
+**UI/UX Enhancements**
+
+- Markdown editor preview now has proper top padding for better readability
+- MarkdownRenderer component now supports customizable zoom level via `initialZoom` prop
+- Chat message bullet lists now use custom styled bullets with better spacing
+- Chat message headings (h1, h2, h3) and blockquotes now properly rendered
+- Note detail page now uses new `NoteContentCard` component with zoom controls
+
 ## [0.16.0] - 2025-11-06
 
 ### Added
@@ -1193,7 +1234,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code splitting
 - Lazy loading for components
 
-[unreleased]: https://github.com/essedev/plannerinator/compare/v0.16.0...HEAD
+[unreleased]: https://github.com/essedev/plannerinator/compare/v0.17.0...HEAD
+[0.17.0]: https://github.com/essedev/plannerinator/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/essedev/plannerinator/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/essedev/plannerinator/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/essedev/plannerinator/compare/v0.13.0...v0.14.0
