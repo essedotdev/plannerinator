@@ -9,24 +9,22 @@ The AI assistant is substantially implemented with core functionality working en
 ## 1. IMPLEMENTED AI ASSISTANT FEATURES
 
 ### 1.1 Chat Interface Components
+
 - **AiChatDrawer** (`/src/components/ai/AiChatDrawer.tsx`)
   - Slide-out drawer UI from the right side
   - Message display with auto-scrolling
   - User and assistant message rendering
   - Pending state with loading spinner
   - Italian localized interface
-  
 - **AiChatTrigger** (`/src/components/ai/AiChatTrigger.tsx`)
   - Icon button to open chat (Bot icon)
   - Tooltip showing shortcut (Cmd+Shift+A)
   - Keyboard shortcut integration
-  
 - **ChatInput** (`/src/components/ai/ChatInput.tsx`)
   - Textarea with auto-resize (max 200px)
   - Enter to send, Shift+Enter for new lines
   - Send button with loading state
   - Keyboard shortcut help text
-  
 - **ChatMessage** (`/src/components/ai/ChatMessage.tsx`)
   - User/assistant message display
   - Markdown rendering for assistant messages
@@ -34,10 +32,10 @@ The AI assistant is substantially implemented with core functionality working en
   - Tools used indicator
 
 ### 1.2 Conversation Management
+
 - **Database Tables:**
   - `ai_conversation`: Stores conversations with JSONB messages array
   - `ai_usage`: Tracks token usage and costs
-  
 - **Conversation Features:**
   - Auto-create new conversation on first message
   - Persist conversation history in database
@@ -47,6 +45,7 @@ The AI assistant is substantially implemented with core functionality working en
   - Retrieve recent conversations
 
 ### 1.3 System Architecture
+
 - **Frontend:** Client components (use client)
 - **Backend:** Server actions for API calls
 - **LLM Integration:** OpenRouter API (OpenAI-compatible)
@@ -62,6 +61,7 @@ The AI has access to 7 main tools defined in `/src/lib/ai/functions.ts`:
 ### 2.1 Create Tools
 
 #### a) **create_task**
+
 - Creates one or multiple tasks
 - Parameters:
   - title (required)
@@ -71,6 +71,7 @@ The AI has access to 7 main tools defined in `/src/lib/ai/functions.ts`:
 - Handles date parsing (relative dates → ISO 8601)
 
 #### b) **create_event**
+
 - Creates calendar events
 - Parameters:
   - title (required)
@@ -81,6 +82,7 @@ The AI has access to 7 main tools defined in `/src/lib/ai/functions.ts`:
 - Time conversion support
 
 #### c) **create_note**
+
 - Creates notes/documents
 - Parameters:
   - content (required)
@@ -90,6 +92,7 @@ The AI has access to 7 main tools defined in `/src/lib/ai/functions.ts`:
 - Markdown content support
 
 #### d) **create_project**
+
 - Creates new projects
 - Parameters:
   - name (required)
@@ -100,6 +103,7 @@ The AI has access to 7 main tools defined in `/src/lib/ai/functions.ts`:
 ### 2.2 Query Tools
 
 #### e) **search_entities**
+
 - Searches across tasks, events, notes, projects
 - Parameters:
   - query (required)
@@ -109,6 +113,7 @@ The AI has access to 7 main tools defined in `/src/lib/ai/functions.ts`:
 - Uses global search functionality
 
 #### f) **get_statistics**
+
 - Retrieves productivity metrics
 - Implemented metrics:
   - tasks_completed_today
@@ -121,6 +126,7 @@ The AI has access to 7 main tools defined in `/src/lib/ai/functions.ts`:
 ### 2.3 Modification Tools
 
 #### g) **update_task**
+
 - Modifies existing tasks
 - Parameters:
   - taskIdentifier (ID or title search)
@@ -128,6 +134,7 @@ The AI has access to 7 main tools defined in `/src/lib/ai/functions.ts`:
 - Handles task lookup by partial title
 
 #### h) **delete_entity**
+
 - Deletes entities (task, event, note, project)
 - Parameters:
   - entityType (required)
@@ -143,12 +150,14 @@ The AI has access to 7 main tools defined in `/src/lib/ai/functions.ts`:
 The AI can read from and write to multiple database tables:
 
 **Write Access:**
+
 - Create tasks, events, notes, projects
 - Update task status/properties
 - Delete entities
 - Track AI usage (cost/tokens)
 
 **Read Access:**
+
 - Search all entities by title/description
 - Query task/event status and properties
 - Get conversation history
@@ -157,12 +166,14 @@ The AI can read from and write to multiple database tables:
 ### 3.2 Data the AI Can Access
 
 **Via search_entities:**
+
 - Task titles, descriptions, due dates, priorities, status, projects, tags
 - Event titles, times, locations, projects, tags
 - Note titles, content, types, projects, tags
 - Project names, descriptions, statuses, dates, tags
 
 **Via get_statistics:**
+
 - Task completion counts (today, week)
 - Overdue tasks with details
 - Upcoming events (7-day window)
@@ -170,6 +181,7 @@ The AI can read from and write to multiple database tables:
 - Filtered by project if specified
 
 **Via conversation:**
+
 - Full conversation history stored as JSONB
 - Message roles (user/assistant)
 - Timestamps
@@ -188,34 +200,34 @@ The AI can read from and write to multiple database tables:
 
 ### 4.1 Create Operations
 
-| Entity | Capabilities |
-|--------|-------------|
-| **Tasks** | Create with title, description, due date, priority, project, tags, duration |
-| **Events** | Create with title, time range, location, all-day flag, project, tags |
-| **Notes** | Create with markdown content, auto-title, type, project, tags |
-| **Projects** | Create with name, description, status, color, dates, tags |
+| Entity       | Capabilities                                                                |
+| ------------ | --------------------------------------------------------------------------- |
+| **Tasks**    | Create with title, description, due date, priority, project, tags, duration |
+| **Events**   | Create with title, time range, location, all-day flag, project, tags        |
+| **Notes**    | Create with markdown content, auto-title, type, project, tags               |
+| **Projects** | Create with name, description, status, color, dates, tags                   |
 
 ### 4.2 Read Operations
 
-| Operation | Scope |
-|-----------|-------|
-| **Global Search** | Tasks, events, notes, projects - keyword and filter-based |
-| **Statistics** | Task completion rates, overdue items, upcoming events, status breakdown |
-| **Conversation History** | Full conversation with message history |
+| Operation                | Scope                                                                   |
+| ------------------------ | ----------------------------------------------------------------------- |
+| **Global Search**        | Tasks, events, notes, projects - keyword and filter-based               |
+| **Statistics**           | Task completion rates, overdue items, upcoming events, status breakdown |
+| **Conversation History** | Full conversation with message history                                  |
 
 ### 4.3 Update Operations
 
-| Entity | What Can Be Changed |
-|--------|-------------------|
-| **Tasks** | Title, description, status (including mark done), due date, priority |
-| **Others** | No direct update tools for events/notes/projects (limitation) |
+| Entity     | What Can Be Changed                                                  |
+| ---------- | -------------------------------------------------------------------- |
+| **Tasks**  | Title, description, status (including mark done), due date, priority |
+| **Others** | No direct update tools for events/notes/projects (limitation)        |
 
 ### 4.4 Delete Operations
 
-| Entity | Notes |
-|--------|-------|
+| Entity                             | Notes                                                           |
+| ---------------------------------- | --------------------------------------------------------------- |
 | **Tasks, Events, Notes, Projects** | Can delete any entity type; AI prompted to ask for confirmation |
-| **Safety** | Tool definition includes confirmation requirement guideline |
+| **Safety**                         | Tool definition includes confirmation requirement guideline     |
 
 ---
 
@@ -224,6 +236,7 @@ The AI can read from and write to multiple database tables:
 ### 5.1 COMPLETE IMPLEMENTATIONS
 
 #### Fully Implemented & Working:
+
 - [x] Chat UI (drawer, input, messages)
 - [x] Server-side message processing via sendAiMessage()
 - [x] OpenRouter API integration with Claude Haiku 4.5
@@ -248,6 +261,7 @@ The AI can read from and write to multiple database tables:
 ### 5.2 INCOMPLETE/MISSING IMPLEMENTATIONS
 
 #### 1. **Rate Limiting** (Not Implemented)
+
 ```
 Location: src/features/ai/actions.ts:25-30, :173
 Status: TODO - Commented out code exists
@@ -258,6 +272,7 @@ Expected: 50 requests/hour per user
 ```
 
 #### 2. **Load Conversation History** (Not Fully Implemented)
+
 ```
 Location: src/components/ai/AiChatDrawer.tsx:41-43
 Status: TODO - Comment indicates not implemented
@@ -267,6 +282,7 @@ Expected: Load previous messages when opening existing conversation
 ```
 
 #### 3. **Incomplete Statistics Metrics** (Partial Implementation)
+
 ```
 Functions Defined in Schema: 8 metrics
 Implemented in Tool Handler: 5 metrics
@@ -285,6 +301,7 @@ Missing (return error):
 ```
 
 #### 4. **Update Operations Limited**
+
 ```
 Only update_task is implemented
 Missing:
@@ -295,6 +312,7 @@ Events/notes/projects can only be deleted, not modified
 ```
 
 #### 5. **Tool Result Display in UI**
+
 ```
 Status: Partial
 Current: Shows "Azioni eseguite: {count}" if tools were used
@@ -303,6 +321,7 @@ Issue: toolsUsed structure not fully displayed
 ```
 
 #### 6. **Conversation UI Features**
+
 ```
 Missing:
 - No conversation list/history sidebar
@@ -313,6 +332,7 @@ Missing:
 ```
 
 #### 7. **Tags Support**
+
 ```
 Status: Defined in tool schema but not fully integrated
 Issue: Tags parameter defined but not handled in tool-handlers.ts
@@ -355,12 +375,12 @@ switch (metric) {
   case "overdue_tasks": { ... }
   case "upcoming_events": { ... }
   case "tasks_by_status": { ... }
-  
+
   // These are missing:
   // case "tasks_completed_this_month": NOT IMPLEMENTED
   // case "project_progress": NOT IMPLEMENTED
   // case "tasks_by_priority": NOT IMPLEMENTED
-  
+
   default:
     return { success: false, error: `Unknown metric: ${metric}` };
 }
@@ -449,24 +469,29 @@ ChatMessage component renders response
 ## 9. FILES SUMMARY
 
 ### Component Files:
+
 - `/src/components/ai/AiChatDrawer.tsx` - Main chat UI (161 lines)
 - `/src/components/ai/AiChatTrigger.tsx` - Open button (50 lines)
 - `/src/components/ai/ChatInput.tsx` - Input field (90 lines)
 - `/src/components/ai/ChatMessage.tsx` - Message display (110 lines)
 
 ### Server-Side Files:
+
 - `/src/features/ai/actions.ts` - Server actions for chat (469 lines)
 - `/src/features/ai/tool-handlers.ts` - Tool execution (669 lines)
 - `/src/features/ai/types.ts` - TypeScript types (151 lines)
 - `/src/lib/ai/functions.ts` - Tool definitions (399 lines)
 
 ### Hooks:
+
 - `/src/hooks/use-ai-drawer.tsx` - Chat drawer context (59 lines)
 
 ### Database:
+
 - `/src/db/schema.ts` - aiConversation and aiUsage tables
 
 ### Documentation:
+
 - `/docs/plannerinator/future/AI_ASSISTANT.md` - Design document (947 lines)
 
 ---
@@ -474,19 +499,21 @@ ChatMessage component renders response
 ## 10. COST TRACKING
 
 ### Implementation:
+
 - Input: $1 per 1M tokens = 0.1 cents per 1K
 - Output: $5 per 1M tokens = 0.5 cents per 1K
 - Stored in `ai_usage` table as integer cents
 
 ### Tracked Per:
+
 - User (can see total usage stats)
 - Conversation (linked via foreign key)
 - Timestamp (creation time recorded)
 
 ### Available Stats:
+
 - Total messages
 - Total tokens used
 - Total cost (USD)
 - Average tokens per message
 - Per-message cost visibility in chat
-

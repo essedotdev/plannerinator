@@ -72,7 +72,7 @@ export type CreateNoteInput = {
 export type CreateProjectInput = {
   name: string;
   description?: string;
-  status?: "planning" | "active" | "on_hold" | "completed" | "cancelled";
+  status?: "active" | "on_hold" | "completed" | "archived" | "cancelled";
   color?: string;
   startDate?: string;
   endDate?: string;
@@ -85,8 +85,9 @@ export type CreateProjectInput = {
 export type QueryEntitiesInput = {
   entityTypes: Array<"task" | "event" | "note" | "project">;
   filters?: {
-    status?: string;
-    priority?: string;
+    status?: "todo" | "in_progress" | "done" | "cancelled";
+    priority?: "low" | "medium" | "high" | "urgent";
+    projectStatus?: "active" | "on_hold" | "completed" | "archived" | "cancelled";
     projectName?: string;
     dateRange?: {
       start?: string;
@@ -105,8 +106,9 @@ export type SearchEntitiesInput = {
   query: string;
   entityTypes?: Array<"task" | "event" | "note" | "project">;
   filters?: {
-    status?: string;
-    priority?: string;
+    status?: "todo" | "in_progress" | "done" | "cancelled";
+    priority?: "low" | "medium" | "high" | "urgent";
+    projectStatus?: "active" | "on_hold" | "completed" | "archived" | "cancelled";
     projectName?: string;
     tags?: string[];
     dateRange?: {

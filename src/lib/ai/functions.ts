@@ -103,11 +103,13 @@ export const aiTools = [
                 },
                 endTime: {
                   type: "string",
-                  description: "ISO 8601 date-time string for event end. If not provided, will use startTime + 1 hour.",
+                  description:
+                    "ISO 8601 date-time string for event end. If not provided, will use startTime + 1 hour.",
                 },
                 location: {
                   type: "string",
-                  description: "Physical or virtual location (e.g., 'Room 201', 'https://zoom.us/j/123')",
+                  description:
+                    "Physical or virtual location (e.g., 'Room 201', 'https://zoom.us/j/123')",
                 },
                 allDay: {
                   type: "boolean",
@@ -115,7 +117,8 @@ export const aiTools = [
                 },
                 projectName: {
                   type: "string",
-                  description: "Name of project to assign this event to. Will search for matching project.",
+                  description:
+                    "Name of project to assign this event to. Will search for matching project.",
                 },
                 tags: {
                   type: "array",

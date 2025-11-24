@@ -207,7 +207,13 @@ export function ProjectForm({
             {/* End Date */}
             <div className="space-y-2">
               <Label htmlFor="endDate">End Date</Label>
-              <Input id="endDate" type="date" max="9999-12-31" {...register("endDate")} disabled={isSubmitting} />
+              <Input
+                id="endDate"
+                type="date"
+                max="9999-12-31"
+                {...register("endDate")}
+                disabled={isSubmitting}
+              />
               {formState.errors.endDate && (
                 <p className="text-sm text-destructive">{formState.errors.endDate.message}</p>
               )}

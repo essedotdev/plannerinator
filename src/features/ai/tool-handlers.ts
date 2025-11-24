@@ -51,11 +51,19 @@ export async function executeToolCall(
 
     switch (toolName) {
       case "create_task":
-        result = await handleCreateTasks((toolInput as { tasks: CreateTaskInput[] }).tasks, userId, conversationId);
+        result = await handleCreateTasks(
+          (toolInput as { tasks: CreateTaskInput[] }).tasks,
+          userId,
+          conversationId
+        );
         break;
 
       case "create_event":
-        result = await handleCreateEvents((toolInput as { events: CreateEventInput[] }).events, userId, conversationId);
+        result = await handleCreateEvents(
+          (toolInput as { events: CreateEventInput[] }).events,
+          userId,
+          conversationId
+        );
         break;
 
       case "create_note":
@@ -71,7 +79,11 @@ export async function executeToolCall(
         break;
 
       case "search_entities":
-        result = await handleSearchEntities(toolInput as SearchEntitiesInput, userId, conversationId);
+        result = await handleSearchEntities(
+          toolInput as SearchEntitiesInput,
+          userId,
+          conversationId
+        );
         break;
 
       case "update_task":
@@ -117,7 +129,11 @@ export async function executeToolCall(
 /**
  * Handle create_task tool
  */
-async function handleCreateTasks(tasks: CreateTaskInput[], userId: string, conversationId?: string): Promise<ToolResult> {
+async function handleCreateTasks(
+  tasks: CreateTaskInput[],
+  _userId: string,
+  _conversationId?: string
+): Promise<ToolResult> {
   const results = [];
   const errors = [];
 
@@ -179,7 +195,11 @@ async function handleCreateTasks(tasks: CreateTaskInput[], userId: string, conve
 /**
  * Handle create_event tool
  */
-async function handleCreateEvents(events: CreateEventInput[], userId: string, conversationId?: string): Promise<ToolResult> {
+async function handleCreateEvents(
+  events: CreateEventInput[],
+  _userId: string,
+  _conversationId?: string
+): Promise<ToolResult> {
   const results = [];
   const errors = [];
 
@@ -243,7 +263,11 @@ async function handleCreateEvents(events: CreateEventInput[], userId: string, co
 /**
  * Handle create_note tool
  */
-async function handleCreateNote(input: CreateNoteInput, userId: string, conversationId?: string): Promise<ToolResult> {
+async function handleCreateNote(
+  input: CreateNoteInput,
+  _userId: string,
+  _conversationId?: string
+): Promise<ToolResult> {
   try {
     // Resolve project
     let projectId = null;
@@ -294,7 +318,11 @@ async function handleCreateNote(input: CreateNoteInput, userId: string, conversa
 /**
  * Handle create_project tool
  */
-async function handleCreateProject(input: CreateProjectInput, userId: string, conversationId?: string): Promise<ToolResult> {
+async function handleCreateProject(
+  input: CreateProjectInput,
+  _userId: string,
+  _conversationId?: string
+): Promise<ToolResult> {
   try {
     // Generate random color if not provided
     const colors = ["#3b82f6", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#06b6d4", "#6366f1"];
@@ -333,7 +361,11 @@ async function handleCreateProject(input: CreateProjectInput, userId: string, co
 /**
  * Handle query_entities tool (direct list without text search)
  */
-async function handleQueryEntities(input: QueryEntitiesInput, userId: string, conversationId?: string): Promise<ToolResult> {
+async function handleQueryEntities(
+  input: QueryEntitiesInput,
+  userId: string,
+  conversationId?: string
+): Promise<ToolResult> {
   try {
     const limit = Math.min(input.limit || 10, 50);
     const sortOrder = input.sortOrder || "desc";
@@ -378,7 +410,12 @@ async function handleQueryEntities(input: QueryEntitiesInput, userId: string, co
         conditions.push(lt(task.dueDate, new Date(input.filters.dateRange.end)));
       }
 
-      const sortField = input.sortBy === "dueDate" ? task.dueDate : input.sortBy === "createdAt" ? task.createdAt : task.updatedAt;
+      const sortField =
+        input.sortBy === "dueDate"
+          ? task.dueDate
+          : input.sortBy === "createdAt"
+            ? task.createdAt
+            : task.updatedAt;
       const sortFn = sortOrder === "asc" ? asc : desc;
 
       results.tasks = await db
@@ -395,7 +432,7 @@ async function handleQueryEntities(input: QueryEntitiesInput, userId: string, co
           conditionsCount: conditions.length,
           filters: input.filters,
           sortBy: input.sortBy,
-          sortOrder
+          sortOrder,
         },
         results.tasks.length,
         userId,
@@ -414,7 +451,12 @@ async function handleQueryEntities(input: QueryEntitiesInput, userId: string, co
         conditions.push(lt(event.startTime, new Date(input.filters.dateRange.end)));
       }
 
-      const sortField = input.sortBy === "startTime" ? event.startTime : input.sortBy === "createdAt" ? event.createdAt : event.updatedAt;
+      const sortField =
+        input.sortBy === "startTime"
+          ? event.startTime
+          : input.sortBy === "createdAt"
+            ? event.createdAt
+            : event.updatedAt;
       const sortFn = sortOrder === "asc" ? asc : desc;
 
       results.events = await db
@@ -438,7 +480,12 @@ async function handleQueryEntities(input: QueryEntitiesInput, userId: string, co
     if (input.entityTypes.includes("note")) {
       const conditions = [eq(note.userId, userId)];
 
-      const sortField = input.sortBy === "createdAt" ? note.createdAt : input.sortBy === "title" ? note.title : note.updatedAt;
+      const sortField =
+        input.sortBy === "createdAt"
+          ? note.createdAt
+          : input.sortBy === "title"
+            ? note.title
+            : note.updatedAt;
       const sortFn = sortOrder === "asc" ? asc : desc;
 
       results.notes = await db
@@ -462,8 +509,8 @@ async function handleQueryEntities(input: QueryEntitiesInput, userId: string, co
     if (input.entityTypes.includes("project")) {
       const conditions = [eq(project.userId, userId)];
 
-      if (input.filters?.status) {
-        conditions.push(eq(project.status, input.filters.status));
+      if (input.filters?.projectStatus) {
+        conditions.push(eq(project.status, input.filters.projectStatus));
       }
 
       const sortField = input.sortBy === "createdAt" ? project.createdAt : project.updatedAt;
@@ -486,7 +533,8 @@ async function handleQueryEntities(input: QueryEntitiesInput, userId: string, co
       );
     }
 
-    const total = results.tasks.length + results.events.length + results.notes.length + results.projects.length;
+    const total =
+      results.tasks.length + results.events.length + results.notes.length + results.projects.length;
 
     await aiLogger.info("✅ query_entities completed", {
       userId,
@@ -525,7 +573,11 @@ async function handleQueryEntities(input: QueryEntitiesInput, userId: string, co
 /**
  * Handle search_entities tool
  */
-async function handleSearchEntities(input: SearchEntitiesInput, userId: string, conversationId?: string): Promise<ToolResult> {
+async function handleSearchEntities(
+  input: SearchEntitiesInput,
+  userId: string,
+  conversationId?: string
+): Promise<ToolResult> {
   try {
     const limit = Math.min(input.limit || 10, 50);
 
@@ -543,13 +595,7 @@ async function handleSearchEntities(input: SearchEntitiesInput, userId: string, 
     });
 
     // Log raw search results from globalSearch
-    await aiLogger.logSearch(
-      input.query,
-      input.entityTypes,
-      results,
-      userId,
-      conversationId
-    );
+    await aiLogger.logSearch(input.query, input.entityTypes, results, userId, conversationId);
 
     // Filter by entity types if specified
     let filteredResults = results;
@@ -619,7 +665,11 @@ async function handleSearchEntities(input: SearchEntitiesInput, userId: string, 
 /**
  * Handle update_task tool
  */
-async function handleUpdateTask(input: UpdateTaskInput, userId: string, conversationId?: string): Promise<ToolResult> {
+async function handleUpdateTask(
+  input: UpdateTaskInput,
+  _userId: string,
+  _conversationId?: string
+): Promise<ToolResult> {
   try {
     // Try to find task by ID or title
     let taskId = input.taskIdentifier;
@@ -695,7 +745,11 @@ async function handleUpdateTask(input: UpdateTaskInput, userId: string, conversa
 /**
  * Handle delete_entity tool
  */
-async function handleDeleteEntity(input: DeleteEntityInput, userId: string, conversationId?: string): Promise<ToolResult> {
+async function handleDeleteEntity(
+  input: DeleteEntityInput,
+  _userId: string,
+  _conversationId?: string
+): Promise<ToolResult> {
   try {
     const { entityType, entityIdentifier } = input;
 
@@ -765,7 +819,11 @@ async function handleDeleteEntity(input: DeleteEntityInput, userId: string, conv
 /**
  * Handle get_statistics tool
  */
-async function handleGetStatistics(input: GetStatisticsInput, userId: string, conversationId?: string): Promise<ToolResult> {
+async function handleGetStatistics(
+  input: GetStatisticsInput,
+  userId: string,
+  _conversationId?: string
+): Promise<ToolResult> {
   try {
     const { metric, projectName } = input;
 

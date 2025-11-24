@@ -5,6 +5,7 @@ Sistema completo di logging per debugging e monitoraggio dell'AI assistant.
 ## 📋 Panoramica
 
 Il sistema di logging traccia tutte le operazioni dell'AI:
+
 - **Tool calls** - Quali funzioni vengono chiamate e con quali parametri
 - **Database queries** - Query eseguite e risultati ottenuti
 - **API calls** - Chiamate a OpenRouter e risposte ricevute
@@ -17,6 +18,7 @@ Il sistema di logging traccia tutte le operazioni dell'AI:
 **Causa:** L'AI usava `search_entities` che richiede una query testuale. Quando chiedevi "mostrami le ultime note", il modello doveva inventare una query di ricerca invece di fare una lista diretta.
 
 **Soluzione:**
+
 1. Nuovo tool `query_entities` per liste dirette senza ricerca testuale
 2. Logging completo per capire esattamente cosa accede l'AI
 
@@ -34,12 +36,12 @@ AI_DB_LOGGING_ENABLED=true
 
 ## 📊 Livelli di Log
 
-| Livello | Colore | Uso |
-|---------|--------|-----|
-| `DEBUG` | 🔵 Cyan | Query DB, dettagli API |
-| `INFO` | 🟢 Green | Tool calls, operazioni riuscite |
+| Livello   | Colore    | Uso                               |
+| --------- | --------- | --------------------------------- |
+| `DEBUG`   | 🔵 Cyan   | Query DB, dettagli API            |
+| `INFO`    | 🟢 Green  | Tool calls, operazioni riuscite   |
 | `WARNING` | 🟡 Yellow | Operazioni fallite, dati mancanti |
-| `ERROR` | 🔴 Red | Eccezioni, errori critici |
+| `ERROR`   | 🔴 Red    | Eccezioni, errori critici         |
 
 ## 📝 Esempi di Log
 
@@ -123,12 +125,14 @@ Context: {
 **Quando usarlo:** Liste dirette senza ricerca testuale
 
 **Esempi:**
+
 - "Mostrami le mie note"
 - "Lista tutte le task"
 - "Quali sono i miei progetti recenti?"
 - "Ultime 20 note"
 
 **Vantaggi:**
+
 - Più veloce (no ricerca testuale)
 - Più affidabile (query diretta al DB)
 - Ordinamento personalizzabile
@@ -153,6 +157,7 @@ Context: {
 **Quando usarlo:** Ricerca testuale specifica
 
 **Esempi:**
+
 - "Trova note che contengono 'API'"
 - "Cerca task con 'meeting'"
 - "Note su React"
@@ -164,6 +169,7 @@ Context: {
 **Step di debug:**
 
 1. **Controlla i log della console:**
+
 ```bash
 # Cerca log tipo:
 [AI INFO] 📋 Executing query_entities
@@ -171,12 +177,14 @@ Context: {
 ```
 
 2. **Verifica resultCount:**
+
 ```bash
 # Se vedi resultCount: 0, il problema è nel DB
 # Se vedi resultCount: 5, il problema è nella risposta dell'AI
 ```
 
 3. **Controlla le conditions:**
+
 ```bash
 # Verifica che userId sia corretto
 # Verifica che i filtri siano applicati correttamente
@@ -185,6 +193,7 @@ Context: {
 ### 2. Problema: "L'AI chiama il tool sbagliato"
 
 **Cerca nei log:**
+
 ```bash
 [AI INFO] 🔧 Tool called: search_entities
 # ❌ Sbagliato per "mostrami note"
@@ -199,6 +208,7 @@ Context: {
 ### 3. Problema: "Query troppo lente"
 
 **Cerca execution time:**
+
 ```bash
 [AI INFO] ✅ Tool result: query_entities (2345ms)
 # Se > 1000ms, ottimizzare query o aggiungere indici
@@ -225,6 +235,7 @@ LIMIT 50;
 ### Query Utili
 
 **Tool calls per conversazione:**
+
 ```sql
 SELECT
   metadata->>'toolName' as tool,
@@ -237,6 +248,7 @@ GROUP BY tool;
 ```
 
 **Errori recenti:**
+
 ```sql
 SELECT
   message,
@@ -274,6 +286,7 @@ AI_DB_LOGGING_ENABLED=true  # Salva nel DB per analisi
 ### 4. Privacy
 
 I log contengono:
+
 - ✅ User IDs (necessario per debug)
 - ✅ Query parameters
 - ✅ Tool inputs/outputs
@@ -294,6 +307,7 @@ WHERE created_at < NOW() - INTERVAL '30 days';
 **Domanda utente:** "Mostrami le mie note"
 
 **Log da cercare:**
+
 ```bash
 # 1. Tool call
 [AI INFO] 🔧 Tool called: query_entities
@@ -313,6 +327,7 @@ WHERE created_at < NOW() - INTERVAL '30 days';
 **Problema:** L'AI non trova dati esistenti
 
 **Controlla quale tool usa:**
+
 - Se usa `search_entities` con query vuota → PROBLEMA
 - Se usa `query_entities` → OK
 
@@ -321,6 +336,7 @@ WHERE created_at < NOW() - INTERVAL '30 days';
 ### Caso 3: Performance monitoring
 
 **Query lente:**
+
 ```bash
 grep "executionTimeMs" logs.txt | awk '{print $NF}' | sort -n
 # Se vedi valori > 1000ms, indaga

@@ -120,12 +120,7 @@ class AILogger {
   /**
    * Log tool call details
    */
-  async logToolCall(
-    toolName: string,
-    input: unknown,
-    userId: string,
-    conversationId?: string
-  ) {
+  async logToolCall(toolName: string, input: unknown, userId: string, conversationId?: string) {
     await this.info(`🔧 Tool called: ${toolName}`, {
       userId,
       conversationId,
