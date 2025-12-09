@@ -5,11 +5,16 @@
  * They bridge between AI tool calls and existing server actions.
  */
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { createTask } from "@/features/tasks/actions";
 import { createEvent } from "@/features/events/actions";
 import { createNote } from "@/features/notes/actions";
 import { createProject } from "@/features/projects/actions";
 import { updateTask, markTaskComplete } from "@/features/tasks/actions";
+import { updateEvent } from "@/features/events/actions";
+import { updateNote } from "@/features/notes/actions";
+import { updateProject } from "@/features/projects/actions";
 import { deleteTask } from "@/features/tasks/actions";
 import { deleteEvent } from "@/features/events/actions";
 import { deleteNote } from "@/features/notes/actions";
@@ -28,6 +33,9 @@ import type {
   QueryEntitiesInput,
   SearchEntitiesInput,
   UpdateTaskInput,
+  UpdateEventInput,
+  UpdateNoteInput,
+  UpdateProjectInput,
   DeleteEntityInput,
   GetStatisticsInput,
 } from "./types";
@@ -88,6 +96,18 @@ export async function executeToolCall(
 
       case "update_task":
         result = await handleUpdateTask(toolInput as UpdateTaskInput, userId, conversationId);
+        break;
+
+      case "update_event":
+        result = await handleUpdateEvent(toolInput as UpdateEventInput, userId, conversationId);
+        break;
+
+      case "update_note":
+        result = await handleUpdateNote(toolInput as UpdateNoteInput, userId, conversationId);
+        break;
+
+      case "update_project":
+        result = await handleUpdateProject(toolInput as UpdateProjectInput, userId, conversationId);
         break;
 
       case "delete_entity":
@@ -738,6 +758,213 @@ async function handleUpdateTask(
     return {
       success: false,
       error: `Failed to update task: ${error}`,
+    };
+  }
+}
+
+/**
+ * Handle update_event tool
+ */
+async function handleUpdateEvent(
+  input: UpdateEventInput,
+  _userId: string,
+  _conversationId?: string
+): Promise<ToolResult> {
+  try {
+    // Try to find event by ID or title
+    let eventId = input.eventIdentifier;
+
+    // If not a UUID, search by title
+    if (!eventId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+      const searchResults = await globalSearch(input.eventIdentifier, {
+        entityTypes: ["event"],
+        limit: 10,
+      });
+      if (searchResults.events.length === 0) {
+        return {
+          success: false,
+          error: `No event found matching "${input.eventIdentifier}"`,
+        };
+      }
+      if (searchResults.events.length > 1) {
+        return {
+          success: false,
+          error: `Multiple events found matching "${input.eventIdentifier}". Please be more specific.`,
+          data: {
+            matches: searchResults.events.map((e) => ({
+              id: e.id,
+              title: e.title,
+            })),
+          },
+        };
+      }
+      eventId = searchResults.events[0].id;
+    }
+
+    // Build updates object
+    const updates: {
+      title?: string;
+      description?: string;
+      startTime?: Date;
+      endTime?: Date;
+      location?: string;
+      allDay?: boolean;
+    } = {};
+    if (input.updates.title) updates.title = input.updates.title;
+    if (input.updates.description) updates.description = input.updates.description;
+    if (input.updates.startTime) updates.startTime = new Date(input.updates.startTime);
+    if (input.updates.endTime) updates.endTime = new Date(input.updates.endTime);
+    if (input.updates.location) updates.location = input.updates.location;
+    if (input.updates.allDay !== undefined) updates.allDay = input.updates.allDay;
+
+    const result = await updateEvent(eventId, updates);
+
+    return {
+      success: result.success,
+      data: {
+        message: `Event "${result.event.title}" updated successfully`,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: `Failed to update event: ${error}`,
+    };
+  }
+}
+
+/**
+ * Handle update_note tool
+ */
+async function handleUpdateNote(
+  input: UpdateNoteInput,
+  _userId: string,
+  _conversationId?: string
+): Promise<ToolResult> {
+  try {
+    // Try to find note by ID or title
+    let noteId = input.noteIdentifier;
+
+    // If not a UUID, search by title
+    if (!noteId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+      const searchResults = await globalSearch(input.noteIdentifier, {
+        entityTypes: ["note"],
+        limit: 10,
+      });
+      if (searchResults.notes.length === 0) {
+        return {
+          success: false,
+          error: `No note found matching "${input.noteIdentifier}"`,
+        };
+      }
+      if (searchResults.notes.length > 1) {
+        return {
+          success: false,
+          error: `Multiple notes found matching "${input.noteIdentifier}". Please be more specific.`,
+          data: {
+            matches: searchResults.notes.map((n) => ({
+              id: n.id,
+              title: n.title || "Untitled",
+            })),
+          },
+        };
+      }
+      noteId = searchResults.notes[0].id;
+    }
+
+    // Build updates object
+    const updates: {
+      title?: string;
+      content?: string;
+      type?: string;
+    } = {};
+    if (input.updates.title) updates.title = input.updates.title;
+    if (input.updates.content) updates.content = input.updates.content;
+    if (input.updates.type) updates.type = input.updates.type;
+
+    const result = await updateNote(noteId, updates);
+
+    return {
+      success: result.success,
+      data: {
+        message: `Note "${result.note.title}" updated successfully`,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: `Failed to update note: ${error}`,
+    };
+  }
+}
+
+/**
+ * Handle update_project tool
+ */
+async function handleUpdateProject(
+  input: UpdateProjectInput,
+  _userId: string,
+  _conversationId?: string
+): Promise<ToolResult> {
+  try {
+    // Try to find project by ID or name
+    let projectId = input.projectIdentifier;
+
+    // If not a UUID, search by name
+    if (!projectId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+      const searchResults = await globalSearch(input.projectIdentifier, {
+        entityTypes: ["project"],
+        limit: 10,
+      });
+      if (searchResults.projects.length === 0) {
+        return {
+          success: false,
+          error: `No project found matching "${input.projectIdentifier}"`,
+        };
+      }
+      if (searchResults.projects.length > 1) {
+        return {
+          success: false,
+          error: `Multiple projects found matching "${input.projectIdentifier}". Please be more specific.`,
+          data: {
+            matches: searchResults.projects.map((p) => ({
+              id: p.id,
+              title: p.title,
+            })),
+          },
+        };
+      }
+      projectId = searchResults.projects[0].id;
+    }
+
+    // Build updates object
+    const updates: {
+      name?: string;
+      description?: string;
+      status?: string;
+      color?: string;
+      startDate?: Date;
+      endDate?: Date;
+    } = {};
+    if (input.updates.name) updates.name = input.updates.name;
+    if (input.updates.description) updates.description = input.updates.description;
+    if (input.updates.status) updates.status = input.updates.status;
+    if (input.updates.color) updates.color = input.updates.color;
+    if (input.updates.startDate) updates.startDate = new Date(input.updates.startDate);
+    if (input.updates.endDate) updates.endDate = new Date(input.updates.endDate);
+
+    const result = await updateProject(projectId, updates);
+
+    return {
+      success: result.success,
+      data: {
+        message: `Project "${result.project.name}" updated successfully`,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: `Failed to update project: ${error}`,
     };
   }
 }

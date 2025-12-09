@@ -44,12 +44,12 @@ export function TagInput({ entityType, entityId, initialTags }: TagInputProps) {
 
   // Search tags as user types
   useEffect(() => {
-    if (searchQuery.trim().length < 2) {
-      setSearchResults([]);
-      return;
-    }
-
     const search = async () => {
+      if (searchQuery.trim().length < 2) {
+        setSearchResults([]);
+        return;
+      }
+
       try {
         const results = await searchTags(searchQuery, 10);
         // Filter out already assigned tags

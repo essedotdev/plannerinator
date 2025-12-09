@@ -23,24 +23,26 @@ interface GenericThumbnailProps {
  * Generic file icon thumbnail for non-previewable files
  */
 
-function getFileIcon(mimeType: string) {
+function renderFileIcon(mimeType: string, className: string) {
   const category = getFileCategory(mimeType);
+  const iconProps = { className };
+
   switch (category) {
     case "image":
-      return FileImage;
+      return <FileImage {...iconProps} />;
     case "document":
     case "presentation":
-      return FileText;
+      return <FileText {...iconProps} />;
     case "spreadsheet":
-      return FileSpreadsheet;
+      return <FileSpreadsheet {...iconProps} />;
     case "video":
-      return FileVideo;
+      return <FileVideo {...iconProps} />;
     case "audio":
-      return FileAudio;
+      return <FileAudio {...iconProps} />;
     case "archive":
-      return FileArchive;
+      return <FileArchive {...iconProps} />;
     default:
-      return File;
+      return <File {...iconProps} />;
   }
 }
 
@@ -69,7 +71,6 @@ function getFileColorClass(mimeType: string): string {
 }
 
 export function GenericThumbnail({ attachment, className, onClick }: GenericThumbnailProps) {
-  const Icon = getFileIcon(attachment.mimeType);
   const colorClass = getFileColorClass(attachment.mimeType);
 
   return (
@@ -82,7 +83,7 @@ export function GenericThumbnail({ attachment, className, onClick }: GenericThum
       )}
       onClick={onClick}
     >
-      <Icon className="h-8 w-8" />
+      {renderFileIcon(attachment.mimeType, "h-8 w-8")}
     </div>
   );
 }

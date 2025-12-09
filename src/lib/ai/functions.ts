@@ -412,6 +412,149 @@ export const aiTools = [
   {
     type: "function",
     function: {
+      name: "update_event",
+      description:
+        "Update an existing event's properties. Use when the user wants to modify an event's title, time, location, or description. " +
+        "Can reschedule events, change locations, update details, etc.",
+      parameters: {
+        type: "object",
+        properties: {
+          eventIdentifier: {
+            type: "string",
+            description:
+              "Event ID (UUID) or partial title to identify the event. If title, will search for matches.",
+          },
+          updates: {
+            type: "object",
+            description: "Properties to update",
+            properties: {
+              title: {
+                type: "string",
+                description: "New event title",
+              },
+              description: {
+                type: "string",
+                description: "New description",
+              },
+              startTime: {
+                type: "string",
+                description: "New start time (ISO 8601)",
+              },
+              endTime: {
+                type: "string",
+                description: "New end time (ISO 8601)",
+              },
+              location: {
+                type: "string",
+                description: "New location",
+              },
+              allDay: {
+                type: "boolean",
+                description: "Whether this is an all-day event",
+              },
+            },
+          },
+        },
+        required: ["eventIdentifier", "updates"],
+      },
+    },
+  },
+
+  {
+    type: "function",
+    function: {
+      name: "update_note",
+      description:
+        "Update an existing note's properties. Use when the user wants to modify a note's title, content, or type. " +
+        "Can edit note content, change titles, update categorization, etc.",
+      parameters: {
+        type: "object",
+        properties: {
+          noteIdentifier: {
+            type: "string",
+            description:
+              "Note ID (UUID) or partial title to identify the note. If title, will search for matches.",
+          },
+          updates: {
+            type: "object",
+            description: "Properties to update",
+            properties: {
+              title: {
+                type: "string",
+                description: "New note title",
+              },
+              content: {
+                type: "string",
+                description: "New note content (supports Markdown)",
+              },
+              type: {
+                type: "string",
+                enum: ["note", "document", "research", "idea", "snippet"],
+                description: "New note type/category",
+              },
+            },
+          },
+        },
+        required: ["noteIdentifier", "updates"],
+      },
+    },
+  },
+
+  {
+    type: "function",
+    function: {
+      name: "update_project",
+      description:
+        "Update an existing project's properties. Use when the user wants to modify a project's name, status, dates, or description. " +
+        "Can change project status, update timelines, rename projects, etc.",
+      parameters: {
+        type: "object",
+        properties: {
+          projectIdentifier: {
+            type: "string",
+            description:
+              "Project ID (UUID) or project name to identify the project. If name, will search for matches.",
+          },
+          updates: {
+            type: "object",
+            description: "Properties to update",
+            properties: {
+              name: {
+                type: "string",
+                description: "New project name",
+              },
+              description: {
+                type: "string",
+                description: "New project description",
+              },
+              status: {
+                type: "string",
+                enum: ["planning", "active", "on_hold", "completed", "cancelled"],
+                description: "New project status",
+              },
+              color: {
+                type: "string",
+                description: "New color code (e.g., '#3B82F6')",
+              },
+              startDate: {
+                type: "string",
+                description: "New start date (ISO 8601)",
+              },
+              endDate: {
+                type: "string",
+                description: "New end date (ISO 8601)",
+              },
+            },
+          },
+        },
+        required: ["projectIdentifier", "updates"],
+      },
+    },
+  },
+
+  {
+    type: "function",
+    function: {
       name: "delete_entity",
       description:
         "Delete an entity (task, event, note, or project). " +

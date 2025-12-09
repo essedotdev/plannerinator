@@ -79,11 +79,6 @@ export function ChatInput({
           {disabled ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
         </Button>
       </div>
-      <p className="text-xs text-muted-foreground mt-2">
-        <kbd className="px-1.5 py-0.5 text-xs font-mono bg-muted rounded">Enter</kbd> per inviare,{" "}
-        <kbd className="px-1.5 py-0.5 text-xs font-mono bg-muted rounded">Shift+Enter</kbd> per
-        nuova riga
-      </p>
     </div>
   );
 }

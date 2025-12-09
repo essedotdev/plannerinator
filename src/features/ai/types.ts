@@ -134,6 +134,48 @@ export type UpdateTaskInput = {
 };
 
 /**
+ * Update event input
+ */
+export type UpdateEventInput = {
+  eventIdentifier: string;
+  updates: {
+    title?: string;
+    description?: string;
+    startTime?: string;
+    endTime?: string;
+    location?: string;
+    allDay?: boolean;
+  };
+};
+
+/**
+ * Update note input
+ */
+export type UpdateNoteInput = {
+  noteIdentifier: string;
+  updates: {
+    title?: string;
+    content?: string;
+    type?: "note" | "document" | "research" | "idea" | "snippet";
+  };
+};
+
+/**
+ * Update project input
+ */
+export type UpdateProjectInput = {
+  projectIdentifier: string;
+  updates: {
+    name?: string;
+    description?: string;
+    status?: "planning" | "active" | "on_hold" | "completed" | "cancelled";
+    color?: string;
+    startDate?: string;
+    endDate?: string;
+  };
+};
+
+/**
  * Delete entity input
  */
 export type DeleteEntityInput = {
@@ -168,5 +210,8 @@ export type ToolInput =
   | QueryEntitiesInput
   | SearchEntitiesInput
   | UpdateTaskInput
+  | UpdateEventInput
+  | UpdateNoteInput
+  | UpdateProjectInput
   | DeleteEntityInput
   | GetStatisticsInput;

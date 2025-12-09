@@ -7,6 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.1] - 2025-12-09
+
+### Changed
+
+**Dependency Updates**
+
+- Updated Next.js from 15.5.4 to 16.0.8 with improved performance and stability
+- Updated React and React DOM from 19.2.0 to 19.2.1
+- Updated better-auth from 1.3.34 to 1.4.6 with authentication improvements
+- Updated @opennextjs/cloudflare from 1.11.0 to 1.14.4 for better Cloudflare Workers deployment
+- Updated drizzle-orm from 0.44.7 to 0.45.0 with query optimization improvements
+- Updated lucide-react from 0.545.0 to 0.556.0 with new icons
+- Updated @react-email/components from 0.5.7 to 1.0.1 (major version)
+- Updated react-hook-form from 7.65.0 to 7.68.0
+- Updated resend from 6.3.0 to 6.6.0
+- Updated zod from 4.1.12 to 4.1.13
+- Updated AWS SDK packages (@aws-sdk/client-s3, @aws-sdk/s3-request-presigner) from 3.919.0 to 3.947.0
+- Updated @radix-ui packages (react-label, react-progress, react-separator, react-slot) to latest versions
+- Updated tailwindcss from 4.1.16 to 4.1.17
+- Updated tailwind-merge from 3.3.1 to 3.4.0
+- Updated prettier from 3.6.2 to 3.7.4
+- Updated eslint from 9.38.0 to 9.39.1 with improved linting rules
+- Updated eslint-config-next from 15.5.4 to 16.0.8
+- Updated drizzle-kit from 0.31.6 to 0.31.8
+- Updated wrangler from 4.45.2 to 4.53.0
+- Updated vitest from 3.2.4 to 4.0.15 (major version)
+- Updated tsx from 4.20.6 to 4.21.0
+- Updated @types packages (@types/node, @types/react, @types/react-dom) to latest versions
+
+**Configuration Improvements**
+
+- Modernized ESLint configuration to use native Next.js config imports instead of @eslint/eslintrc compatibility layer
+- Simplified eslint.config.mjs by removing FlatCompat wrapper and using direct imports
+- Updated TypeScript configuration with improved paths and module resolution
+- Updated next-env.d.ts to use import statement instead of triple-slash reference for better type safety
+- Standardized code formatting across configuration files
+
+**Type System Enhancements**
+
+- Improved TypeScript type definitions in cloudflare-env.d.ts with better interface formatting
+- Enhanced WorkflowEntrypoint interface formatting for better readability
+- Updated type imports in package.json for better type resolution
+
 ## [0.17.0] - 2025-11-24
 
 ### Added
@@ -1234,7 +1277,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code splitting
 - Lazy loading for components
 
-[unreleased]: https://github.com/essedev/plannerinator/compare/v0.17.0...HEAD
+[unreleased]: https://github.com/essedev/plannerinator/compare/v0.17.1...HEAD
+[0.17.1]: https://github.com/essedev/plannerinator/compare/v0.17.0...v0.17.1
 [0.17.0]: https://github.com/essedev/plannerinator/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/essedev/plannerinator/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/essedev/plannerinator/compare/v0.14.0...v0.15.0
