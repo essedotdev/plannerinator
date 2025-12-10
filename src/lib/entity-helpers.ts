@@ -308,7 +308,9 @@ export async function softDeleteEntity(
  * - Links (bidirectional)
  * - Main entity
  *
- * Uses database transaction to ensure atomicity.
+ * Note: neon-http driver doesn't support transactions, so operations
+ * are executed sequentially. In case of partial failure, some related
+ * data might remain orphaned.
  *
  * @param entityType - Type of entity
  * @param entityId - Entity UUID
@@ -323,85 +325,82 @@ export async function hardDeleteEntity(
   // Check ownership
   await checkOwnership(entityType, entityId, userId);
 
-  // Execute cleanup in transaction for atomicity
-  await db.transaction(async (tx) => {
-    // ========================================================================
-    // 1. DELETE ATTACHMENTS (R2 files + database records + storage quota)
-    // ========================================================================
-    const attachments = await tx
-      .select()
-      .from(attachment)
+  // ========================================================================
+  // 1. DELETE ATTACHMENTS (R2 files + database records + storage quota)
+  // ========================================================================
+  const attachments = await db
+    .select()
+    .from(attachment)
+    .where(and(eq(attachment.entityType, entityType), eq(attachment.entityId, entityId)));
+
+  // Delete files from R2
+  if (attachments.length > 0) {
+    const r2DeletePromises = attachments.map((att) =>
+      r2.deleteObject({ Key: att.storageKey }).catch((error) => {
+        console.error(`Error deleting ${att.storageKey} from R2:`, error);
+        // Continue even if R2 deletion fails (file might already be deleted)
+      })
+    );
+    await Promise.all(r2DeletePromises);
+
+    // Delete attachment records from database
+    await db
+      .delete(attachment)
       .where(and(eq(attachment.entityType, entityType), eq(attachment.entityId, entityId)));
 
-    // Delete files from R2
-    if (attachments.length > 0) {
-      const r2DeletePromises = attachments.map((att) =>
-        r2.deleteObject({ Key: att.storageKey }).catch((error) => {
-          console.error(`Error deleting ${att.storageKey} from R2:`, error);
-          // Continue even if R2 deletion fails (file might already be deleted)
-        })
-      );
-      await Promise.all(r2DeletePromises);
+    // Update user storage quota
+    const totalSize = attachments.reduce((sum, att) => sum + att.fileSize, 0);
+    await db
+      .update(user)
+      .set({
+        storageUsedBytes: sql`GREATEST(0, ${user.storageUsedBytes} - ${totalSize})`,
+      })
+      .where(eq(user.id, userId));
+  }
 
-      // Delete attachment records from database
-      await tx
-        .delete(attachment)
-        .where(and(eq(attachment.entityType, entityType), eq(attachment.entityId, entityId)));
+  // ========================================================================
+  // 2. DELETE COMMENTS
+  // ========================================================================
+  await db
+    .delete(comment)
+    .where(and(eq(comment.entityType, entityType), eq(comment.entityId, entityId)));
 
-      // Update user storage quota
-      const totalSize = attachments.reduce((sum, att) => sum + att.fileSize, 0);
-      await tx
-        .update(user)
-        .set({
-          storageUsedBytes: sql`GREATEST(0, ${user.storageUsedBytes} - ${totalSize})`,
-        })
-        .where(eq(user.id, userId));
-    }
+  // ========================================================================
+  // 3. DELETE ENTITY TAGS
+  // ========================================================================
+  await db
+    .delete(entityTag)
+    .where(and(eq(entityTag.entityType, entityType), eq(entityTag.entityId, entityId)));
 
-    // ========================================================================
-    // 2. DELETE COMMENTS
-    // ========================================================================
-    await tx
-      .delete(comment)
-      .where(and(eq(comment.entityType, entityType), eq(comment.entityId, entityId)));
+  // ========================================================================
+  // 4. DELETE LINKS (bidirectional - both from and to)
+  // ========================================================================
+  await db
+    .delete(link)
+    .where(
+      or(
+        and(eq(link.fromType, entityType), eq(link.fromId, entityId)),
+        and(eq(link.toType, entityType), eq(link.toId, entityId))
+      )
+    );
 
-    // ========================================================================
-    // 3. DELETE ENTITY TAGS
-    // ========================================================================
-    await tx
-      .delete(entityTag)
-      .where(and(eq(entityTag.entityType, entityType), eq(entityTag.entityId, entityId)));
-
-    // ========================================================================
-    // 4. DELETE LINKS (bidirectional - both from and to)
-    // ========================================================================
-    await tx
-      .delete(link)
-      .where(
-        or(
-          and(eq(link.fromType, entityType), eq(link.fromId, entityId)),
-          and(eq(link.toType, entityType), eq(link.toId, entityId))
-        )
-      );
-
-    // ========================================================================
-    // 5. DELETE MAIN ENTITY
-    // ========================================================================
-    switch (entityType) {
-      case "task":
-        await tx.delete(task).where(eq(task.id, entityId));
-        break;
-      case "event":
-        await tx.delete(event).where(eq(event.id, entityId));
-        break;
-      case "note":
-        await tx.delete(note).where(eq(note.id, entityId));
-        break;
-      case "project":
-        await tx.delete(project).where(eq(project.id, entityId));
-        break;
-    }
-  });
+  // ========================================================================
+  // 5. DELETE MAIN ENTITY
+  // ========================================================================
+  switch (entityType) {
+    case "task":
+      await db.delete(task).where(eq(task.id, entityId));
+      break;
+    case "event":
+      await db.delete(event).where(eq(event.id, entityId));
+      break;
+    case "note":
+      await db.delete(note).where(eq(note.id, entityId));
+      break;
+    case "project":
+      await db.delete(project).where(eq(project.id, entityId));
+      break;
+  }
 
   // Revalidate paths
   revalidateEntityPaths(entityType, undefined, undefined, true);

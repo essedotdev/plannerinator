@@ -16,7 +16,7 @@ type Message = {
   role: "user" | "assistant";
   content: string;
   timestamp: string;
-  toolsUsed?: Array<{ type: string; tool_use_id: string; content: string }>;
+  toolsUsed?: Array<{ name: string; result: unknown }>;
 };
 
 interface ChatMessageProps {
@@ -126,9 +126,18 @@ export function ChatMessage({ message }: ChatMessageProps) {
           )}
         </div>
 
-        {message.toolsUsed && message.toolsUsed.length > 0 && (
+        {/* Tool usage indicator */}
+        {!isUser && (
           <div className="mt-2 pt-2 border-t border-border/50">
-            <p className="text-xs opacity-70">Azioni eseguite: {message.toolsUsed.length}</p>
+            {message.toolsUsed && message.toolsUsed.length > 0 ? (
+              <p className="text-xs opacity-70">
+                ✓ Azioni eseguite: {message.toolsUsed.length}
+              </p>
+            ) : (
+              <p className="text-xs opacity-50">
+                💬 Risposta diretta (nessuna azione sul database)
+              </p>
+            )}
           </div>
         )}
       </div>

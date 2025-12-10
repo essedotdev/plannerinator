@@ -7,6 +7,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.18.0] - 2025-12-10
+
+### Added
+
+**AI Conversation History**
+
+- Conversation history dropdown in AI chat header to browse and resume past conversations
+- `ConversationHistoryDropdown` component with recent conversations list
+- `ConversationList` component for sidebar conversation navigation
+- Automatic conversation persistence - new conversations are saved and can be resumed later
+- Load conversation messages when selecting a previous conversation
+
+**AI System Prompt Architecture**
+
+- Modular prompt system with dedicated sections (`src/lib/ai/prompts/`)
+- Prompt sections for identity, context, rules, tools, dates, examples, conversation, formatting, and guidelines
+- `buildSystemPrompt()` function for composable prompt generation
+- `createTemporalContext()` for timezone-aware date handling
+- `getUserStats()` for including user statistics in AI context
+- Type-safe prompt context with `PromptContext` interface
+
+**AI Verbose Logging**
+
+- New environment variable `AI_VERBOSE_LOGGING` for detailed AI debugging
+- Verbose logging of full messages sent to AI
+- Verbose logging of AI responses (content, tool calls, finish reason)
+- Tool call logging with input parameters
+- Tool result logging with execution time tracking
+
+### Changed
+
+**AI Assistant Improvements**
+
+- AI chat drawer now persists conversation ID across messages
+- New chat button to start fresh conversations
+- Removed cost display from chat (simplified UI)
+- Improved chat message tool indicator showing whether tools were used or response was direct
+- AI responses now use lower temperature (0.2) for more consistent output
+
+**Database Schema**
+
+- Removed `costUsd` column from `ai_usage` table (cost tracking simplified)
+
+**UI/UX Enhancements**
+
+- Sidebar header height standardized to 64px (`h-16`) for visual consistency with AI drawer
+- Sidebar colors now use CSS variables referencing main theme colors for better theme integration
+- Simplified dark mode CSS by using CSS variables instead of duplicate rules
+- Dashboard layout main content now has `min-w-0` to prevent overflow issues
+- Logout button now shows confirmation dialog before signing out
+- ThemeToggle component now properly handles hydration with useEffect
+- Select component trigger now shows pointer cursor
+- Sheet close button now shows pointer cursor
+- Trash list item title no longer truncates text
+- Trash list action buttons have `shrink-0` to prevent squishing
+
+**Code Quality**
+
+- Refactored AI logging configuration with three separate environment variables:
+  - `AI_LOGGING_ENABLED` - Basic logging (default: true)
+  - `AI_DB_LOGGING_ENABLED` - Database logging (default: false)
+  - `AI_VERBOSE_LOGGING` - Detailed debug logs (default: false)
+
 ## [0.17.1] - 2025-12-09
 
 ### Changed
@@ -1277,7 +1340,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code splitting
 - Lazy loading for components
 
-[unreleased]: https://github.com/essedev/plannerinator/compare/v0.17.1...HEAD
+[unreleased]: https://github.com/essedev/plannerinator/compare/v0.18.0...HEAD
+[0.18.0]: https://github.com/essedev/plannerinator/compare/v0.17.1...v0.18.0
 [0.17.1]: https://github.com/essedev/plannerinator/compare/v0.17.0...v0.17.1
 [0.17.0]: https://github.com/essedev/plannerinator/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/essedev/plannerinator/compare/v0.15.0...v0.16.0

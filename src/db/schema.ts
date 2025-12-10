@@ -952,13 +952,8 @@ export const aiConversation = pgTable(
 /**
  * AI Usage table
  *
- * Tracks token usage and costs for AI interactions.
- * Used for analytics, billing, and rate limiting.
- *
- * Cost calculation:
- * - Claude Haiku 4.5 via OpenRouter
- * - Input: $1 per 1M tokens
- * - Output: $5 per 1M tokens
+ * Tracks token usage for AI interactions.
+ * Used for analytics and rate limiting.
  *
  * Relations:
  * - user: User who initiated the request
@@ -978,9 +973,6 @@ export const aiUsage = pgTable(
     // Token counts
     inputTokens: integer("input_tokens").notNull(),
     outputTokens: integer("output_tokens").notNull(),
-
-    // Cost in USD (calculated)
-    costUsd: integer("cost_usd").notNull(), // Store as integer cents for precision
 
     // Model identifier
     model: text("model").notNull().default("anthropic/claude-haiku-4.5"),

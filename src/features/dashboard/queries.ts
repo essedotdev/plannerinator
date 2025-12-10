@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { task, event } from "@/db/schema";
-import { eq, and, gte, lte, sql } from "drizzle-orm";
+import { eq, and, gte, lte, sql, isNull } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { startOfDay, endOfDay, addDays } from "date-fns";
 
@@ -42,6 +42,8 @@ export async function getTodayItems() {
       .where(
         and(
           eq(task.userId, userSession.user.id),
+          isNull(task.deletedAt),
+          isNull(task.archivedAt),
           sql`${task.dueDate} <= ${endOfToday}`,
           sql`${task.status} NOT IN ('done', 'cancelled')`
         )
@@ -63,6 +65,8 @@ export async function getTodayItems() {
       .where(
         and(
           eq(event.userId, userSession.user.id),
+          isNull(event.deletedAt),
+          isNull(event.archivedAt),
           gte(event.startTime, startOfToday),
           lte(event.startTime, endOfToday)
         )
@@ -102,6 +106,8 @@ export async function getUpcomingDeadlines() {
     .where(
       and(
         eq(task.userId, userSession.user.id),
+        isNull(task.deletedAt),
+        isNull(task.archivedAt),
         gte(task.dueDate, startOfToday),
         lte(task.dueDate, endOfWeek),
         sql`${task.status} NOT IN ('done', 'cancelled')`
@@ -133,6 +139,7 @@ export async function getQuickStats() {
     .where(
       and(
         eq(task.userId, userSession.user.id),
+        isNull(task.deletedAt),
         eq(task.status, "done"),
         gte(task.updatedAt, startOfToday),
         lte(task.updatedAt, endOfToday)
@@ -146,6 +153,8 @@ export async function getQuickStats() {
     .where(
       and(
         eq(task.userId, userSession.user.id),
+        isNull(task.deletedAt),
+        isNull(task.archivedAt),
         sql`${task.dueDate} < ${startOfToday}`,
         sql`${task.status} NOT IN ('done', 'cancelled')`
       )
@@ -156,14 +165,26 @@ export async function getQuickStats() {
     .select({ count: sql<number>`count(*)` })
     .from(task)
     .where(
-      and(eq(task.userId, userSession.user.id), sql`${task.status} NOT IN ('done', 'cancelled')`)
+      and(
+        eq(task.userId, userSession.user.id),
+        isNull(task.deletedAt),
+        isNull(task.archivedAt),
+        sql`${task.status} NOT IN ('done', 'cancelled')`
+      )
     );
 
   // Tasks in progress
   const inProgressTasks = await db
     .select({ count: sql<number>`count(*)` })
     .from(task)
-    .where(and(eq(task.userId, userSession.user.id), eq(task.status, "in_progress")));
+    .where(
+      and(
+        eq(task.userId, userSession.user.id),
+        isNull(task.deletedAt),
+        isNull(task.archivedAt),
+        eq(task.status, "in_progress")
+      )
+    );
 
   return {
     doneToday: Number(tasksDoneToday[0]?.count ?? 0),

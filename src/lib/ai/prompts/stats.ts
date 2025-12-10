@@ -1,0 +1,173 @@
+/**
+ * User Stats Query
+ *
+ * Fetches dynamic statistics for context-aware prompts.
+ */
+
+import { db } from "@/db";
+import { task, event, project } from "@/db/schema";
+import { eq, and, gte, lt, ne, isNull, sql } from "drizzle-orm";
+import type { UserStats } from "./types";
+
+/**
+ * Get user statistics for prompt context
+ */
+export async function getUserStats(userId: string): Promise<UserStats> {
+  const now = new Date();
+
+  // Start of today
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+
+  // End of today
+  const todayEnd = new Date(now);
+  todayEnd.setHours(23, 59, 59, 999);
+
+  // Start of tomorrow
+  const tomorrowStart = new Date(todayStart);
+  tomorrowStart.setDate(tomorrowStart.getDate() + 1);
+
+  // End of tomorrow
+  const tomorrowEnd = new Date(tomorrowStart);
+  tomorrowEnd.setHours(23, 59, 59, 999);
+
+  // Run queries in parallel for performance
+  const [
+    openTasksResult,
+    completedTodayResult,
+    dueTodayResult,
+    dueTomorrowResult,
+    overdueResult,
+    eventsTodayResult,
+    eventsTomorrowResult,
+    activeProjectsResult,
+  ] = await Promise.all([
+    // Open tasks count
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(task)
+      .where(
+        and(
+          eq(task.userId, userId),
+          ne(task.status, "done"),
+          ne(task.status, "cancelled"),
+          isNull(task.deletedAt),
+          isNull(task.archivedAt)
+        )
+      ),
+
+    // Tasks completed today
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(task)
+      .where(
+        and(
+          eq(task.userId, userId),
+          eq(task.status, "done"),
+          gte(task.completedAt, todayStart),
+          isNull(task.deletedAt)
+        )
+      ),
+
+    // Tasks due today
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(task)
+      .where(
+        and(
+          eq(task.userId, userId),
+          ne(task.status, "done"),
+          ne(task.status, "cancelled"),
+          gte(task.dueDate, todayStart),
+          lt(task.dueDate, tomorrowStart),
+          isNull(task.deletedAt),
+          isNull(task.archivedAt)
+        )
+      ),
+
+    // Tasks due tomorrow
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(task)
+      .where(
+        and(
+          eq(task.userId, userId),
+          ne(task.status, "done"),
+          ne(task.status, "cancelled"),
+          gte(task.dueDate, tomorrowStart),
+          lt(task.dueDate, tomorrowEnd),
+          isNull(task.deletedAt),
+          isNull(task.archivedAt)
+        )
+      ),
+
+    // Overdue tasks
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(task)
+      .where(
+        and(
+          eq(task.userId, userId),
+          ne(task.status, "done"),
+          ne(task.status, "cancelled"),
+          lt(task.dueDate, todayStart),
+          isNull(task.deletedAt),
+          isNull(task.archivedAt)
+        )
+      ),
+
+    // Events today
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(event)
+      .where(
+        and(
+          eq(event.userId, userId),
+          gte(event.startTime, todayStart),
+          lt(event.startTime, tomorrowStart),
+          isNull(event.deletedAt),
+          isNull(event.archivedAt)
+        )
+      ),
+
+    // Events tomorrow
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(event)
+      .where(
+        and(
+          eq(event.userId, userId),
+          gte(event.startTime, tomorrowStart),
+          lt(event.startTime, tomorrowEnd),
+          isNull(event.deletedAt),
+          isNull(event.archivedAt)
+        )
+      ),
+
+    // Active projects with names
+    db
+      .select({ name: project.name })
+      .from(project)
+      .where(
+        and(
+          eq(project.userId, userId),
+          eq(project.status, "active"),
+          isNull(project.deletedAt),
+          isNull(project.archivedAt)
+        )
+      )
+      .limit(5),
+  ]);
+
+  return {
+    tasksOpenCount: Number(openTasksResult[0]?.count ?? 0),
+    tasksCompletedToday: Number(completedTodayResult[0]?.count ?? 0),
+    tasksDueToday: Number(dueTodayResult[0]?.count ?? 0),
+    tasksDueTomorrow: Number(dueTomorrowResult[0]?.count ?? 0),
+    tasksOverdue: Number(overdueResult[0]?.count ?? 0),
+    eventsToday: Number(eventsTodayResult[0]?.count ?? 0),
+    eventsTomorrow: Number(eventsTomorrowResult[0]?.count ?? 0),
+    activeProjectsCount: activeProjectsResult.length,
+    recentProjectNames: activeProjectsResult.map((p) => p.name),
+  };
+}

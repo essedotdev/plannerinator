@@ -284,6 +284,14 @@ export const aiTools = [
             type: "number",
             description: "Maximum number of results per entity type (default: 10, max: 50)",
           },
+          includeDeleted: {
+            type: "boolean",
+            description: "Include deleted entities in results (default: false). Only set to true if user explicitly asks for deleted items.",
+          },
+          includeArchived: {
+            type: "boolean",
+            description: "Include archived entities in results (default: false). Only set to true if user explicitly asks for archived items.",
+          },
         },
         required: ["entityTypes"],
       },
@@ -353,6 +361,14 @@ export const aiTools = [
           limit: {
             type: "number",
             description: "Maximum number of results to return (default: 10, max: 50)",
+          },
+          includeDeleted: {
+            type: "boolean",
+            description: "Include deleted entities in search results (default: false). Only set to true if user explicitly asks for deleted items.",
+          },
+          includeArchived: {
+            type: "boolean",
+            description: "Include archived entities in search results (default: false). Only set to true if user explicitly asks for archived items.",
           },
         },
         required: ["query"],

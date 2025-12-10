@@ -1,6 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -104,6 +116,7 @@ export function AppSidebar() {
   });
 
   const isCollapsed = state === "collapsed";
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const handleLogout = async () => {
     await signOut();
@@ -114,8 +127,8 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       {/* Header */}
-      <SidebarHeader className="border-b border-sidebar-border">
-        <div className="flex h-16 items-center px-4">
+      <SidebarHeader className="flex h-16 border-b border-sidebar-border p-0">
+        <div className="flex items-center px-4 w-full h-full">
           {!isCollapsed ? (
             <Link href="/dashboard" className="flex items-center space-x-2">
               <span className="text-lg font-bold">Plannerinator</span>
@@ -180,7 +193,7 @@ export function AppSidebar() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={handleLogout}
+                onClick={() => setShowLogoutDialog(true)}
                 aria-label="Logout"
                 className="h-9 w-9"
               >
@@ -195,7 +208,7 @@ export function AppSidebar() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={handleLogout}
+                onClick={() => setShowLogoutDialog(true)}
                 aria-label="Logout"
                 className="h-9 w-9"
               >
@@ -205,6 +218,23 @@ export function AppSidebar() {
           </div>
         )}
       </SidebarFooter>
+
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Conferma logout</AlertDialogTitle>
+            <AlertDialogDescription>
+              Sei sicuro di voler uscire? Dovrai effettuare nuovamente l&apos;accesso per
+              continuare.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout}>Esci</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Sidebar>
   );
 }

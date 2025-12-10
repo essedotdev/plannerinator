@@ -129,7 +129,7 @@ export function TrashList({ items }: TrashListProps) {
               <div className="flex items-center gap-4">
                 {/* Title and Metadata */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium truncate">{item.title}</h3>
+                  <h3 className="font-medium">{item.title}</h3>
                   <div className="flex items-center gap-2 mt-2">
                     {/* Entity Type Badge */}
                     <Badge variant="outline" className={ENTITY_TYPE_CONFIG[item.type].color}>
@@ -144,7 +144,7 @@ export function TrashList({ items }: TrashListProps) {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                   {/* Restore Button */}
                   <Button
                     variant="outline"

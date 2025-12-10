@@ -22,7 +22,7 @@ import { deleteProject } from "@/features/projects/actions";
 import { globalSearch } from "@/features/search/queries";
 import { db } from "@/db";
 import { task, event, note, project } from "@/db/schema";
-import { eq, and, gte, lt, ne, sql, desc, asc } from "drizzle-orm";
+import { eq, and, gte, lt, ne, sql, desc, asc, isNull } from "drizzle-orm";
 import { aiLogger } from "@/lib/ai/logger";
 import type {
   ToolResult,
@@ -416,6 +416,14 @@ async function handleQueryEntities(
     if (input.entityTypes.includes("task")) {
       const conditions = [eq(task.userId, userId)];
 
+      // Filter deleted and archived by default
+      if (!input.includeDeleted) {
+        conditions.push(isNull(task.deletedAt));
+      }
+      if (!input.includeArchived) {
+        conditions.push(isNull(task.archivedAt));
+      }
+
       // Apply filters
       if (input.filters?.status) {
         conditions.push(eq(task.status, input.filters.status));
@@ -464,6 +472,14 @@ async function handleQueryEntities(
     if (input.entityTypes.includes("event")) {
       const conditions = [eq(event.userId, userId)];
 
+      // Filter deleted and archived by default
+      if (!input.includeDeleted) {
+        conditions.push(isNull(event.deletedAt));
+      }
+      if (!input.includeArchived) {
+        conditions.push(isNull(event.archivedAt));
+      }
+
       if (input.filters?.dateRange?.start) {
         conditions.push(gte(event.startTime, new Date(input.filters.dateRange.start)));
       }
@@ -500,6 +516,14 @@ async function handleQueryEntities(
     if (input.entityTypes.includes("note")) {
       const conditions = [eq(note.userId, userId)];
 
+      // Filter deleted and archived by default
+      if (!input.includeDeleted) {
+        conditions.push(isNull(note.deletedAt));
+      }
+      if (!input.includeArchived) {
+        conditions.push(isNull(note.archivedAt));
+      }
+
       const sortField =
         input.sortBy === "createdAt"
           ? note.createdAt
@@ -528,6 +552,14 @@ async function handleQueryEntities(
     // Query projects
     if (input.entityTypes.includes("project")) {
       const conditions = [eq(project.userId, userId)];
+
+      // Filter deleted and archived by default
+      if (!input.includeDeleted) {
+        conditions.push(isNull(project.deletedAt));
+      }
+      if (!input.includeArchived) {
+        conditions.push(isNull(project.archivedAt));
+      }
 
       if (input.filters?.projectStatus) {
         conditions.push(eq(project.status, input.filters.projectStatus));
@@ -612,6 +644,8 @@ async function handleSearchEntities(
     const results = await globalSearch(input.query, {
       limit,
       entityTypes: input.entityTypes,
+      includeDeleted: input.includeDeleted,
+      includeArchived: input.includeArchived,
     });
 
     // Log raw search results from globalSearch
@@ -709,11 +743,14 @@ async function handleUpdateTask(
       if (searchResults.tasks.length > 1) {
         return {
           success: false,
-          error: `Multiple tasks found matching "${input.taskIdentifier}". Please be more specific.`,
+          error: `Ho trovato ${searchResults.tasks.length} task con questo nome. Quale vuoi modificare?`,
           data: {
-            matches: searchResults.tasks.map((t) => ({
+            matches: searchResults.tasks.map((t, idx) => ({
+              number: idx + 1,
               id: t.id,
               title: t.title,
+              status: t.status,
+              dueDate: t.dueDate,
             })),
           },
         };
@@ -789,11 +826,13 @@ async function handleUpdateEvent(
       if (searchResults.events.length > 1) {
         return {
           success: false,
-          error: `Multiple events found matching "${input.eventIdentifier}". Please be more specific.`,
+          error: `Ho trovato ${searchResults.events.length} eventi con questo nome. Quale vuoi modificare?`,
           data: {
-            matches: searchResults.events.map((e) => ({
+            matches: searchResults.events.map((e, idx) => ({
+              number: idx + 1,
               id: e.id,
               title: e.title,
+              startTime: e.startTime,
             })),
           },
         };
@@ -860,11 +899,13 @@ async function handleUpdateNote(
       if (searchResults.notes.length > 1) {
         return {
           success: false,
-          error: `Multiple notes found matching "${input.noteIdentifier}". Please be more specific.`,
+          error: `Ho trovato ${searchResults.notes.length} note con questo nome. Quale vuoi modificare?`,
           data: {
-            matches: searchResults.notes.map((n) => ({
+            matches: searchResults.notes.map((n, idx) => ({
+              number: idx + 1,
               id: n.id,
-              title: n.title || "Untitled",
+              title: n.title || "Senza titolo",
+              type: n.type,
             })),
           },
         };
@@ -925,11 +966,13 @@ async function handleUpdateProject(
       if (searchResults.projects.length > 1) {
         return {
           success: false,
-          error: `Multiple projects found matching "${input.projectIdentifier}". Please be more specific.`,
+          error: `Ho trovato ${searchResults.projects.length} progetti con questo nome. Quale vuoi modificare?`,
           data: {
-            matches: searchResults.projects.map((p) => ({
+            matches: searchResults.projects.map((p, idx) => ({
+              number: idx + 1,
               id: p.id,
               title: p.title,
+              status: p.status,
             })),
           },
         };
@@ -1001,7 +1044,14 @@ async function handleDeleteEntity(
       if (entities.length > 1) {
         return {
           success: false,
-          error: `Multiple ${entityType}s found. Please be more specific.`,
+          error: `Ho trovato ${entities.length} ${entityType === "task" ? "task" : entityType === "event" ? "eventi" : entityType === "note" ? "note" : "progetti"} con questo nome. Quale vuoi eliminare?`,
+          data: {
+            matches: entities.map((entity, idx) => ({
+              number: idx + 1,
+              id: entity.id,
+              title: entity.title,
+            })),
+          },
         };
       }
       entityId = entities[0].id;

@@ -75,6 +75,7 @@ ${"=".repeat(80)}`;
 class AILogger {
   private enabled = process.env.AI_LOGGING_ENABLED !== "false"; // Default: enabled
   private dbLoggingEnabled = process.env.AI_DB_LOGGING_ENABLED === "true"; // Default: disabled
+  private verboseLoggingEnabled = process.env.AI_VERBOSE_LOGGING === "true"; // Default: disabled
 
   /**
    * Log a message
@@ -248,6 +249,59 @@ class AILogger {
       finishReason,
       toolCallsCount,
       tokenUsage,
+    });
+  }
+
+  /**
+   * VERBOSE: Log complete messages sent to OpenRouter
+   */
+  async logVerboseMessages(messages: unknown[], userId: string, conversationId?: string) {
+    if (!this.verboseLoggingEnabled) return;
+
+    await this.debug(`📤 VERBOSE: Full message history sent to OpenRouter (${messages.length} messages)`, {
+      userId,
+      conversationId,
+      messages,
+    });
+  }
+
+  /**
+   * VERBOSE: Log AI response content
+   */
+  async logVerboseAiResponse(
+    content: string | null,
+    toolCalls: unknown[] | undefined,
+    finishReason: string,
+    userId: string,
+    conversationId?: string
+  ) {
+    if (!this.verboseLoggingEnabled) return;
+
+    const hasToolCalls = toolCalls && toolCalls.length > 0;
+
+    await this.debug(
+      `🤖 VERBOSE: AI Response - ${hasToolCalls ? `Called ${toolCalls.length} tool(s)` : "Direct response (NO TOOLS)"}`,
+      {
+        userId,
+        conversationId,
+        finishReason,
+        content: content || "(empty)",
+        toolCalls: toolCalls || [],
+      }
+    );
+  }
+
+  /**
+   * VERBOSE: Log final response sent to user
+   */
+  async logVerboseFinalResponse(content: string, userId: string, conversationId?: string) {
+    if (!this.verboseLoggingEnabled) return;
+
+    await this.debug(`💬 VERBOSE: Final response to user`, {
+      userId,
+      conversationId,
+      content,
+      length: content.length,
     });
   }
 }

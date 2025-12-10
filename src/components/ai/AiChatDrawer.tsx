@@ -2,30 +2,39 @@
  * AI Chat Drawer Component
  *
  * Main drawer UI for the AI assistant chat interface.
- * Opens from the right side of the screen.
+ * Opens from the right side of the screen with conversation history sidebar.
  */
 
 "use client";
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { sendAiMessage } from "@/features/ai/actions";
+import { Button } from "@/components/ui/button";
+import { sendAiMessage, getConversation } from "@/features/ai/actions";
 import { useAiDrawer } from "@/hooks/use-ai-drawer";
-import { Bot, Loader2, Sparkles } from "lucide-react";
+import { Bot, Loader2, Plus } from "lucide-react";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { ChatInput } from "./ChatInput";
 import { ChatMessage } from "./ChatMessage";
+import { ConversationHistoryDropdown } from "./ConversationHistoryDropdown";
 
 type Message = {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: string;
-  toolsUsed?: Array<{ type: string; tool_use_id: string; content: string }>;
+  toolsUsed?: Array<{ name: string; result: unknown }>;
 };
 
 export function AiChatDrawer() {
-  const { isOpen, close, conversationId } = useAiDrawer();
+  const {
+    isOpen,
+    close,
+    conversationId,
+    setConversationId,
+    createNewConversation,
+    loadConversations,
+  } = useAiDrawer();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isPending, startTransition] = useTransition();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -35,13 +44,30 @@ export function AiChatDrawer() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Load conversation when opening
+  // Load conversation messages when conversationId changes
   useEffect(() => {
-    if (isOpen && conversationId) {
-      // TODO: Load conversation from server
-      // For now, start fresh each time
+    if (!conversationId) {
+      startTransition(() => {
+        setMessages([]);
+      });
+      return;
     }
-  }, [isOpen, conversationId]);
+
+    // Load conversation from server
+    const loadMessages = async () => {
+      try {
+        const result = await getConversation(conversationId);
+        if (result.success && result.data) {
+          setMessages(result.data.messages || []);
+        }
+      } catch (error) {
+        console.error("Error loading conversation:", error);
+        toast.error("Errore nel caricamento della conversazione");
+      }
+    };
+
+    loadMessages();
+  }, [conversationId]);
 
   const handleSendMessage = (content: string) => {
     // Add user message optimistically
@@ -60,6 +86,13 @@ export function AiChatDrawer() {
         const result = await sendAiMessage(content, conversationId || undefined);
 
         if (result.success && result.data) {
+          // ✅ FIX: Save conversationId from response
+          if (!conversationId && result.data.conversationId) {
+            setConversationId(result.data.conversationId);
+            // Reload conversations list to show the new one
+            await loadConversations();
+          }
+
           // Add assistant response
           const assistantMessage: Message = {
             id: crypto.randomUUID(),
@@ -69,12 +102,6 @@ export function AiChatDrawer() {
           };
 
           setMessages((prev) => [...prev, assistantMessage]);
-
-          // Show cost info (optional)
-          if (result.data.costCents > 0) {
-            const costUsd = (result.data.costCents / 100).toFixed(4);
-            console.log(`AI call cost: $${costUsd} (${result.data.tokensUsed} tokens)`);
-          }
         } else {
           // Show error
           toast.error(result.error || "Errore durante l'invio del messaggio");
@@ -90,21 +117,44 @@ export function AiChatDrawer() {
     });
   };
 
+  const handleNewChat = () => {
+    createNewConversation();
+    setMessages([]);
+  };
+
+  const handleSelectConversation = async (id: string) => {
+    // Don't reload if already selected
+    if (id === conversationId) return;
+
+    try {
+      const result = await getConversation(id);
+      if (result.success && result.data) {
+        setConversationId(id);
+        setMessages(result.data.messages || []);
+      }
+    } catch (error) {
+      console.error("Error loading conversation:", error);
+      toast.error("Errore nel caricamento della conversazione");
+    }
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && close()}>
       <SheetContent
         side="right"
-        className="w-full sm:w-[440px] md:w-[500px] p-0 flex flex-col focus-visible:outline-none"
+        className="w-full sm:w-[440px] md:w-[500px] p-0 flex flex-col focus-visible:outline-none bg-sidebar"
       >
-        {/* Header */}
-        <SheetHeader className="px-6 py-4 border-b">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <Sparkles className="h-4 w-4 text-primary" />
-            </div>
-            <div>
-              <SheetTitle className="text-base">AI Assistant</SheetTitle>
-              <p className="text-xs text-muted-foreground">Powered by Claude Haiku 4.5</p>
+        {/* Header with buttons */}
+        <SheetHeader className="flex h-16 border-b border-sidebar-border p-0">
+          <div className="flex items-center justify-between px-6 w-full h-full pr-14">
+            <SheetTitle className="text-lg font-bold">AI Assistant</SheetTitle>
+            <div className="flex items-center gap-2">
+              {/* New Chat Button */}
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleNewChat}>
+                <Plus className="h-4 w-4" />
+              </Button>
+              {/* History Dropdown */}
+              <ConversationHistoryDropdown onSelectConversation={handleSelectConversation} />
             </div>
           </div>
         </SheetHeader>

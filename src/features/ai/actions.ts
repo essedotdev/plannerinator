@@ -14,6 +14,12 @@ import { aiTools } from "@/lib/ai/functions";
 import { executeToolCall } from "./tool-handlers";
 import { eq, desc } from "drizzle-orm";
 import { aiLogger } from "@/lib/ai/logger";
+import {
+  buildSystemPrompt,
+  createTemporalContext,
+  getUserStats,
+  type PromptContext,
+} from "@/lib/ai/prompts";
 
 /**
  * OpenRouter configuration
@@ -21,89 +27,6 @@ import { aiLogger } from "@/lib/ai/logger";
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const MODEL = process.env.OPENROUTER_MODEL || "anthropic/claude-3.5-haiku";
 
-/**
- * Rate limit configuration for AI requests
- * TODO: Implement rate limiting using Better Auth's built-in rate limiting
- */
-// const AI_RATE_LIMIT = {
-//   requests: 50, // Max 50 messages per hour
-//   window: 3600, // 1 hour in seconds
-// };
-
-/**
- * Cost calculation (in cents)
- * Note: Costs vary by model - these are estimates for Claude Haiku
- * Input: $1 per 1M tokens = $0.001 per 1K = 0.1 cents per 1K
- * Output: $5 per 1M tokens = $0.005 per 1K = 0.5 cents per 1K
- */
-function calculateCost(inputTokens: number, outputTokens: number): number {
-  const inputCostCents = (inputTokens / 1000) * 0.1;
-  const outputCostCents = (outputTokens / 1000) * 0.5;
-  return Math.round(inputCostCents + outputCostCents);
-}
-
-/**
- * Build system prompt with current context
- */
-function buildSystemPrompt(userName: string): string {
-  const now = new Date();
-  const dateStr = now.toLocaleDateString("it-IT", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-  const timeStr = now.toLocaleTimeString("it-IT", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-  return `Sei un assistente AI per Plannerinator, un'app di produttività personale.
-
-Data e ora corrente: ${dateStr} alle ${timeStr}
-Fuso orario: Europe/Rome (UTC+1/+2)
-Utente: ${userName}
-
-Puoi aiutare l'utente a:
-- Creare, modificare ed eliminare task, eventi, note e progetti
-- Cercare tra le entità esistenti con filtri avanzati
-- Ottenere statistiche e insights sulla produttività
-- Rispondere a domande sui suoi dati
-
-Linee guida importanti:
-- Sii conciso e amichevole nel tono
-- Rispondi in italiano a meno che l'utente non scriva in inglese
-- Quando crei task/eventi, converti date relative ("domani", "prossima settimana") in date ISO specifiche
-- Prima di eliminare qualcosa, chiedi sempre conferma a meno che l'utente non dica esplicitamente "elimina" o "cancella"
-- Se trovi più risultati per un'operazione, chiedi all'utente di essere più specifico
-- Mostra i risultati in modo chiaro con bullet points o liste
-- Quando completi un'azione, conferma cosa hai fatto
-
-Formattazione delle risposte (IMPORTANTE - Usa sempre Markdown):
-- Usa emoji occasionalmente per rendere le risposte più amichevoli (ma senza esagerare)
-- Usa **grassetto** per evidenziare nomi, titoli e informazioni importanti
-- Usa liste puntate Markdown (- o *) per elencare risultati
-- Usa codice inline \`come questo\` per nomi di entità tecnici
-- Aggiungi una riga vuota tra il testo introduttivo e le liste
-- Struttura gerarchica: usa sottotitoli ### quando necessario
-
-Esempio di risposta per liste:
-"Ecco le tue ultime 10 note: 📝
-
-- **Presentazione Simone** (Document)
-  Documento completo di presentazione per Yellow Tech
-
-- **Bash Commands Cheatsheet** (Note)
-  Ultima modifica: 22 ottobre
-
-- **TypeScript Utility Types** (Snippet)
-  Creato il 22 ottobre"
-
-Esempio per conferma azione:
-"Ho creato il task **Chiamare Mario** con scadenza domani alle 15:00. ✓
-
-Vuoi che aggiunga altri dettagli come priorità o progetto?"`;
-}
 
 /**
  * OpenRouter API response types (OpenAI-compatible format)
@@ -163,6 +86,7 @@ async function callOpenRouter(messages: OpenRouterMessage[]): Promise<OpenRouter
       messages,
       tools: aiTools,
       max_tokens: 2048,
+      temperature: 0.2,
     }),
   });
 
@@ -225,11 +149,28 @@ export async function sendAiMessage(userMessage: string, conversationId?: string
       conversation = newConv;
     }
 
+    // Build prompt context with user stats
+    const [userStats] = await Promise.all([getUserStats(session.user.id)]);
+
+    const promptContext: PromptContext = {
+      user: {
+        id: session.user.id,
+        name: session.user.name,
+        email: session.user.email,
+        preferences: {
+          language: "it",
+          timezone: "Europe/Rome",
+        },
+      },
+      stats: userStats,
+      temporal: createTemporalContext("Europe/Rome", "it-IT"),
+    };
+
     // Build messages array for OpenRouter (OpenAI format)
     const messages: OpenRouterMessage[] = [
       {
         role: "system",
-        content: buildSystemPrompt(session.user.name),
+        content: buildSystemPrompt(promptContext),
       },
       ...messageHistory.map((msg) => ({
         role: msg.role,
@@ -244,6 +185,9 @@ export async function sendAiMessage(userMessage: string, conversationId?: string
     // Log API call
     await aiLogger.logApiCall(messages.length, true, session.user.id, conversation.id);
 
+    // VERBOSE: Log full messages sent to AI
+    await aiLogger.logVerboseMessages(messages, session.user.id, conversation.id);
+
     // First API call - get tool use or direct response
     const initialResponse = await callOpenRouter(messages);
     const initialChoice = initialResponse.choices[0];
@@ -257,6 +201,15 @@ export async function sendAiMessage(userMessage: string, conversationId?: string
         completion: initialResponse.usage.completion_tokens,
         total: initialResponse.usage.total_tokens,
       },
+      session.user.id,
+      conversation.id
+    );
+
+    // VERBOSE: Log AI response content
+    await aiLogger.logVerboseAiResponse(
+      initialChoice.message.content,
+      initialChoice.message.tool_calls,
+      initialChoice.finish_reason,
       session.user.id,
       conversation.id
     );
@@ -278,7 +231,15 @@ export async function sendAiMessage(userMessage: string, conversationId?: string
         const toolName = toolCall.function.name;
         const toolInput = JSON.parse(toolCall.function.arguments);
 
+        // Log tool call
+        await aiLogger.logToolCall(toolName, toolInput, session.user.id, conversation.id);
+
+        const startTime = Date.now();
         const result = await executeToolCall(toolName, toolInput, session.user.id, conversation.id);
+        const executionTime = Date.now() - startTime;
+
+        // Log tool result
+        await aiLogger.logToolResult(toolName, result, session.user.id, executionTime, conversation.id);
 
         // Add tool result to messages
         messages.push({
@@ -295,19 +256,30 @@ export async function sendAiMessage(userMessage: string, conversationId?: string
 
       // Second API call - get final response with tool results
       finalResponse = await callOpenRouter(messages);
+
+      // VERBOSE: Log second AI response (after tool execution)
+      await aiLogger.logVerboseAiResponse(
+        finalResponse.choices[0].message.content,
+        finalResponse.choices[0].message.tool_calls,
+        finalResponse.choices[0].finish_reason,
+        session.user.id,
+        conversation.id
+      );
     }
 
     // Extract text response
     const assistantMessage = finalResponse.choices[0].message.content || "Scusa, non ho capito.";
 
-    // Calculate total tokens and cost
+    // VERBOSE: Log final response
+    await aiLogger.logVerboseFinalResponse(assistantMessage, session.user.id, conversation.id);
+
+    // Calculate total tokens
     const totalInputTokens =
       initialResponse.usage.prompt_tokens +
       (finalResponse !== initialResponse ? finalResponse.usage.prompt_tokens : 0);
     const totalOutputTokens =
       initialResponse.usage.completion_tokens +
       (finalResponse !== initialResponse ? finalResponse.usage.completion_tokens : 0);
-    const costCents = calculateCost(totalInputTokens, totalOutputTokens);
 
     // Save conversation messages
     const updatedMessages = [
@@ -341,7 +313,6 @@ export async function sendAiMessage(userMessage: string, conversationId?: string
       conversationId: conversation.id,
       inputTokens: totalInputTokens,
       outputTokens: totalOutputTokens,
-      costUsd: costCents,
       model: MODEL,
     });
 
@@ -351,7 +322,6 @@ export async function sendAiMessage(userMessage: string, conversationId?: string
         conversationId: conversation.id,
         message: assistantMessage,
         tokensUsed: totalInputTokens + totalOutputTokens,
-        costCents,
       },
     };
   } catch (error) {
@@ -458,42 +428,3 @@ export async function deleteConversation(conversationId: string) {
   }
 }
 
-/**
- * Get AI usage statistics for current user
- */
-export async function getAiUsageStats() {
-  const { headers } = await import("next/headers");
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) {
-    return { success: false, error: "Non autenticato" };
-  }
-
-  try {
-    const usageRecords = await db
-      .select()
-      .from(aiUsage)
-      .where(eq(aiUsage.userId, session.user.id))
-      .orderBy(desc(aiUsage.createdAt));
-
-    const totalTokens = usageRecords.reduce(
-      (sum, record) => sum + record.inputTokens + record.outputTokens,
-      0
-    );
-    const totalCostCents = usageRecords.reduce((sum, record) => sum + record.costUsd, 0);
-
-    return {
-      success: true,
-      data: {
-        totalMessages: usageRecords.length,
-        totalTokens,
-        totalCostUsd: (totalCostCents / 100).toFixed(4),
-        averageTokensPerMessage: Math.round(totalTokens / (usageRecords.length || 1)),
-      },
-    };
-  } catch {
-    return {
-      success: false,
-      error: "Errore nel calcolo delle statistiche",
-    };
-  }
-}

@@ -97,6 +97,8 @@ export type QueryEntitiesInput = {
   sortBy?: "createdAt" | "updatedAt" | "dueDate" | "startTime" | "title";
   sortOrder?: "asc" | "desc";
   limit?: number;
+  includeDeleted?: boolean;
+  includeArchived?: boolean;
 };
 
 /**
@@ -117,6 +119,8 @@ export type SearchEntitiesInput = {
     };
   };
   limit?: number;
+  includeDeleted?: boolean;
+  includeArchived?: boolean;
 };
 
 /**

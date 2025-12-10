@@ -52,7 +52,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
           {/* Main content - full width senza container */}
           <main className="flex-1 overflow-auto">
-            <div className="p-4 md:p-6 lg:p-8">{children}</div>
+            <div className="p-4 md:p-6 lg:p-8 min-w-0">{children}</div>
           </main>
         </SidebarInset>
 

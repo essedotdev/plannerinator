@@ -3,7 +3,7 @@
 import { db } from "@/db";
 import { event, note, project, task } from "@/db/schema";
 import { auth } from "@/lib/auth";
-import { and, eq, ilike, or, sql } from "drizzle-orm";
+import { and, eq, ilike, or, sql, isNull } from "drizzle-orm";
 import { headers } from "next/headers";
 
 // ===========================
@@ -50,6 +50,8 @@ export async function globalSearch(
   options?: {
     limit?: number;
     entityTypes?: SearchEntityType[];
+    includeDeleted?: boolean;
+    includeArchived?: boolean;
   }
 ): Promise<GroupedSearchResults> {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -84,7 +86,9 @@ export async function globalSearch(
           .where(
             and(
               eq(task.userId, userId),
-              or(ilike(task.title, searchPattern), ilike(task.description, searchPattern))
+              or(ilike(task.title, searchPattern), ilike(task.description, searchPattern)),
+              ...(options?.includeDeleted ? [] : [isNull(task.deletedAt)]),
+              ...(options?.includeArchived ? [] : [isNull(task.archivedAt)])
             )
           )
           .limit(limit)
@@ -112,7 +116,9 @@ export async function globalSearch(
                 ilike(event.title, searchPattern),
                 ilike(event.description, searchPattern),
                 ilike(event.location, searchPattern)
-              )
+              ),
+              ...(options?.includeDeleted ? [] : [isNull(event.deletedAt)]),
+              ...(options?.includeArchived ? [] : [isNull(event.archivedAt)])
             )
           )
           .limit(limit)
@@ -135,7 +141,9 @@ export async function globalSearch(
           .where(
             and(
               eq(note.userId, userId),
-              or(ilike(note.title, searchPattern), ilike(note.content, searchPattern))
+              or(ilike(note.title, searchPattern), ilike(note.content, searchPattern)),
+              ...(options?.includeDeleted ? [] : [isNull(note.deletedAt)]),
+              ...(options?.includeArchived ? [] : [isNull(note.archivedAt)])
             )
           )
           .limit(limit)
@@ -155,7 +163,9 @@ export async function globalSearch(
           .where(
             and(
               eq(project.userId, userId),
-              or(ilike(project.name, searchPattern), ilike(project.description, searchPattern))
+              or(ilike(project.name, searchPattern), ilike(project.description, searchPattern)),
+              ...(options?.includeDeleted ? [] : [isNull(project.deletedAt)]),
+              ...(options?.includeArchived ? [] : [isNull(project.archivedAt)])
             )
           )
           .limit(limit)
@@ -244,7 +254,7 @@ export async function getRecentItems(limit: number = 8): Promise<GroupedSearchRe
       })
       .from(task)
       .leftJoin(project, eq(task.projectId, project.id))
-      .where(eq(task.userId, userId))
+      .where(and(eq(task.userId, userId), isNull(task.deletedAt), isNull(task.archivedAt)))
       .orderBy(sql`${task.updatedAt} DESC`)
       .limit(limit),
 
@@ -261,7 +271,7 @@ export async function getRecentItems(limit: number = 8): Promise<GroupedSearchRe
       })
       .from(event)
       .leftJoin(project, eq(event.projectId, project.id))
-      .where(eq(event.userId, userId))
+      .where(and(eq(event.userId, userId), isNull(event.deletedAt), isNull(event.archivedAt)))
       .orderBy(sql`${event.updatedAt} DESC`)
       .limit(limit),
 
@@ -278,7 +288,7 @@ export async function getRecentItems(limit: number = 8): Promise<GroupedSearchRe
       })
       .from(note)
       .leftJoin(project, eq(note.projectId, project.id))
-      .where(eq(note.userId, userId))
+      .where(and(eq(note.userId, userId), isNull(note.deletedAt), isNull(note.archivedAt)))
       .orderBy(sql`${note.updatedAt} DESC`)
       .limit(limit),
 
@@ -292,7 +302,7 @@ export async function getRecentItems(limit: number = 8): Promise<GroupedSearchRe
         projectStatus: project.status,
       })
       .from(project)
-      .where(eq(project.userId, userId))
+      .where(and(eq(project.userId, userId), isNull(project.deletedAt), isNull(project.archivedAt)))
       .orderBy(sql`${project.updatedAt} DESC`)
       .limit(limit),
   ]);
